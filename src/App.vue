@@ -83,7 +83,7 @@
                 <footer class="bg-white">
                     <div class="max-w-7xl mx-auto py-12 md:flex md:items-center md:justify-between">
                         <div class="flex justify-center space-x-6 md:order-2">
-                            <a v-for="item in socials" :key="item.name" :href="item.href" class="text-gray-400 hover:text-gray-500">
+                            <a v-for="item in socials" :key="item.name" :href="item.href" target="_blank" class="text-gray-400 hover:text-gray-500">
                                 <span class="sr-only">{{ item.name }}</span>
                                 <i :class="item.icon" class="fab fa-fw fa-2x" aria-hidden="true"></i>
                             </a>
@@ -112,9 +112,15 @@ export default {
     data() {
         return {
             availableFirmware: {
-                'BrainPad_FW_2_1_0': {
-                    title: 'BrainPad DUE',
-                    url: 'firmware/BrainPad_FWv2.1.0-DueApp.ghi',
+                'microPython_0_2_0': {
+                    title: 'microPython 0.2.0',
+                    url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.0.glb',
+                    isGlb: true,
+                    image: null,
+                },
+                'TinyCLR_2_1_0_6': {
+                    title: 'TinyCLR RC2',
+                    url: 'firmware/SITCore-SC13-Firmware-v2.1.0.6000.ghi',
                     isGlb: false,
                     image: null,
                 },
@@ -129,17 +135,17 @@ export default {
             socials: [
                 {
                     name: 'Facebook',
-                    href: '#',
+                    href: 'https://www.facebook.com/brainpadboard/',
                     icon: 'fa-facebook',
                 },
                 {
-                    name: 'Instagram',
-                    href: '#',
-                    icon: 'fa-instagram',
+                    name: 'YouTube',
+                    href: 'https://www.youtube.com/channel/UCBOWfhv7bPF3tevjmGQMa7A',
+                    icon: 'fa-youtube',
                 },
                 {
                     name: 'Twitter',
-                    href: '#',
+                    href: 'https://www.twitter.com/brainpadboard',
                     icon: 'fa-twitter',
                 },
             ],
