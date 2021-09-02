@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+kbd {
+    @apply border border-gray-900 rounded px-1.5 py-0.5;
+}
