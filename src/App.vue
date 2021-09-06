@@ -62,17 +62,17 @@
                             </select>
                         </div>
                         <button @click="writeFirmware" :disabled="!firmware || !availableFirmware[firmware].image" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 select-none disabled:opacity-25 disabled:pointer-events-none">
-                            Write
+                            Load
                         </button>
                     </template>
                     <div v-else-if="state === 'writing'">
-                        <div class="mb-2">Writing... {{ percent }}%</div>
+                        <div class="mb-2">Loading... {{ percent }}%</div>
                         <div class="w-full h-2 bg-yellow-600 bg-opacity-25">
                             <div class="h-2 bg-yellow-600" :style="`width:${percent}%`"></div>
                         </div>
                     </div>
                     <div v-else-if="state === 'complete'">
-                        <div class="mb-2">Writing is complete.</div>
+                        <div class="mb-2">Loading is complete.</div>
                         <div class="mb-4 w-full h-2 bg-yellow-600"></div>
                         <button @click="state = 'idle'" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                             Start Over
@@ -173,7 +173,7 @@ export default {
             }
         },
         progress(current, total) {
-            this.operation = current < 3 ? 'Erasing' : 'Writing';
+            this.operation = current < 3 ? 'Erasing' : 'Loading';
             this.percent = Math.round((current / total) * 100);
             if (this.percent >= 100) {
                 this.state = 'complete';
@@ -227,7 +227,7 @@ export default {
                 await this.saveFirmwareImage(saveAs, blob);
                 this.availableFirmware[key].image = data;
             } else {
-                this.error = `Unable to download the firmware for writing (${response.status}).`;
+                this.error = `Unable to download the firmware (${response.status}).`;
                 this.availableFirmware[key].image = null;
             }
         },
