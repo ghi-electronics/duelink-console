@@ -113,13 +113,13 @@ export default {
         return {
             availableFirmware: {
                 'microPython_0_2_3': {
-                    title: 'microPython 0.2.3',
+                    title: 'Python (MicroPython v0.2.3)',
                     url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.3.glb',
                     isGlb: true,
                     image: null,
                 },
-                'TinyCLR_2_1_0_6': {
-                    title: 'TinyCLR RC2',
+                'TinyCLR_2_1_0_6300': {
+                    title: '.NET C# (TinyCLR OS v2.1.0.6300)',
                     url: 'firmware/SITCore-BrainPad-Firmware-v2.1.0.6300.ghi',
                     isGlb: false,
                     image: null,
