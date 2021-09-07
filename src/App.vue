@@ -112,15 +112,15 @@ export default {
     data() {
         return {
             availableFirmware: {
-                'microPython_0_2_0': {
-                    title: 'microPython 0.2.0',
-                    url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.0.glb',
+                'microPython_0_2_3': {
+                    title: 'microPython 0.2.3',
+                    url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.3.glb',
                     isGlb: true,
                     image: null,
                 },
                 'TinyCLR_2_1_0_6': {
                     title: 'TinyCLR RC2',
-                    url: 'firmware/SITCore-SC13-Firmware-v2.1.0.6000.ghi',
+                    url: 'firmware/SITCore-BrainPad-Firmware-v2.1.0.6300.ghi',
                     isGlb: false,
                     image: null,
                 },
