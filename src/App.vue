@@ -17,7 +17,7 @@
                         </ul>
                     </li>
                     <li>Click the connect button below and select the <em>GHI Bootloader Interface</em>.</li>
-                    <li>Select the desired firmware and click <em>Write</em>.</li>
+                    <li>Select the desired firmware and click <em>Load</em>.</li>
                     <li>Once writing is complete, you may <em>Disconnect</em>, <em>Start Over</em>, or close the browser.</li>
                 </ol>
 
