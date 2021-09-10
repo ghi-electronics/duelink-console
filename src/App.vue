@@ -11,13 +11,13 @@
                 <ol class="list-inside list-decimal space-y-4">
                     <li>Connect your board to the computer.</li>
                     <li>
-                        On your board, hold down <kbd>A</kbd> while pressing the <kbd>RESET</kbd> button once.
+                        On your board, hold down <kbd>A</kbd> button while pressing and releasing the <kbd>RESET</kbd> button once. <strong>Keep holding the A button down</strong>. Wait one second and then release the <kbd>A</kbd> button.
                         <ul class="mt-2 ml-8 list-inside list-disc text-blue-700">
                             <li>This will put restart your board in bootloader mode.</li>
                         </ul>
                     </li>
                     <li>Click the connect button below and select the <em>GHI Bootloader Interface</em>.</li>
-                    <li>Select the desired firmware and click <em>Write</em>.</li>
+                    <li>Select the desired firmware and click <em>Load</em>.</li>
                     <li>Once writing is complete, you may <em>Disconnect</em>, <em>Start Over</em>, or close the browser.</li>
                 </ol>
 
