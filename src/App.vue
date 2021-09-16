@@ -8,21 +8,28 @@
 
                 <h1 class="text-2xl font-bold">Steps to load new firmware.</h1>
 
-                <ol class="list-inside list-decimal space-y-4">
+                <ol class="ol-reset space-y-4 leading-loose">
                     <li>Connect your board to the computer.</li>
                     <li>
-                        On your board, hold down <kbd>A</kbd> button while pressing and releasing the <kbd>RESET</kbd> button once. <strong>Keep holding the A button down</strong>. Wait one second and then release the <kbd>A</kbd> button.
-                        <ul class="mt-2 ml-8 list-inside list-disc text-blue-700">
+                        On your board, hold down the <kbd>A</kbd> button while pressing and releasing the <kbd>RESET</kbd> button once.
+                        <span class="font-semibold">Keep holding the <kbd>A</kbd> button down,</span> wait for a second, and then release it.
+                        <ul class="mt-2 ul-reset text-[#f08000]">
                             <li>This will put restart your board in bootloader mode.</li>
                         </ul>
                     </li>
                     <li>Click the connect button below and select the <em>GHI Bootloader Interface</em>.</li>
-                    <li>Select the desired firmware and click <em>Load</em>.</li>
-                    <li>Once writing is complete, you may <em>Disconnect</em>, <em>Start Over</em>, or close the browser.</li>
+                    <li>
+                        Select the desired firmware and click <em>Load</em>.
+                        <ul class="mt-2 ul-reset text-[#f08000]">
+                            <li>This will completely erase your board.</li>
+                        </ul>
+                    </li>
+                    <li>Once <span class="font-semibold">Loading is complete</span>, press and release the <kbd>RESET</kbd> button.</li>
+                    <li>You may now begin using the board.</li>
                 </ol>
 
-                <button @click="doConnect" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                    {{ isConnected ? 'Disconnect' : 'Connect' }}
+                <button v-if="!isConnected" @click="doConnect" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Connect
                 </button>
 
                 <div v-if="error" class="rounded-md bg-red-50 p-4">
@@ -51,7 +58,7 @@
                     </div>
                 </div>
 
-                <div v-if="isConnected" :class="{ 'bg-yellow-100': state !== 'idle' }" class="bg-gray-100 rounded-lg p-8">
+                <div v-if="isConnected" class="bg-gray-100 rounded-lg p-8">
                     <template v-if="state === 'idle'">
                         <div class="mb-4">
                             <label for="firmware" class="block text-sm font-medium text-gray-700">Firmware</label>
@@ -61,22 +68,36 @@
                                 </option>
                             </select>
                         </div>
-                        <button @click="writeFirmware" :disabled="!firmware || !availableFirmware[firmware].image" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 select-none disabled:opacity-25 disabled:pointer-events-none">
-                            Load
-                        </button>
+                        <div class="space-x-4">
+                            <button @click="writeFirmware" :disabled="!firmware || !availableFirmware[firmware].image" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 select-none disabled:opacity-25 disabled:pointer-events-none">
+                                Load
+                            </button>
+                            <button @click="doConnect" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Disconnect
+                            </button>
+                        </div>
                     </template>
+                    <div v-else-if="state === 'erasing'">
+                        <div class="mb-2">Erasing...</div>
+                        <div class="w-full h-2"></div>
+                    </div>
                     <div v-else-if="state === 'writing'">
                         <div class="mb-2">Loading... {{ percent }}%</div>
-                        <div class="w-full h-2 bg-yellow-600 bg-opacity-25">
-                            <div class="h-2 bg-yellow-600" :style="`width:${percent}%`"></div>
+                        <div class="w-full h-2 bg-[#f08000] bg-opacity-25">
+                            <div class="h-2 bg-[#f08000]" :style="`width:${percent}%`"></div>
                         </div>
                     </div>
                     <div v-else-if="state === 'complete'">
                         <div class="mb-2">Loading is complete.</div>
-                        <div class="mb-4 w-full h-2 bg-yellow-600"></div>
-                        <button @click="state = 'idle'" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Start Over
-                        </button>
+                        <div class="mb-4 w-full h-2 bg-[#f08000]"></div>
+                        <div class="space-x-4">
+                            <button @click="state = 'idle'" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Start Over
+                            </button>
+                            <button @click="doConnect" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Disconnect
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -152,6 +173,15 @@ export default {
             state: 'idle',
         };
     },
+    created() {
+        navigator.serial.addEventListener('disconnect', () => {
+            if (this.state === 'complete') {
+                this.state = 'idle';
+                this.firmware = undefined;
+                this.isConnected = false;
+            }
+        });
+    },
     methods: {
         async doConnect() {
             this.error = null;
@@ -167,6 +197,10 @@ export default {
                 await this.ghiLoader.open(this.port);
                 this.isConnected = true;
             } catch (error) {
+                // Ignore showing an error when a user cancels the prompt.
+                if (error.indexOf('No port selected by the user.') > -1) {
+                    return;
+                }
                 this.error = error;
                 this.isConnected = false;
                 this.port = undefined;
@@ -206,6 +240,8 @@ export default {
             if (!this.availableFirmware[this.firmware].image) {
                 this.error = 'Failed to load firmware from the server &mdash; cannot program the device.';
             }
+            this.state = 'erasing';
+            await this.ghiLoader.erase();
             this.state = 'writing';
             await this.ghiLoader.flash(
                 this.availableFirmware[this.firmware].image,

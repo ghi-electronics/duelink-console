@@ -3,5 +3,19 @@
 @tailwind utilities;
 
 kbd {
-    @apply border border-gray-900 rounded px-1.5 py-0.5;
+    @apply border border-gray-900 rounded px-2 py-0.5;
+}
+
+.ol-reset {
+    list-style-type: decimal;
+    padding-left: 16px;
+}
+
+.ul-reset {
+    list-style-type: disc;
+    padding-left: 16px;
+}
+
+.ul-reset li, .ol-reset li {
+    margin-bottom: 0;
 }
