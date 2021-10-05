@@ -145,6 +145,12 @@ export default {
                     isGlb: false,
                     image: null,
                 },
+				'MakeCode_0_1_0': {
+                    title: 'MakeCode Loader (v0.1.0)',
+                    url: 'firmware/MakeCode_BrainPadPulse_Bootloader_v0.1.0.ghi',
+                    isGlb: false,
+                    image: null,
+                },
             },
             error: null,
             firmware: undefined,
