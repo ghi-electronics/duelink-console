@@ -133,9 +133,9 @@ export default {
     data() {
         return {
             availableFirmware: {
-                'microPython_0_2_3': {
-                    title: 'Python (MicroPython v0.2.3)',
-                    url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.3.glb',
+                'microPython_0_2_4': {
+                    title: 'Python (MicroPython v0.2.4)',
+                    url: 'firmware/SITCore-SC13-MP-Firmware-v0.2.4.glb',
                     isGlb: true,
                     image: null,
                 },
