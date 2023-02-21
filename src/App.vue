@@ -151,9 +151,9 @@ export default {
                     isGlb: false,
                     image: null,
                 },
-				'BrainPad_Experimental_0_0_4': {
-                    title: 'BrainPad_Experimental (v0.0.4)',
-                    url: 'firmware/Brainpad_experimental_004.ghi',
+				'BrainPad_Experimental_0_0_5': {
+                    title: 'BrainPad_Experimental (v0.0.5)',
+                    url: 'firmware/Brainpad_experimental_005.ghi',
                     isGlb: false,
                     image: null,
                 },
