@@ -151,9 +151,9 @@ export default {
                     isGlb: false,
                     image: null,
                 },
-				'Brainpad_Due_Pulse_009': {
-                    title: 'Brainpad_Due_Pulse (v0.0.9)',
-                    url: 'firmware/Brainpad_Due_Pulse_009.ghi',
+				'Brainpad_Due_Pulse_010': {
+                    title: 'Brainpad_Due_Pulse (v0.1.0)',
+                    url: 'firmware/Brainpad_Due_Pulse_010.ghi',
                     isGlb: false,
                     image: null,
                 },
