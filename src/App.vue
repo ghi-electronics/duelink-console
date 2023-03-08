@@ -139,9 +139,9 @@ export default {
                     isGlb: true,
                     image: null,
                 },
-                'TinyCLR_2_1_0_6500': {
-                    title: '.NET C# (TinyCLR OS v2.1.0.6500)',
-                    url: 'firmware/SITCore-SC13-Firmware-v2.1.0.6500.ghi',
+                'TinyCLR_2_2_0_5100': {
+                    title: '.NET C# (TinyCLR OS v2.2.0.5100)',
+                    url: 'firmware/SITCore-SC13-Firmware-v2.2.0.5100.ghi',
                     isGlb: false,
                     image: null,
                 },
@@ -151,9 +151,15 @@ export default {
                     isGlb: false,
                     image: null,
                 },
-				'Brainpad_Due_Pulse_011': {
-                    title: 'Brainpad_Due_Pulse (v0.1.1)',
-                    url: 'firmware/Brainpad_Due_Pulse_011.ghi',
+				'Brainpad_Due_Pulse_012': {
+                    title: 'Brainpad_Due_Pulse (v0.1.2)',
+                    url: 'firmware/Brainpad_Due_Pulse_012.ghi',
+                    isGlb: false,
+                    image: null,
+                },
+				'Brainpad_Due_Edge_002': {
+                    title: 'Brainpad_Due_Edge (v0.0.2)',
+                    url: 'firmware/Brainpad_Due_Edge_002.ghi',
                     isGlb: false,
                     image: null,
                 },
