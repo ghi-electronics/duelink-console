@@ -2,20 +2,276 @@
 @tailwind components;
 @tailwind utilities;
 
-kbd {
-    @apply border border-gray-900 rounded px-2 py-0.5;
+html, body {
+    height: 100%;
+    width: 100%;
 }
 
-.ol-reset {
-    list-style-type: decimal;
-    padding-left: 16px;
+body {
+    @apply bg-geyser-50 dark:bg-black text-geyser-2100 dark:text-bunker-50;
 }
 
-.ul-reset {
-    list-style-type: disc;
-    padding-left: 16px;
+#app {
+    width: 100%;
+    display: grid;
+    grid-gap: 4px;
+    grid-template-columns: 100%;
+    grid-template-rows: 32px 48px 40px 8px 412px auto auto;
+    grid-template-areas:
+    "menu-bar"
+    "tool-bar"
+    "tab-bar"
+    "progress-bar"
+    "editor"
+    "side-panel"
+    "footer";
 }
 
-.ul-reset li, .ol-reset li {
-    margin-bottom: 0;
+@screen md {
+    #app {
+        height: 100%;
+        grid-template-columns: auto 300px;
+        grid-template-rows: 48px 48px 2.5rem 8px auto auto 64px;
+        grid-template-areas:
+        "menu-bar menu-bar"
+        "tool-bar tool-bar"
+        "tab-bar side-panel"
+        "progress-bar side-panel"
+        "editor side-panel"
+        "editor side-panel"
+        "footer footer";
+    }
+}
+
+#menu-bar {
+    grid-area: menu-bar;
+    @apply bg-geyser-400 dark:bg-bunker-900;
+}
+
+#tool-bar {
+    grid-area: tool-bar;
+    @apply bg-geyser-300 dark:bg-bunker-800;
+}
+
+#tab-bar {
+    grid-area: tab-bar;
+    @apply bg-geyser-300 dark:bg-bunker-800 overflow-hidden;
+}
+
+#progress-bar {
+    grid-area: progress-bar;
+    @apply bg-geyser-200 dark:bg-bunker-800;
+}
+
+#editor {
+    grid-area: editor;
+    @apply bg-geyser-100 dark:bg-bunker-900;
+}
+
+@screen md {
+    #editor {
+        overflow: auto;
+    }
+}
+
+#side-panel {
+    grid-area: side-panel;
+    @apply bg-geyser-100 dark:bg-bunker-900 overflow-y-auto;
+}
+
+#footer {
+    grid-area: footer;
+    @apply bg-geyser-100 dark:bg-bunker-900;
+}
+
+.logo {
+    @apply filter dark:grayscale dark:brightness-100 transition duration-150 ease-in-out;
+}
+
+.logo:hover {
+    @apply dark:brightness-200;
+}
+
+.social-icon {
+    @apply md:text-5xl opacity-60 dark:opacity-30 transition duration-150 ease-in-out;
+}
+
+.social-icon:hover {
+    @apply opacity-100;
+}
+
+.social-icon-facebook,
+.social-icon-twitter,
+.social-icon-youtube,
+.social-icon-linkedin
+{
+    @apply text-geyser-900;
+}
+
+.dark .social-icon-facebook,
+.dark .social-icon-twitter,
+.dark .social-icon-youtube,
+.dark .social-icon-linkedin
+{
+    @apply text-white;
+}
+
+.social-icon-facebook:hover {
+    color: #0063e1;
+}
+
+.dark .social-icon-facebook:hover {
+    color: #17aafd;
+}
+
+.social-icon-twitter:hover {
+    color: #1da1f2;
+}
+
+.dark .social-icon-twitter:hover {
+    color: #60c9ff;
+}
+
+.social-icon-linkedin:hover {
+    color: #0a66c2;
+}
+
+.dark .social-icon-linkedin:hover {
+    color: #98cde6;
+}
+
+.social-icon-youtube:hover {
+    color: #ff0000;
+}
+
+.tippy-box[data-theme~='due'] {
+    @apply bg-black text-geyser-50;
+}
+
+.tippy-box[data-theme~='due'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: #000;
+}
+
+.tippy-box[data-theme~='due'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: #000;
+}
+
+.tippy-box[data-theme~='due'][data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: #000;
+}
+
+.tippy-box[data-theme~='due'][data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: #000;
+}
+
+.dark .tippy-box[data-theme~='due'] {
+    @apply bg-white text-bunker-900;
+}
+
+.dark .tippy-box[data-theme~='due'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: #fff;
+}
+
+.dark .tippy-box[data-theme~='due'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: #fff;
+}
+
+.dark .tippy-box[data-theme~='due'][data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: #fff;
+}
+
+.dark .tippy-box[data-theme~='due'][data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: #fff;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scroller {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Chrome, Safari and Opera */
+.scroller::-webkit-scrollbar {
+    display: none;
+}
+
+h1 {
+    @apply text-2xl font-bold;
+}
+
+h2 {
+    @apply text-xl font-bold;
+}
+
+h3 {
+    @apply text-lg font-semibold;
+}
+
+.btn {
+    @apply inline-flex items-center justify-center cursor-pointer select-none transition duration-150 ease-in-out;
+}
+
+.btn-tool {
+    @apply w-8 h-8 rounded;
+    @apply bg-geyser-50 hover:bg-white text-geyser-900 hover:text-geyser-2100;
+    @apply dark:bg-bunker-600 dark:hover:bg-bunker-500 dark:text-bunker-100 dark:hover:text-white;
+}
+
+.btn-tool:disabled {
+    @apply cursor-default;
+    @apply bg-geyser-100 text-geyser-500;
+    @apply dark:bg-bunker-700 dark:text-bunker-500;
+}
+
+.btn-action {
+    @apply px-4 py-0.5 rounded;
+    @apply bg-geyser-50 hover:bg-white text-geyser-900 hover:text-geyser-2100;
+    @apply dark:bg-bunker-600 dark:text-bunker-100 dark:hover:bg-bunker-500 dark:hover:text-white;
+}
+
+.btn-pin {
+    @apply w-6 h-6 rounded;
+    @apply bg-geyser-300 hover:bg-geyser-200 text-geyser-1100 hover:text-geyser-2100;
+    @apply dark:bg-bunker-800 dark:hover:bg-bunker-700 dark:text-bunker-200 dark:hover:text-white;
+}
+
+.btn-modal {
+    @apply px-4 py-1 rounded;
+}
+.btn-modal:disabled {
+    @apply opacity-40 pointer-events-none cursor-default;
+}
+
+.btn-modal-color {
+    @apply bg-geyser-1100 hover:bg-geyser-1000 text-geyser-100 dark:bg-bunker-100 dark:hover:bg-bunker-200 dark:text-bunker-900;
+}
+
+/*.btn-pin.active {*/
+/*    background-color: theme('colors.geyser.200') !important;*/
+/*    color: theme('colors.geyser.2100') !important;*/
+/*}*/
+.btn-pin.active {
+    @apply bg-geyser-50 text-geyser-900;
+    @apply dark:bg-bunker-600 dark:text-bunker-100;
+}
+
+.btn-scroller {
+    @apply hidden;
+    @apply w-10 h-10;
+    @apply bg-geyser-300 hover:bg-geyser-200 text-geyser-1100 hover:text-geyser-2100;
+    @apply dark:bg-bunker-800 dark:hover:bg-bunker-700 dark:text-bunker-200 dark:hover:text-white;
+}
+
+.btn-scroller.disabled {
+    @apply text-geyser-600 dark:text-bunker-600 pointer-events-none;
+}
+
+@screen md {
+    .btn-scroller {
+        @apply inline-flex;
+    }
+}
+
+.ace_gutter-cell.ace_breakpoint {
+    @apply bg-red-600 text-white;
 }

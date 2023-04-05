@@ -5,7 +5,16 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BrainPad Online Loader</title>
+    <title>BrainPad IDE</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.style.colorScheme = 'dark';
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.style.colorScheme = 'light';
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 <body>
     <div id="app"></div>

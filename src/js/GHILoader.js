@@ -1,8 +1,8 @@
 import ConsumerQueue from 'consumer-queue';
 import Xmodem from './Xmodem';
 
-const log = function (message) {
-    //console.log(message);
+const log = function () {
+    console.log(...arguments);
 };
 
 export default class GHILoader {
@@ -33,7 +33,7 @@ export default class GHILoader {
     }
 
     async readLoop() {
-        let strbuf = "";
+        let strBuf = '';
         let firstRun = 0
         this.enableReadLoop = true;
         while (this.enableReadLoop) {
@@ -41,11 +41,12 @@ export default class GHILoader {
                 const { value, done } = await this.reader.read();
                 if (value) {
                     const text = this.decoder.decode(value);
-                    log("ghiLoader <<< ", text);
-                    strbuf += text;
-                    let idx = strbuf.indexOf('\n');
+                    strBuf += text;
+                    let idx = strBuf.indexOf('\n');
+
                     while (idx >= 0) {
-                        let line = strbuf.substr(0, idx).replace("\r", "");
+                        let line = strBuf.substr(0, idx).replace("\r", "");
+                        log('ghiLoader <<<', line);
                         // We do this to eliminate the first three lines that the loader spits out when booted
                         if (firstRun < 2) {
                             if (line.includes("Bootloader")) {
@@ -65,8 +66,8 @@ export default class GHILoader {
                             this.respq.push(line);
                         }
 
-                        strbuf = strbuf.substr(idx + 1);
-                        idx = strbuf.indexOf('\n');
+                        strBuf = strBuf.substr(idx + 1);
+                        idx = strBuf.indexOf('\n');
 
                         if (firstRun === 2) {
                             firstRun = 3
@@ -145,7 +146,8 @@ export default class GHILoader {
         do {
             line = await this.respq.pop();
             result.push(line);
-        } while (line !== terminator);
+        } while (!line.startsWith(terminator));
+        log('Line found', line);
         return result;
     }
 
@@ -163,8 +165,8 @@ export default class GHILoader {
 
     async sendCommand(cmd) {
         await this.readUntilEmpty();
-        log("ghiLoader >>> " + cmd)
-        this.writer.write(this.encoder.encode(cmd + "\n"))
+        log('ghiLoader >>>', cmd);
+        this.writer.write(this.encoder.encode(cmd + "\n"));
     }
 
     async sendAndExpect(cmd, exp) {
@@ -174,7 +176,7 @@ export default class GHILoader {
 
     async sendConfirmAndExpect(cmd, exp) {
         await this.sendCommand(cmd);
-        var line = await this.respq.pop();
+        const line = await this.respq.pop();
         if (line.endsWith("?")) {
             await this.sendAndExpect("Y", exp);
         }
