@@ -101,7 +101,7 @@ async function run() {
     await webSerial.sendAndExpect('$', '$');
     const lines = code.value.replace("\r", '').split("\n");
     for (const line of lines) {
-        await webSerial.sendAndExpect(line.trim() + "\n", '$');
+        await webSerial.sendAndExpect(line.trim(), '$');
     }
     await webSerial.sendAndExpect('run', '$');
 }
