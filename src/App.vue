@@ -1,153 +1,105 @@
 <template>
-    <div id="menu-bar">
-        <MenuBar/>
+    <div class="mb-4">
+        <button @click="webSerial.connect">Connect</button>
     </div>
-    <div id="tool-bar">
-        <ToolBar v-model:theme="theme" @run="run"/>
-    </div>
-    <div id="tab-bar">
-        <TabBar v-model="activeTab" :tabs="tabs" @close="closeFile"/>
-    </div>
-    <div id="progress-bar"></div>
-    <div id="editor">
-        <div class="h-full flex flex-col">
+    <div class="grid grid-cols-2 gap-4 bg-gray-200">
+        <div class="col-span-1 space-y-4">
             <v-ace-editor
-                ref="editor"
-                v-model:value="code"
+                v-if="webSerial.isConnected"
+                v-model:value="recordingModeCode"
                 :lang="language"
-                :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'"
-                class="w-full flex-1"
+                class="w-full h-[600px]"
+                :disabled="!webSerial.isConnected"
+                ref="editor"
                 @init="onEditorInit"
             />
-            <div class="w-full py-2 px-4 text-right text-geyser-1100 dark:text-bunker-300">
-                {{ `Line ${editorLine}, Column ${editorColumn}` }}
+            <div v-else class="bg-white w-full h-[600px]"></div>
+            <div class="flex divide-x divide-gray-400">
+                <button :disabled="!webSerial.isConnected" @click="sendRecordingMode">Send</button>
+                <button :disabled="!webSerial.isConnected" @click="list">List</button>
+                <button :disabled="!webSerial.isConnected" @click="_new">New</button>
             </div>
         </div>
-    </div>
-    <div id="side-panel">
-        <div class="space-y-1">
-            <PanelSerial :web-serial="webSerial" />
-            <Panel title="Output">
-                {{ output }}
-            </Panel>
-            <Panel title="Errors">
-                <ul v-for="error in webSerial.errorLog" :key="error">
-                    <li>{{ error }}</li>
-                </ul>
-            </Panel>
+        <div class="col-span-1 space-y-4">
+            <div :class="['w-full h-[600px] p-4 bg-black overflow-y-auto whitespace-pre-wrap text-white', !webSerial.isConnected ? 'opacity-40' : '']">
+                {{ webSerial.output.join("\n") }}
+            </div>
+            <div class="flex divide-x divide-gray-400">
+                <button :disabled="!webSerial.isConnected" @click="webSerial.output.length = 0">Clear</button>
+            </div>
         </div>
-    </div>
-    <div id="footer">
-        <Footer/>
+        <div class="col-span-1">
+            <div class="flex">
+                <input :disabled="!webSerial.isConnected" v-model="immediateModeCode" type="text" class="flex-1">
+                <button :disabled="!webSerial.isConnected" @click="sendImmediateMode">Send</button>
+            </div>
+            <hr class="my-2 h-px bg-gray-400 text-gray-400">
+            <div class="mt-4 flex divide-x divide-gray-400">
+                <button :disabled="!webSerial.isConnected" @click="testPrint">Test Print</button>
+                <button :disabled="!webSerial.isConnected" @click="testDigitalWrite">Test Digital Write</button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { nextTick, reactive, ref } from 'vue';
-import states from './js/states';
-import tippy from 'tippy.js';
+import { reactive, ref } from 'vue';
 
 // Components
 
-import MenuBar from './components/MenuBar.vue';
-import ToolBar from './components/ToolBar.vue';
-import TabBar from './components/TabBar.vue';
-import Footer from './components/Footer.vue';
-import Panel from './components/Panel.vue';
-import PanelSerial from './components/PanelSerial.vue';
 import { VAceEditor } from 'vue3-ace-editor';
 import WebSerial from "./js/WebSerial";
 
-// Expose
-
-defineExpose({ run });
-
-// Refs
-
-const $refs = { explorerPanel: null };
-
 // Data
 
-const activeTab = ref(null);
-const breakpointIcon = ref('fa-circle');
-const code = ref('');
+const recordingModeCode = ref('');
+const immediateModeCode = ref('');
 const editor = ref(null);
 const editorLine = ref(1);
 const editorColumn = ref(1);
-const files = reactive([{ name: 'Program', content: '' }]);
 const language = ref('javascript');
-const output = ref('');
-const removeIcon = reactive({});
-const state = ref(states.idle);
-const tabs = reactive([]);
-const theme = ref(localStorage.theme ? localStorage.theme : 'light');
-const tippyConfig = reactive({
-    animation: 'fade',
-    appendTo: document.body,
-    interactive: true,
-    placement: 'bottom',
-    theme: 'due',
-});
 const webSerial = reactive(new WebSerial());
-
-// Created
-
-openFile('Program');
+const echo = ref(true);
 
 // Methods
 
-async function run() {
-    console.log('run');
-    await webSerial.sendAndExpect('$', '$');
-    const lines = code.value.replace("\r", '').split("\n");
+async function sendRecordingMode() {
+    console.log('Send recording mode code');
+    await webSerial.send('$');
+    const lines = recordingModeCode.value.replace("\r", '').split("\n");
     for (const line of lines) {
-        await webSerial.sendAndExpect(line.trim(), '$');
+        await webSerial.send(line);
     }
-    await webSerial.sendAndExpect('run', '$');
+    await webSerial.send('run');
 }
 
-function addFile(name) {
-    if (! name.length) {
-        alert('You cannot have a blank file name.');
-        return;
-    }
-    const index = files.findIndex((file) => file.name.toUpperCase() === name.toUpperCase());
-    if (index > -1) {
-        alert(`A file named ${files[index].name} already exists.`);
-        return;
-    }
-    files.push({ name: name, content: '' });
-    $refs.explorerPanel.open();
+async function sendImmediateMode() {
+    console.log('Send immediate mode code');
+    //await webSerial.send('>');
+    await webSerial.send(immediateModeCode.value);
 }
 
-function closeFile(name) {
-    if (tabs.length === 1) {
-        return;
-    }
-    const index = tabs.findIndex((tab) => tab === name);
-    if (index > -1) {
-        tabs.splice(index, 1);
-        activeTab.value = tabs.length > 0 ? tabs[tabs.length - 1] : undefined;
-    }
+async function list() {
+    console.log('Send list');
+    await webSerial.send('list');
 }
 
-function editorSelection(line, column, length) {
-    editor.value.selection.setRange(new window.ace.Range(line, column, line, column + length));
+async function _new() {
+    console.log('Send new');
+    await webSerial.send('new');
 }
 
-function determineBreakpointIcon() {
-    if (editor.value) {
-        const breakpoints = editor.value.session.getBreakpoints();
-        if (typeof breakpoints[editorLine.value - 1] !== 'undefined') {
-            breakpointIcon.value = 'fa-minus-circle';
-            return;
-        }
+async function testPrint() {
+    await webSerial.send('print("Hello World")');
+}
+
+async function testDigitalWrite() {
+    const lines = ['for x = 1 to 10', 'DWrite(100,1)', 'Wait(200)', 'DWrite(100,0)', 'Wait(200)', 'next'];
+    await webSerial.send('$');
+    for (const line of lines) {
+        await webSerial.send(line);
     }
-    breakpointIcon.value = 'fa-plus-circle';
-}
-
-function hideRemove(name) {
-    delete removeIcon[name];
+    await webSerial.send('run');
 }
 
 function onEditorInit(editor) {
@@ -158,44 +110,7 @@ function onEditorInit(editor) {
         const pos = editor.getCursorPosition();
         editorLine.value = pos.row + 1;
         editorColumn.value = pos.column + 1;
-        // determineBreakpointIcon();
     });
     editor.value = editor;
-}
-
-function openFile(name) {
-    if (!tabs.find((tab) => tab === name)) {
-        tabs.push(name);
-    }
-    activeTab.value = name;
-}
-
-function removeFile(name) {
-    if (name !== 'Program') {
-        const index = files.findIndex((file) => file.name === name);
-        if (index > -1) {
-            closeFile(name);
-            files.splice(index, 1);
-        }
-    }
-}
-
-function showRemove(name) {
-    if (name !== 'Program') {
-        removeIcon[name] = true;
-    }
-}
-
-function updateTippy(target) {
-    if (! target) {
-        return;
-    }
-    nextTick(() => {
-        if (target._tippy) {
-            target._tippy.setContent(target.getAttribute('data-tippy-content'));
-        } else {
-            tippy([target], tippyConfig);
-        }
-    });
 }
 </script>

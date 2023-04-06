@@ -1,4 +1,4 @@
-import ConsumerQueue from 'consumer-queue';
+// import ConsumerQueue from 'consumer-queue';
 
 export default class WebSerial {
     constructor() {
@@ -6,21 +6,43 @@ export default class WebSerial {
         this.port = null;
         this.reader = null;
         this.writer = null;
-        this.readLoopPromise = null;
         this.encoder = new TextEncoder();
         this.decoder = new TextDecoder();
-        this.queue = new ConsumerQueue();
-        this.enableReadLoop = false;
+        // this.queue = new ConsumerQueue();
+        this.readLoopActive = false;
+        this.readLoopPromise = null;
+        this.output = [];
+        this.isConnected = false;
     }
 
     async connect() {
         this.port = await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
+
         try {
             await this.attach();
         } catch (error) {
             this.errorLog.push(error);
             this.port = null;
         }
+
+        await this.sleep(100);
+        await this.synchronize();
+
+        await this.send('>');
+
+        // Turn off echoing
+        await this.send('echo(0)');
+
+        this.startReadLoop();
+
+        this.isConnected = true;
+    }
+
+    async synchronize() {
+        // Escape the current program
+        await this.send("\x1B", '');
+        // Version
+        await this.send('version()');
     }
 
     async disconnect() {
@@ -36,8 +58,6 @@ export default class WebSerial {
             flowControl: 'none',
         });
 
-        console.log(this.port);
-
         if (this.port?.writable == null) {
             this.errorLog.push('This is not a writable port.');
         }
@@ -47,8 +67,10 @@ export default class WebSerial {
 
         this.reader = this.port.readable.getReader();
         this.writer = this.port.writable.getWriter();
+    }
 
-        this.startReadLoop();
+    async sleep(ms) {
+        await new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     async detach() {
@@ -63,7 +85,7 @@ export default class WebSerial {
     }
 
     async stopReadLoop() {
-        this.enableReadLoop = false;
+        this.readLoopActive = false;
         if (this.readLoopPromise) {
             await this.reader.cancel();
             await this.readLoopPromise;
@@ -71,87 +93,114 @@ export default class WebSerial {
         }
     }
 
-    async readLoop() {
-        let strBuf = '';
-        let firstRun = 0
-        this.enableReadLoop = true;
-        while (this.enableReadLoop) {
-            try {
-                const { value, done } = await this.reader.read();
-                if (value) {
-                    const text = this.decoder.decode(value);
-                    strBuf += text;
-                    let idx = strBuf.indexOf('\n');
+    async readResponse(v1 = true) {
+        let str = this.leftOver;
+        const end = Date.now() + this.readTimeout;
 
-                    while (idx >= 0) {
-                        let line = strBuf.substr(0, idx).replace("\r", "");
-                        // We do this to eliminate the first three lines that the loader spits out when booted
-                        if (firstRun < 2) {
-                            if (line.includes("Bootloader")) {
-                                firstRun = 0
-                            } else if (line.includes("------")) {
-                                firstRun = 1
-                            } else if (line.includes("OK.")) {
-                                // skip the OK that follows the header lines
-                                firstRun = 2
-                            }
-                            else {
-                                firstRun = 3
-                            }
-                        }
+        const response = { success: false, response: null };
 
-                        if (firstRun === 3) {
-                            this.queue.push(line);
-                        }
+        while (Date.now() < end) {
+            const { value, _ } = await this.reader.read();
+            if (value) {
+                const text = this.decoder.decode(value);
+                str += text;
 
-                        strBuf = strBuf.substr(idx + 1);
-                        idx = strBuf.indexOf('\n');
+                str = str.replace("\n", '');
+                str = str.replace("\r", '');
 
-                        if (firstRun === 2) {
-                            firstRun = 3
-                        }
-                    }
+                let idx1 = str.indexOf('>');
+                let idx2 = str.indexOf('&');
+
+                if (idx1 === -1) {
+                    idx1 = str.indexOf('$');
                 }
-                if (done) {
-                    this.enableReadLoop = false;
+
+                if (idx1 === -1 && idx2 === -1) {
+                    continue;
                 }
-            } catch (error) {
-                this.errorLog.push(error);
-                break;
+
+                const idx = (idx1 === -1) ? idx2 : idx1;
+
+                console.log('----------', idx);
+                console.log(str);
+                console.log('----------');
+                console.log(idx + 1, str.length, str.substring(idx + 1, str.length));
+                console.log('----------');
+                console.log(0, idx, str.substring(0, idx));
+
+                this.leftOver = str.substring(idx + 1);
+                response.success = true;
+                response.response = str.substring(0, idx);
+
+                const idx3 = str.indexOf('!');
+                if (idx3 !== -1 && (response.response.indexOf('error') > -1 || response.response.indexOf('unknown') > -1)) {
+                    response.success = false;
+                }
+
+                return response;
             }
         }
     }
 
-    async readUntil(str) {
-        const result = [];
-        let line = "";
-        do {
-            line = await this.queue.pop();
-            result.push(line);
-        } while (!line.startsWith(str));
-        return result;
-    }
-
-    async readUntilEmpty() {
-        const result = [];
-        let line = "";
-        do {
-            line = await this.queue.tryPop();
-            if (line) {
-                result.push(line);
+    async readResponse2() {
+        let str = '';
+        try {
+            while (true) {
+                console.log('reading...');
+                const { value, done } = await this.reader.read();
+                // const { value, done } = await Promise.race([
+                //     this.reader.read(),
+                //     new Promise((_, reject) => setTimeout(reject, this.readTimeout))
+                //         .catch(() => ({ value: null, done: true }))
+                // ]);
+                if (value) {
+                    const text = this.decoder.decode(value);
+                    str += text;
+                    console.log('value', text);
+                } else {
+                    console.log('no value');
+                }
+                if (done) {
+                    console.log('done');
+                    break;
+                } else {
+                    console.log('not done');
+                }
             }
-        } while (line);
-        return result;
+        } catch (error) {
+            console.error(error);
+        }
+        return str;
     }
 
-    async send(command) {
-        command += "\n";
-        await this.readUntilEmpty();
+    async send(command, terminator = "\n") {
+        command += terminator;
         this.writer.write(this.encoder.encode(command));
+        console.log(command);
+        await this.sleep(1);
     }
 
-    async sendAndExpect(command, str) {
-        await this.send(command);
-        return await this.readUntil(str);
+    async readLoop() {
+        let str = '';
+        this.readLoopActive = true;
+        while (this.readLoopActive) {
+            try {
+                const { value, done } = await this.reader.read();
+                if (value) {
+                    str += this.decoder.decode(value);
+                    const index = str.indexOf("\n");
+                    if (index > -1) {
+                        this.output.push(str.substring(0, index).replace("\r", ''));
+                        str = str.substring(index + 1);
+                    }
+                }
+                if (done) {
+                    this.readLoopActive = false;
+                }
+            } catch (error) {
+                console.error(error);
+                break;
+            }
+        }
     }
 }
