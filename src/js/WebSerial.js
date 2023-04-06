@@ -1,4 +1,4 @@
-// import ConsumerQueue from 'consumer-queue';
+import ConsumerQueue from 'consumer-queue';
 
 export default class WebSerial {
     constructor() {
@@ -8,11 +8,17 @@ export default class WebSerial {
         this.writer = null;
         this.encoder = new TextEncoder();
         this.decoder = new TextDecoder();
-        // this.queue = new ConsumerQueue();
+        this.queue = new ConsumerQueue();
         this.readLoopActive = false;
         this.readLoopPromise = null;
         this.output = [];
         this.isConnected = false;
+        this.echo = true;
+        this.version = null;
+
+
+        this.readTimeout = 3000;
+        this.leftOver = '';
     }
 
     async connect() {
@@ -25,28 +31,54 @@ export default class WebSerial {
             this.port = null;
         }
 
+        this.startReadLoop();
+
+        this.leftOver = '';
         await this.sleep(100);
         await this.synchronize();
-
-        await this.send('>');
-
-        // Turn off echoing
-        await this.send('echo(0)');
-
-        this.startReadLoop();
 
         this.isConnected = true;
     }
 
-    async synchronize() {
-        // Escape the current program
-        await this.send("\x1B", '');
-        // Version
-        await this.send('version()');
-    }
-
     async disconnect() {
         await this.detach();
+    }
+
+    async synchronize() {
+        // Escape the current program.
+        await this.send("\x1B", '');
+        // Force immediate mode.
+        await this.send('>');
+        // Try to get the version.
+        let tryCount = 3;
+        while (tryCount > 0) {
+            await this.sleep(100);
+            const result = await this.getVersion();
+            if (typeof result === 'string') {
+                this.version = result;
+                break;
+            }
+            tryCount--;
+        }
+    }
+
+    async getVersion() {
+        await this.send('version()');
+        const result = await this.readUntilEmpty();
+        if (this.echo) {
+            await this.turnOffEcho();
+            return result[1];
+        }
+        return result[0];
+    }
+
+    async turnOffEcho() {
+        if (!this.echo) {
+            return;
+        }
+        await this.send('echo(0)');
+        await this.readUntilEmpty();
+        this.echo = false;
     }
 
     async attach() {
@@ -69,15 +101,15 @@ export default class WebSerial {
         this.writer = this.port.writable.getWriter();
     }
 
-    async sleep(ms) {
-        await new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
     async detach() {
         await this.stopReadLoop();
         await this.writer.releaseLock();
         await this.reader.releaseLock();
         await this.port.close();
+    }
+
+    async sleep(ms) {
+        await new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     startReadLoop() {
@@ -93,105 +125,76 @@ export default class WebSerial {
         }
     }
 
-    async readResponse(v1 = true) {
+    async readResponse() {
         let str = this.leftOver;
         const end = Date.now() + this.readTimeout;
 
         const response = { success: false, response: null };
 
         while (Date.now() < end) {
-            const { value, _ } = await this.reader.read();
-            if (value) {
-                const text = this.decoder.decode(value);
-                str += text;
+            const { value } = await this.reader.read();
+            const text = this.decoder.decode(value);
 
-                str = str.replace("\n", '');
-                str = str.replace("\r", '');
+            str += text;
 
-                let idx1 = str.indexOf('>');
-                let idx2 = str.indexOf('&');
+            str = str.replace("\n", '');
+            str = str.replace("\r", '');
 
-                if (idx1 === -1) {
-                    idx1 = str.indexOf('$');
-                }
+            let idx1 = str.indexOf('>');
+            let idx2 = str.indexOf('&');
 
-                if (idx1 === -1 && idx2 === -1) {
-                    continue;
-                }
-
-                const idx = (idx1 === -1) ? idx2 : idx1;
-
-                console.log('----------', idx);
-                console.log(str);
-                console.log('----------');
-                console.log(idx + 1, str.length, str.substring(idx + 1, str.length));
-                console.log('----------');
-                console.log(0, idx, str.substring(0, idx));
-
-                this.leftOver = str.substring(idx + 1);
-                response.success = true;
-                response.response = str.substring(0, idx);
-
-                const idx3 = str.indexOf('!');
-                if (idx3 !== -1 && (response.response.indexOf('error') > -1 || response.response.indexOf('unknown') > -1)) {
-                    response.success = false;
-                }
-
-                return response;
+            if (idx1 === -1) {
+                idx1 = str.indexOf('$');
             }
-        }
-    }
 
-    async readResponse2() {
-        let str = '';
-        try {
-            while (true) {
-                console.log('reading...');
-                const { value, done } = await this.reader.read();
-                // const { value, done } = await Promise.race([
-                //     this.reader.read(),
-                //     new Promise((_, reject) => setTimeout(reject, this.readTimeout))
-                //         .catch(() => ({ value: null, done: true }))
-                // ]);
-                if (value) {
-                    const text = this.decoder.decode(value);
-                    str += text;
-                    console.log('value', text);
-                } else {
-                    console.log('no value');
-                }
-                if (done) {
-                    console.log('done');
-                    break;
-                } else {
-                    console.log('not done');
-                }
+            if (idx1 === -1 && idx2 === -1) {
+                continue;
             }
-        } catch (error) {
-            console.error(error);
-        }
-        return str;
-    }
 
-    async send(command, terminator = "\n") {
-        command += terminator;
-        this.writer.write(this.encoder.encode(command));
-        console.log(command);
-        await this.sleep(1);
+            const idx = (idx1 === -1) ? idx2 : idx1;
+
+            console.log('----------', idx);
+            console.log(str);
+            console.log('----------');
+            console.log(idx + 1, str.length, str.substring(idx + 1, str.length));
+            console.log('----------');
+            console.log(0, idx, str.substring(0, idx));
+
+            this.leftOver = str.substring(idx + 1);
+            response.success = true;
+            response.response = str.substring(0, idx);
+
+            const idx3 = str.indexOf('!');
+            if (idx3 !== -1 && (response.response.indexOf('error') > -1 || response.response.indexOf('unknown') > -1)) {
+                response.success = false;
+            }
+
+            return response;
+        }
+
+        this.leftOver = '';
+
+        return response;
     }
 
     async readLoop() {
-        let str = '';
+        let line, str = '';
         this.readLoopActive = true;
         while (this.readLoopActive) {
             try {
                 const { value, done } = await this.reader.read();
                 if (value) {
                     str += this.decoder.decode(value);
-                    const index = str.indexOf("\n");
-                    if (index > -1) {
-                        this.output.push(str.substring(0, index).replace("\r", ''));
+                    let index = str.indexOf("\n");
+                    while (index > 0) {
+                        line = str.substring(0, index).replace("\r", '');
+                        while (line.startsWith('>') || line.startsWith('$')) {
+                            line = line.substring(1);
+                        }
+                        console.log('>>', line);
+                        this.queue.push(line);
                         str = str.substring(index + 1);
+                        index = str.indexOf("\n");
                     }
                 }
                 if (done) {
@@ -202,5 +205,24 @@ export default class WebSerial {
                 break;
             }
         }
+    }
+
+    async readUntilEmpty() {
+        const result = [];
+        let line;
+        do {
+            line = await this.queue.tryPop();
+            if (line) {
+                result.push(line);
+            }
+        } while (line);
+        return result;
+    }
+
+    async send(command, terminator = "\n") {
+        console.log(command);
+        await this.readUntilEmpty();
+        this.writer.write(this.encoder.encode(command + terminator));
+        await this.sleep(10);
     }
 }
