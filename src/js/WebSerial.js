@@ -2,7 +2,6 @@ import ConsumerQueue from 'consumer-queue';
 
 export default class WebSerial {
     constructor() {
-        this.errorLog = [];
         this.port = null;
         this.reader = null;
         this.writer = null;
@@ -11,44 +10,62 @@ export default class WebSerial {
         this.queue = new ConsumerQueue();
         this.readLoopActive = false;
         this.readLoopPromise = null;
-        this.output = [];
+        this.errorLog = [];
+        this.isBusy = true;
         this.isConnected = false;
-        this.echo = true;
+        this.isEchoing = true;
+        this.isTalking = false;
+        this.mode = '>';
         this.version = null;
-
-
-        this.readTimeout = 3000;
-        this.leftOver = '';
     }
 
     async connect() {
-        this.port = await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
+        this.isBusy = true;
 
-        try {
-            await this.attach();
-        } catch (error) {
-            this.errorLog.push(error);
-            this.port = null;
+        this.port = await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
+        await this.port.open({
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: 'none',
+        });
+
+        if (this.port?.writable == null) {
+            this.errorLog.push('This is not a writable port.');
+            return;
         }
+        if (this.port?.readable == null) {
+            this.errorLog.push('This is not a readable port.');
+            return;
+        }
+
+        this.reader = this.port.readable.getReader();
+        this.writer = this.port.writable.getWriter();
 
         this.startReadLoop();
 
-        this.leftOver = '';
         await this.sleep(100);
         await this.synchronize();
 
         this.isConnected = true;
+        this.isBusy = false;
+
+        console.log('ready');
     }
 
     async disconnect() {
-        await this.detach();
+        await this.stopReadLoop();
+        await this.writer.releaseLock();
+        await this.reader.releaseLock();
+        await this.port.close();
     }
 
     async synchronize() {
+        // Direct mode.
+        await this.write('>');
         // Escape the current program.
-        await this.send("\x1B", '');
-        // Force immediate mode.
-        await this.send('>');
+        await this.write("\x1B", '');
         // Try to get the version.
         let tryCount = 3;
         while (tryCount > 0) {
@@ -60,56 +77,26 @@ export default class WebSerial {
             }
             tryCount--;
         }
+        if (this.isEchoing) {
+            await this.turnOffEcho();
+        }
     }
 
     async getVersion() {
-        await this.send('version()');
-        const result = await this.readUntilEmpty();
-        if (this.echo) {
-            await this.turnOffEcho();
-            return result[1];
-        }
+        const result = await this.write('version()');
         return result[0];
     }
 
     async turnOffEcho() {
-        if (!this.echo) {
+        if (!this.isEchoing) {
             return;
         }
-        await this.send('echo(0)');
-        await this.readUntilEmpty();
-        this.echo = false;
+        await this.write('isEchoing(0)');
+        this.isEchoing = false;
     }
 
-    async attach() {
-        await this.port.open({
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: 'none',
-        });
-
-        if (this.port?.writable == null) {
-            this.errorLog.push('This is not a writable port.');
-        }
-        if (this.port?.readable == null) {
-            this.errorLog.push('This is not a readable port.');
-        }
-
-        this.reader = this.port.readable.getReader();
-        this.writer = this.port.writable.getWriter();
-    }
-
-    async detach() {
-        await this.stopReadLoop();
-        await this.writer.releaseLock();
-        await this.reader.releaseLock();
-        await this.port.close();
-    }
-
-    async sleep(ms) {
-        await new Promise((resolve) => setTimeout(resolve, ms));
+    sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     startReadLoop() {
@@ -125,78 +112,45 @@ export default class WebSerial {
         }
     }
 
-    async readResponse() {
-        let str = this.leftOver;
-        const end = Date.now() + this.readTimeout;
-
-        const response = { success: false, response: null };
-
-        while (Date.now() < end) {
-            const { value } = await this.reader.read();
-            const text = this.decoder.decode(value);
-
-            str += text;
-
-            str = str.replace("\n", '');
-            str = str.replace("\r", '');
-
-            let idx1 = str.indexOf('>');
-            let idx2 = str.indexOf('&');
-
-            if (idx1 === -1) {
-                idx1 = str.indexOf('$');
-            }
-
-            if (idx1 === -1 && idx2 === -1) {
-                continue;
-            }
-
-            const idx = (idx1 === -1) ? idx2 : idx1;
-
-            console.log('----------', idx);
-            console.log(str);
-            console.log('----------');
-            console.log(idx + 1, str.length, str.substring(idx + 1, str.length));
-            console.log('----------');
-            console.log(0, idx, str.substring(0, idx));
-
-            this.leftOver = str.substring(idx + 1);
-            response.success = true;
-            response.response = str.substring(0, idx);
-
-            const idx3 = str.indexOf('!');
-            if (idx3 !== -1 && (response.response.indexOf('error') > -1 || response.response.indexOf('unknown') > -1)) {
-                response.success = false;
-            }
-
-            return response;
-        }
-
-        this.leftOver = '';
-
-        return response;
-    }
-
     async readLoop() {
         let line, str = '';
         this.readLoopActive = true;
         while (this.readLoopActive) {
             try {
                 const { value, done } = await this.reader.read();
-                if (value) {
-                    str += this.decoder.decode(value);
-                    let index = str.indexOf("\n");
-                    while (index > 0) {
-                        line = str.substring(0, index).replace("\r", '');
-                        while (line.startsWith('>') || line.startsWith('$')) {
-                            line = line.substring(1);
-                        }
-                        console.log('>>', line);
-                        this.queue.push(line);
-                        str = str.substring(index + 1);
-                        index = str.indexOf("\n");
-                    }
+
+                console.log('Reading...');
+                str += this.decoder.decode(value).replace("\r", '');
+
+                if (!str) {
+                    continue;
                 }
+
+                let index = str.indexOf("\n");
+
+                if (index > -1) {
+                    str.split("\n").forEach((value) => console.log('->', value));
+                } else {
+                    console.log('->', str);
+                }
+
+                while (index > -1) {
+                    line = str.substring(0, index);
+                    if (line) {
+                        console.log('queued:', line);
+                        this.queue.push(line);
+                    }
+
+                    str = str.substring(index + 1);
+                    index = str.indexOf("\n");
+                }
+
+                if (str === '>' || str === '$') {
+                    console.log('queued:', str);
+                    this.queue.push(str);
+                    str = '';
+                }
+
                 if (done) {
                     this.readLoopActive = false;
                 }
@@ -207,7 +161,30 @@ export default class WebSerial {
         }
     }
 
-    async readUntilEmpty() {
+    readUntil(terminator) {
+        return new Promise(async (resolve) => {
+            const result = [];
+            let line;
+            do {
+                line = await this.queue.pop().catch(() => {
+                    console.log('read until', 'queue waiter terminated', result);
+                    resolve(result);
+                });
+                if (line.startsWith('!')) {
+                    console.log('Error:', line);
+                    break;
+                }
+                result.push(line);
+            } while (line !== terminator);
+            console.log('read until', 'found', result);
+            if (result.length > 1) {
+                result.pop();
+            }
+            resolve(result);
+        });
+    }
+
+    async flush() {
         const result = [];
         let line;
         do {
@@ -216,13 +193,40 @@ export default class WebSerial {
                 result.push(line);
             }
         } while (line);
+        console.log('flushed', result);
         return result;
     }
 
-    async send(command, terminator = "\n") {
-        console.log(command);
-        await this.readUntilEmpty();
-        this.writer.write(this.encoder.encode(command + terminator));
-        await this.sleep(10);
+    async escape() {
+        this.isBusy = true;
+        this.queue.cancelWait(new Error('Escape'));
+        await this.write("\x1B", '');
+        this.isBusy = false;
+    }
+
+    async write(command, lineEnd = "\n") {
+        console.log('----- write -----');
+
+        this.isTalking = true;
+
+        await this.flush();
+
+        this.writer.write(this.encoder.encode(command + lineEnd));
+        console.log('wrote', command);
+
+        if (command === '>' || command === '$') {
+            this.mode = command;
+        }
+
+        console.log('write is sleeping');
+        await this.sleep(50);
+
+        console.log('write is reading');
+        const result = await this.readUntil(this.mode);
+
+        this.isTalking = false;
+
+        console.log('write result', result);
+        return result;
     }
 }

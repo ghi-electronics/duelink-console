@@ -7,15 +7,22 @@ body {
 }
 
 button {
-    @apply bg-gray-300 px-2.5 py-1;
+    @apply bg-blue-300 px-2.5 py-1;
 }
 button:not(:disabled) {
-    @apply hover:bg-gray-400;
+    @apply hover:bg-blue-400;
 }
 button:disabled {
     @apply opacity-40;
 }
 
+button.tester {
+    @apply bg-green-300 px-2.5 py-1;
+}
+button.tester:not(:disabled) {
+    @apply hover:bg-green-400;
+}
+
 input[type="text"] {
-    @apply px-2 py-1 outline-0;
+    @apply font-mono px-2 py-1 outline-0;
 }
