@@ -17,6 +17,7 @@ export default class WebSerial {
         this.isTalking = false;
         this.mode = '>';
         this.version = null;
+        this.str = '';
     }
 
     async connect() {
@@ -62,10 +63,21 @@ export default class WebSerial {
     }
 
     async synchronize() {
-        // Direct mode.
-        await this.write('>');
         // Escape the current program.
-        await this.write("\x1B", '');
+        this.writer.write(this.encoder.encode("\x1B"));
+        console.log('wrote escape');
+
+        await this.sleep(100);
+        let result = await this.flush();
+
+        console.log('escape result', result);
+        if (result.length === 1) {
+            result = result.pop();
+            if (result === '>' || result === '$') {
+                this.mode = result;
+                console.log('mode set to', result);
+            }
+        }
         // Try to get the version.
         let tryCount = 3;
         while (tryCount > 0) {
@@ -84,14 +96,20 @@ export default class WebSerial {
 
     async getVersion() {
         const result = await this.write('version()');
-        return result[0];
+        for (const line of result) {
+            console.log('line', line, (line.match(/\./g) || []).length);
+            if (line.startsWith('v') && (line.match(/\./g) || []).length === 2) {
+                return line;
+            }
+        }
+        return undefined;
     }
 
     async turnOffEcho() {
         if (!this.isEchoing) {
             return;
         }
-        await this.write('isEchoing(0)');
+        await this.write('echo(0)');
         this.isEchoing = false;
     }
 
@@ -113,42 +131,42 @@ export default class WebSerial {
     }
 
     async readLoop() {
-        let line, str = '';
+        let line;
         this.readLoopActive = true;
         while (this.readLoopActive) {
             try {
                 const { value, done } = await this.reader.read();
 
                 console.log('Reading...');
-                str += this.decoder.decode(value).replace("\r", '');
+                this.str += this.decoder.decode(value).replace("\r", '');
 
-                if (!str) {
+                if (!this.str) {
                     continue;
                 }
 
-                let index = str.indexOf("\n");
+                let index = this.str.indexOf("\n");
 
                 if (index > -1) {
-                    str.split("\n").forEach((value) => console.log('->', value));
+                    this.str.split("\n").forEach((value) => console.log('->', value));
                 } else {
-                    console.log('->', str);
+                    console.log('->', this.str);
                 }
 
                 while (index > -1) {
-                    line = str.substring(0, index);
+                    line = this.str.substring(0, index);
                     if (line) {
                         console.log('queued:', line);
                         this.queue.push(line);
                     }
 
-                    str = str.substring(index + 1);
-                    index = str.indexOf("\n");
+                    this.str = this.str.substring(index + 1);
+                    index = this.str.indexOf("\n");
                 }
 
-                if (str === '>' || str === '$') {
-                    console.log('queued:', str);
-                    this.queue.push(str);
-                    str = '';
+                if (this.str === '>' || this.str === '$') {
+                    console.log('queued:', this.str);
+                    this.queue.push(this.str);
+                    this.str = '';
                 }
 
                 if (done) {
@@ -193,6 +211,10 @@ export default class WebSerial {
                 result.push(line);
             }
         } while (line);
+        // Clear read loop string.
+        if (!result.length) {
+            this.str = '';
+        }
         console.log('flushed', result);
         return result;
     }
