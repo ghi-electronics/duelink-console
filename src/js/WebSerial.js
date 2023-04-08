@@ -188,10 +188,12 @@ export default class WebSerial {
                     console.log('read until', 'queue waiter terminated', result);
                     resolve(result);
                 });
-                result.push(line);
-                if (line.startsWith('!')) {
-                    console.log('Error:', line);
-                    break;
+                if (line) {
+                    result.push(line);
+                    if (line.startsWith('!')) {
+                        console.log('Error:', line);
+                        break;
+                    }
                 }
             } while (line !== terminator);
             console.log('read until', 'found', result);
