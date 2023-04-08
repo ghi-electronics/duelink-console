@@ -85,6 +85,9 @@ const webSerial = reactive(new WebSerial());
 const output = ref([]);
 const lastCode = ref(null);
 
+let prevProgram = '';
+
+
 // Computed
 
 const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
@@ -93,12 +96,12 @@ const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || we
 
 async function sendRecordMode() {
     console.log('sendRecordMode');
+    await sendNew();
     await webSerial.write('$');
     const lines = recordModeCode.value.replace("\r", '').split("\n");
     for (const line of lines) {
         await webSerial.write(line);
     }
-    await webSerial.write('run');
 }
 
 async function sendDirectMode() {
@@ -113,11 +116,17 @@ async function sendDirectMode() {
 async function sendNew() {
     console.log('sendNew');
     await webSerial.write('new');
+    prevProgram = '';
     lastCode.value = '';
     output.value = [];
 }
 
 async function sendRun() {
+    if (recordModeCode.value !== prevProgram) {
+        console.log('code changed');
+        await sendRecordMode();
+    }
+    prevProgram = recordModeCode.value;
     console.log('sendRun');
     const result = await webSerial.write('run');
     output.value.push(...result);
