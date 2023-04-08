@@ -119,7 +119,8 @@ async function sendNew() {
 
 async function sendRun() {
     console.log('sendRun');
-    await webSerial.write('run');
+    const result = await webSerial.write('run');
+    output.value.push(...result);
 }
 
 async function sendList() {
