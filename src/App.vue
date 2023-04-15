@@ -85,9 +85,6 @@ const webSerial = reactive(new WebSerial());
 const output = ref([]);
 const lastCode = ref(null);
 
-let prevProgram = '';
-
-
 // Computed
 
 const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
@@ -96,17 +93,32 @@ const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || we
 
 async function sendRecordMode() {
     console.log('sendRecordMode');
-    await sendNew();
-    await webSerial.write('$');
-    const lines = recordModeCode.value.replace("\r", '').split("\n");
+    //await sendNew();
+    //await webSerial.write('$');
+    //const lines = recordModeCode.value.replace("\r", '').split("\n");
+    //for (const line of lines) {
+    //    await webSerial.write(line);
+    //}
+
+    const result = await webSerial.write('pgmstream()', '&');
+    console.log(result);
+
+    const lines = recordModeCode.value.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
     for (const line of lines) {
-        await webSerial.write(line);
+        let response = await webSerial.stream(line+'\n');
+        if (response) {
+            output.value.push(response);
+            break;
+        }
     }
+    await webSerial.stream('\0');
+    await webSerial.readUntil()
 }
 
 async function sendDirectMode() {
     console.log('sendDirectMode');
-    const result = await webSerial.write(directModeCode.value);
+    const line = directModeCode.value.replace(/\t/gm, ' ');
+    const result = await webSerial.write(line);
     output.value.push(...result);
     lastCode.value = directModeCode.value;
     directModeCode.value = '';
@@ -116,17 +128,11 @@ async function sendDirectMode() {
 async function sendNew() {
     console.log('sendNew');
     await webSerial.write('new');
-    prevProgram = '';
     lastCode.value = '';
     output.value = [];
 }
 
 async function sendRun() {
-    if (recordModeCode.value !== prevProgram) {
-        console.log('code changed');
-        await sendRecordMode();
-    }
-    prevProgram = recordModeCode.value;
     console.log('sendRun');
     const result = await webSerial.write('run');
     output.value.push(...result);

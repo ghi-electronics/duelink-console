@@ -137,6 +137,7 @@ export default class WebSerial {
     async readLoop() {
         let line;
         this.readLoopActive = true;
+        
         while (this.readLoopActive) {
             try {
                 const { value, done } = await this.reader.read();
@@ -167,7 +168,7 @@ export default class WebSerial {
                     index = this.str.indexOf("\n");
                 }
 
-                if (this.str === '>' || this.str === '$') {
+                if (this.str === '>' || this.str === '$' || this.str === '&') {
                     console.log('queued:', this.str);
                     this.queue.push(this.str);
                     this.str = '';
@@ -184,33 +185,29 @@ export default class WebSerial {
     }
 
     readUntil(terminator) {
-        this.isWaiting = true;
+        if (!terminator) terminator = this.mode;
+
         return new Promise(async (resolve) => {
             const result = [];
-            try {
-                let line;
-                do {
-                    line = await this.queue.pop().catch(() => {
-                        console.log('read until', 'queue waiter terminated', result);
-                        resolve(result);
-                        this.isWaiting = false;                        
-                    });
-                    if (line) {
-                        result.push(line);
-                        if (line.startsWith('!')) {
-                            console.log('Error:', line);
-                            break;
-                        }
+            let line;
+            do {
+                line = await this.queue.pop().catch(() => {
+                    console.log('read until', 'queue waiter terminated', result);
+                    resolve(result);
+                });
+                if (line) {
+                    result.push(line);
+                    if (line.startsWith('!')) {
+                        console.log('Error:', line);
+                        break;
                     }
-                } while (line !== terminator);
-                console.log('read until found', result);
-                if (result.length > 1) {
-                    result.pop();
                 }
-                resolve(result);                
-            } finally {
-                this.isWaiting = false;
+            } while (line !== terminator);
+            console.log('read until found', result);
+            if (result.length > 1) {
+                result.pop();
             }
+            resolve(result);                            
         });
     }
 
@@ -241,7 +238,7 @@ export default class WebSerial {
         }
     }
 
-    async write(command, lineEnd = "\n") {
+    async write(command, terminator = null, lineEnd = "\n") {
         let wasTalking = this.isTalking;
         try {
             console.log('----- write -----');
@@ -265,12 +262,33 @@ export default class WebSerial {
             let result = [];
             if (!wasTalking) {
                 console.log('write is reading');
-                result = await this.readUntil(this.mode);                
+                if (!terminator) {
+                    result = await this.readUntil(this.mode);                
+                } else {
+                    result = await this.readUntil(terminator);                
+                }
             }
             console.log('write result', result);
             return result;
         } finally {
             if (!wasTalking) this.isTalking = false;
         }
+    }
+
+    async stream(data) {
+        console.log('----- stream -----');
+        let bytes = this.encoder.encode(data);
+        let buf = new Uint8Array(1);
+        for(let i=0; i<bytes.length;i++) {
+            buf[0] = bytes[i];
+            await this.writer.write(buf);
+            let response = await this.queue.tryPop();
+            if (response) {
+                return response;
+            }
+            if (i % 4 == 0) await this.sleep(1);
+        }
+        await this.sleep(5);
+        return null;
     }
 }
