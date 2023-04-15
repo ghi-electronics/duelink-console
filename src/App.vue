@@ -12,6 +12,9 @@
                 <button :disabled="!webSerial.isConnected || webSerial.isBusy" @click="sendEscape">Esc</button>
                 <div class="px-2">{{ webSerial.version }}</div>
             </div>
+            <div class="w-full" style="border: solid;">
+                <div :ref="(el)=>$refs.progress=el"  style="width:0%; height:5px; background-color: blue;"/>
+            </div>
             <v-ace-editor
                 v-if="webSerial.isConnected"
                 v-model:value="recordModeCode"
@@ -71,7 +74,7 @@ import WebSerial from "./js/WebSerial";
 
 // Refs
 
-const $refs = { input: null };
+const $refs = { input: null, progress: null };
 
 // Data
 
@@ -104,15 +107,21 @@ async function sendRecordMode() {
     console.log(result);
 
     const lines = recordModeCode.value.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
-    for (const line of lines) {
+    let lineNumber = 0;
+    
+    for (let line of lines) {
+        if (line.trim().length===0) line=' ';
         let response = await webSerial.stream(line+'\n');
         if (response) {
             output.value.push(response);
             break;
         }
+        $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
     }
+    $refs.progress.style.width = '100%';
     await webSerial.stream('\0');
     await webSerial.readUntil()
+    $refs.progress.style.width = '0%';
 }
 
 async function sendDirectMode() {

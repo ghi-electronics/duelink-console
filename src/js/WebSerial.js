@@ -276,19 +276,25 @@ export default class WebSerial {
     }
 
     async stream(data) {
-        console.log('----- stream -----');
+        const BLOCK_SIZE = 64;
+
+        //console.log('----- stream -----');
         let bytes = this.encoder.encode(data);
-        let buf = new Uint8Array(1);
-        for(let i=0; i<bytes.length;i++) {
-            buf[0] = bytes[i];
+
+        let count = bytes.length;
+        let offset = 0;
+        while (count > 0) {
+            const buf = bytes.subarray(offset, offset + Math.min(BLOCK_SIZE, count));
             await this.writer.write(buf);
+
             let response = await this.queue.tryPop();
             if (response) {
                 return response;
             }
-            if (i % 4 == 0) await this.sleep(1);
-        }
-        await this.sleep(5);
-        return null;
+            offset += BLOCK_SIZE;
+            count -= buf.length; 
+            await this.sleep(1);
+        }  
+        return null;      
     }
 }
