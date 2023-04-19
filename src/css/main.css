@@ -2,18 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    @apply bg-gray-200 text-gray-900 text-base p-8;
+html, body {
+    height: 100%;
+    width: 100%;
 }
 
+body {
+    @apply bg-gray-50 text-gray-900;
+    @apply dark:bg-dark-900 dark:text-dark-50;
+}
+
+#app {
+    width: 100%;
+    display: grid;
+    grid-gap: 2px;
+    grid-template-columns: 100%;
+    grid-template-rows: 32px 48px 40px 8px 412px auto auto;
+    grid-template-areas:
+    "menu-bar"
+    "tool-bar"
+    "tab-bar"
+    "progress-bar"
+    "editor"
+    "side-panel"
+    "footer";
+}
+
+@screen md {
+    #app {
+        height: 100%;
+        grid-template-columns: auto 300px;
+        grid-template-rows: 48px 48px 2.5rem 8px auto auto 64px;
+        grid-template-areas:
+        "menu-bar menu-bar"
+        "tool-bar tool-bar"
+        "tab-bar side-panel"
+        "progress-bar side-panel"
+        "editor side-panel"
+        "editor side-panel"
+        "footer footer";
+    }
+}
+
+#menu-bar {
+    grid-area: menu-bar;
+    @apply bg-white dark:bg-dark-900;
+}
+
+#tool-bar {
+    grid-area: tool-bar;
+    @apply bg-gray-50 dark:bg-dark-800;
+}
+
+#tab-bar {
+    grid-area: tab-bar;
+    @apply bg-gray-50 dark:bg-dark-800 overflow-hidden;
+}
+
+#progress-bar {
+    grid-area: progress-bar;
+    @apply bg-gray-50 dark:bg-dark-800;
+}
+
+#editor {
+    grid-area: editor;
+    @apply bg-gray-50 dark:bg-dark-800;
+}
+
+@screen md {
+    #editor {
+        overflow: auto;
+    }
+}
+
+#side-panel {
+    grid-area: side-panel;
+    @apply bg-gray-50 dark:bg-dark-800 overflow-y-auto;
+}
+
+#footer {
+    grid-area: footer;
+    @apply bg-gray-50;
+    @apply dark:bg-dark-800 dark:text-dark-300;
+}
+
+#footer a {
+    @apply dark:hover:text-dark-100;
+}
+
+#logo {
+    @apply text-gray-900;
+    @apply dark:text-dark-50;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 button {
-    @apply bg-blue-300 px-2.5 py-1;
+    @apply px-2.5 py-1 bg-gray-100 text-gray-900;
+    @apply dark:bg-dark-700 dark:text-dark-300;
 }
 button:not(:disabled) {
-    @apply hover:bg-blue-400;
+    @apply hover:bg-gray-200;
+    @apply dark:hover:bg-dark-600;
 }
 button:disabled {
-    @apply opacity-40;
+    @apply bg-gray-200 text-gray-400;
+    @apply dark:bg-dark-900 dark:text-dark-700;
 }
 
 button.tester {

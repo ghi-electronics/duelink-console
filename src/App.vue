@@ -1,63 +1,40 @@
 <template>
-    <div class="grid lg:grid-cols-2 gap-4 bg-gray-200">
-        <div class="col-span-1 space-y-4">
-            <div class="mb-4 flex items-center space-x-2">
-                <button :disabled="webSerial.isConnected" @click="webSerial.connect">Connect</button>
-                <div class="flex divide-x-2 divide-gray-200">
-                    <button :disabled="disabled" @click="sendNew">New</button>
-                    <button :disabled="disabled" @click="sendRecordMode">Send</button>
-                    <button :disabled="disabled" @click="sendRun">Run</button>
-                    <button :disabled="disabled" @click="sendList">List</button>
-                </div>
-                <button :disabled="!webSerial.isConnected || webSerial.isBusy" @click="sendEscape">Esc</button>
-                <div class="px-2">{{ webSerial.version }}</div>
-            </div>
+    <div id="menu-bar">
+        <MenuBar/>
+    </div>
+    <div id="tool-bar">
+        <ToolBar
+            v-model:theme="theme"
+            :disabled="disabled"
+            :is-connected="webSerial.isConnected"
+            @connect="webSerial.connect()"
+            @run="sendRun"
+            @updateTippy="updateTippy"
+        />
+    </div>
+    <div id="tab-bar"></div>
+    <div id="progress-bar"></div>
+    <div id="editor">
+        <div class="h-full flex flex-col">
             <v-ace-editor
                 v-if="webSerial.isConnected"
                 v-model:value="recordModeCode"
                 :lang="language"
-                class="w-full h-[480px]"
+                :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'"
+                class="w-full flex-1"
                 ref="editor"
                 @init="onEditorInit"
             />
-            <div v-else class="bg-white w-full h-[480px]"></div>
-            <div class="space-y-2">
-                <div class="flex">
-                    <div class="bg-gray-300 px-2.5 py-1">
-                        {{ webSerial.mode }}
-                    </div>
-                    <input
-                        :disabled="disabled"
-                        :ref="(el) => $refs.input = el"
-                        v-model="directModeCode"
-                        type="text"
-                        class="flex-1"
-                        @keyup.enter="sendDirectMode"
-                    >
-                    <button :disabled="disabled" @click="sendDirectMode">Send</button>
-                </div>
-                <div v-if="lastCode" class="bg-white bg-opacity-50 px-2 py-1 font-mono whitespace-pre-wrap">
-                    {{ lastCode }}
-                </div>
+            <div class="w-full py-2 px-4 text-right text-geyser-1100 dark:text-bunker-300">
+                {{ `Line ${editorLine}, Column ${editorColumn}` }}
             </div>
         </div>
-        <div class="col-span-1 space-y-4">
-            <div class="flex divide-x divide-blue-400">
-                <button :disabled="disabled" @click="output = []">Clear Output</button>
-            </div>
-            <div :class="['w-full h-[480px] p-4 bg-black overflow-y-auto whitespace-pre-wrap text-white', !webSerial.isConnected ? 'opacity-40' : '']">
-                <template v-if="output.length">
-                    {{ output.join("\n") }}
-                </template>
-                <span v-else class="text-gray-500">
-                    No output
-                </span>
-            </div>
-            <div class="flex divide-x-2 divide-gray-200">
-                <button :disabled="disabled" class="tester" @click="testPrint">Test Print</button>
-                <button :disabled="disabled" class="tester" @click="testDigitalWrite">Test Digital Write</button>
-            </div>
-        </div>
+    </div>
+    <div id="side-panel">
+        <div class="space-y-1"></div>
+    </div>
+    <div id="footer">
+        <Footer/>
     </div>
 </template>
 
@@ -68,6 +45,9 @@ import { computed, reactive, ref } from 'vue';
 
 import { VAceEditor } from 'vue3-ace-editor';
 import WebSerial from "./js/WebSerial";
+import MenuBar from "./components/MenuBar.vue";
+import ToolBar from "./components/ToolBar.vue";
+import Footer from "./components/Footer.vue";
 
 // Refs
 
@@ -84,6 +64,7 @@ const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
 const output = ref([]);
 const lastCode = ref(null);
+const theme = ref('light');
 
 let prevProgram = '';
 
@@ -171,4 +152,6 @@ function onEditorInit(editor) {
     });
     editor.value = editor;
 }
+
+function updateTippy() {}
 </script>

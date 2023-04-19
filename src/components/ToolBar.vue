@@ -1,11 +1,24 @@
 <template>
     <div class="h-full mx-2 flex items-center space-x-8">
         <Button
-            class="btn-tool"
+            :disabled="isConnected"
+            data-tippy-content="Connect"
+            @click.native="$emit('connect')"
+        >
+            <i class="fas fa-fw fa-play"></i>
+        </Button>
+        <Button
+            :disabled="disabled"
             data-tippy-content="Run"
             @click.native="$emit('run')"
         >
             <i class="fas fa-fw fa-play"></i>
+        </Button>
+        <Button
+            :data-tippy-content="theme[0].toUpperCase() + theme.substring(1).toLowerCase()"
+            @click.native="toggleDarkMode"
+        >
+            <i :class="theme === 'dark' ? 'fas' : 'far'" class="fa-fw fa-moon"></i>
         </Button>
     </div>
 </template>
@@ -17,12 +30,14 @@ import Button from './Button.vue';
 
 // Emits
 
-const $emit = defineEmits(['configure', 'run', 'update:state', 'update:theme', 'updateTippy']);
+const $emit = defineEmits(['connect', 'run', 'update:theme', 'updateTippy']);
 
 // Props
 
 const props = defineProps({
+    disabled: Boolean,
     theme: String,
+    isConnected: Boolean,
 });
 
 // Methods
