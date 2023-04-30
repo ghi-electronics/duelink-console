@@ -1,24 +1,52 @@
 <template>
-    <div class="h-full mx-2 flex items-center space-x-8">
+    <div class="h-full mx-2 flex items-center space-x-1">
         <Button
-            :disabled="isConnected"
-            data-tippy-content="Connect"
-            @click.native="$emit('connect')"
+            id="plugBtn"
+            :class="isConnected ? 'connected' : ''"
+            :data-tippy-content="isConnected ? 'Disconnect' : 'Connect'"
+            @click.native="onPlug"
         >
-            <i class="fas fa-fw fa-play"></i>
+            <i class="fas fa-fw fa-plug"></i>
         </Button>
         <Button
             :disabled="disabled"
-            data-tippy-content="Run"
-            @click.native="$emit('run')"
+            data-tippy-content="Play"
+            @click.native="$emit('play')"
         >
             <i class="fas fa-fw fa-play"></i>
         </Button>
         <Button
-            :data-tippy-content="theme[0].toUpperCase() + theme.substring(1).toLowerCase()"
+            :disabled="!isConnected"
+            data-tippy-content="Stop"
+            @click.native="$emit('stop')"
+        >
+            <i class="fas fa-fw fa-square"></i>
+        </Button>
+        <Button
+            :disabled="disabled || !hasCode"
+            data-tippy-content="Record"
+            @click.native="$emit('record')"
+        >
+            <i class="fas fa-fw fa-circle"></i>
+        </Button>
+        <Button
+            :disabled="disabled"
+            data-tippy-content="List"
+            @click.native="$emit('list')"
+        >
+            <i class="fas fa-fw fa-list"></i>
+        </Button>
+        <Button
+            data-tippy-content="Download"
+            @click.native="$emit('download')"
+        >
+            <i class="fas fa-fw fa-download"></i>
+        </Button>
+        <Button
+            :data-tippy-content="(theme === 'light' ? 'Dark' : 'Light') + ' Theme'"
             @click.native="toggleDarkMode"
         >
-            <i :class="theme === 'dark' ? 'fas' : 'far'" class="fa-fw fa-moon"></i>
+            <i :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'" class="fas fa-fw"></i>
         </Button>
     </div>
 </template>
@@ -30,17 +58,36 @@ import Button from './Button.vue';
 
 // Emits
 
-const $emit = defineEmits(['connect', 'run', 'update:theme', 'updateTippy']);
+const $emit = defineEmits([
+    'connect',
+    'disconnect',
+    'download',
+    'play',
+    'stop',
+    'record',
+    'list',
+    'update:theme',
+    'updateTippy'
+]);
 
 // Props
 
 const props = defineProps({
     disabled: Boolean,
     theme: String,
+    hasCode: Boolean,
     isConnected: Boolean,
 });
 
 // Methods
+
+function onPlug(event) {
+    if (props.isConnected) {
+        $emit('disconnect');
+    } else {
+        $emit('connect');
+    }
+}
 
 function toggleDarkMode(event) {
     if (props.theme === 'dark') {
@@ -54,6 +101,6 @@ function toggleDarkMode(event) {
         document.documentElement.style.colorScheme = 'dark';
         document.documentElement.classList.add('dark');
     }
-    $emit('updateTippy', event.target);
+    $emit('updateTippy', event.target, true);
 }
 </script>

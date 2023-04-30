@@ -62,6 +62,8 @@ export default class WebSerial {
         await this.writer.releaseLock();
         await this.reader.releaseLock();
         await this.port.close();
+        this.isConnected = false;
+        this.version = null;
     }
 
     async synchronize() {

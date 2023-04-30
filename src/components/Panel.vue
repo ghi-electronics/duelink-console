@@ -1,20 +1,18 @@
 <template>
-    <div class="bg-geyser-200 dark:bg-bunker-700">
+    <div class="bg-slate-300 dark:bg-zinc-700">
         <div
-            :class="isOpen ?
-            'text-geyser-2100 dark:text-white' :
-            'text-geyser-1400 hover:text-geyser-2100 dark:text-bunker-100 dark:hover:text-white'"
-            class="flex items-center bg-geyser-300 dark:bg-bunker-800 p-2 select-none font-semibold transition duration-150 ease-in-out"
+            class="flex items-center px-4 py-2 cursor-pointer select-none transition duration-150 ease-in-out"
+            @click="isOpen = !isOpen"
         >
-            <div class="flex-1">
-                <div class="btn btn-pin mr-2" @click="isOpen = !isOpen">
+            <div class="flex-1 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
                     <i class="fas" :class="isOpen ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                    <span>{{ title }}</span>
                 </div>
-                <span class="cursor-pointer" @click="isOpen = !isOpen">{{ title }}</span>
+                <slot name="buttons" />
             </div>
-            <slot name="button"></slot>
         </div>
-        <div v-show="isOpen" class="p-4">
+        <div v-show="isOpen" class="bg-slate-100 border-b-8 border-slate-300 dark:bg-zinc-900 dark:border-zinc-700">
             <slot/>
         </div>
     </div>

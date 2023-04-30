@@ -6,18 +6,29 @@
         <ToolBar
             v-model:theme="theme"
             :disabled="disabled"
+            :has-code="recordModeCode.length > 0"
             :is-connected="webSerial.isConnected"
             @connect="webSerial.connect()"
-            @run="sendRun"
+            @disconnect="webSerial.disconnect()"
+            @download="download"
+            @play="sendRun"
+            @stop="sendEscape"
+            @record="sendRecordMode"
+            @list="sendList"
+            @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
         />
     </div>
     <div id="tab-bar"></div>
-    <div id="progress-bar"></div>
+    <div id="progress-bar">
+        <div
+            :class="['h-full bg-sky-400 dark:bg-lime-400 transition-all duration-150 ease-linear', progressClass]"
+            :style="`width:${progressPercent}%`"
+        ></div>
+    </div>
     <div id="editor">
         <div class="h-full flex flex-col">
             <v-ace-editor
-                v-if="webSerial.isConnected"
                 v-model:value="recordModeCode"
                 :lang="language"
                 :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'"
@@ -25,13 +36,52 @@
                 ref="editor"
                 @init="onEditorInit"
             />
-            <div class="w-full py-2 px-4 text-right text-geyser-1100 dark:text-bunker-300">
-                {{ `Line ${editorLine}, Column ${editorColumn}` }}
+            <div class="px-4 py-2 pl-[42px]">
+                <div id="info-bar">
+                    <div v-if="webSerial.version">
+                        {{ webSerial.version }}
+                    </div>
+                    <div>
+                        {{ `Line ${editorLine}, Column ${editorColumn}` }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div id="side-panel">
-        <div class="space-y-1"></div>
+    <div id="direct-panel">
+        <input
+            v-model="directModeCode"
+            :disabled="disabled"
+            :ref="(el) => $refs.input = el"
+            class="w-full xl:w-1/2"
+            placeholder="Code to execute immediately..."
+            type="text"
+            @keyup.enter="sendDirectMode"
+        />
+        <Button
+            :disabled="disabled || !directModeCode.length"
+            data-tippy-content="Execute"
+            @click.native="sendDirectMode"
+        >
+            <i class="fas fa-fw fa-arrow-right"></i>
+        </Button>
+    </div>
+    <div id="side-panel" class="space-y-2">
+        <Panel title="Output">
+            <template #buttons>
+                <Button :disabled="!output.length" @click.native.stop="output = []">
+                    <i class="fas fa-fw fa-ban"></i>
+                </Button>
+            </template>
+            <div class="p-2 whitespace-pre-wrap">
+                <template v-if="!output.length">
+                    ...
+                </template>
+                <template v-else>
+                    {{ output.join("\n") }}
+                </template>
+            </div>
+        </Panel>
     </div>
     <div id="footer">
         <Footer/>
@@ -39,7 +89,8 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
+import tippy from 'tippy.js';
 
 // Components
 
@@ -47,7 +98,9 @@ import { VAceEditor } from 'vue3-ace-editor';
 import WebSerial from "./js/WebSerial";
 import MenuBar from "./components/MenuBar.vue";
 import ToolBar from "./components/ToolBar.vue";
+import Panel from "./components/Panel.vue";
 import Footer from "./components/Footer.vue";
+import Button from "./components/Button.vue";
 
 // Refs
 
@@ -57,17 +110,48 @@ const $refs = { input: null };
 
 const recordModeCode = ref('');
 const directModeCode = ref('');
-const editor = ref(null);
 const editorLine = ref(1);
 const editorColumn = ref(1);
 const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
 const output = ref([]);
-const lastCode = ref(null);
 const theme = ref('light');
+const progressClass = ref('opacity-0');
+const progressPercent = ref(0);
 
-let prevProgram = '';
+const tippyConfig = {
+    animation: 'fade',
+    appendTo: document.body,
+    interactive: true,
+    placement: 'bottom',
+    theme: 'light',
+};
 
+let editor = null;
+let tippyInstances = [];
+
+// Watch
+
+watch(() => webSerial.isConnected, (bool) => {
+    if (editor) {
+        editor.setReadOnly(!bool);
+    }
+    const el = document.getElementById('plugBtn');
+    if (el) {
+        updateTippy(el);
+    }
+});
+
+// Created
+
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    theme.value = 'dark';
+    tippyConfig.theme = 'dark';
+}
+
+// Mounted
+
+onMounted(() => tippyInstances = tippy('[data-tippy-content]', tippyConfig));
 
 // Computed
 
@@ -75,21 +159,39 @@ const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || we
 
 // Methods
 
+function download() {
+    if (!recordModeCode.value.length) {
+        return;
+    }
+    const blob = new Blob([recordModeCode.value], { type: 'text/csv' });
+    const el = window.document.createElement('a');
+    el.href = window.URL.createObjectURL(blob);
+    el.download = 'due-code.txt';
+    document.body.appendChild(el);
+    el.click();
+    document.body.removeChild(el);
+}
+
 async function sendRecordMode() {
     console.log('sendRecordMode');
+    progressPercent.value = 0;
+    progressClass.value = 'opacity-100';
     await sendNew();
     await webSerial.write('$');
     const lines = recordModeCode.value.replace("\r", '').split("\n");
-    for (const line of lines) {
-        await webSerial.write(line);
+    for (let i = 0; i < lines.length; i++) {
+        await webSerial.write(lines[i]);
+        progressPercent.value = ((i + 1) / lines.length) * 100;
     }
+    progressPercent.value = 100;
+    setTimeout(() => progressClass.value = 'opacity-0', 200);
 }
 
 async function sendDirectMode() {
     console.log('sendDirectMode');
+    await webSerial.write('>');
     const result = await webSerial.write(directModeCode.value);
     output.value.push(...result);
-    lastCode.value = directModeCode.value;
     directModeCode.value = '';
     $refs.input.focus();
 }
@@ -97,17 +199,10 @@ async function sendDirectMode() {
 async function sendNew() {
     console.log('sendNew');
     await webSerial.write('new');
-    prevProgram = '';
-    lastCode.value = '';
     output.value = [];
 }
 
 async function sendRun() {
-    if (recordModeCode.value !== prevProgram) {
-        console.log('code changed');
-        await sendRecordMode();
-    }
-    prevProgram = recordModeCode.value;
     console.log('sendRun');
     const result = await webSerial.write('run');
     output.value.push(...result);
@@ -141,17 +236,37 @@ async function sendEscape() {
     await webSerial.escape();
 }
 
-function onEditorInit(editor) {
-    editor.setOptions({
+function onEditorInit(instance) {
+    instance.setReadOnly(true);
+    instance.setOptions({
         fontSize: '16px'
     });
-    editor.session.selection.on('changeCursor', () => {
-        const pos = editor.getCursorPosition();
+    instance.session.selection.on('changeCursor', () => {
+        const pos = instance.getCursorPosition();
         editorLine.value = pos.row + 1;
         editorColumn.value = pos.column + 1;
     });
-    editor.value = editor;
+    editor = instance;
 }
 
-function updateTippy() {}
+function updateTippy(target, show = false) {
+    if (!target) {
+        return;
+    }
+    nextTick(() => {
+        if (target._tippy) {
+            target._tippy.setContent(target.getAttribute('data-tippy-content'));
+            if (show) {
+                target._tippy.show();
+            }
+        } else {
+            tippyConfig.theme = theme.value;
+            tippy([target], tippyConfig);
+        }
+    });
+}
+
+function updateTippyTheme() {
+    tippyInstances.forEach((instance) => instance.setProps({ theme: theme.value }));
+}
 </script>
