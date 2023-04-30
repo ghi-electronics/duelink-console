@@ -13,7 +13,7 @@
             @download="download"
             @play="sendRun"
             @stop="sendEscape"
-            @record="sendRecordMode"
+            @record="sendRecordModeOld"
             @list="sendList"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
@@ -22,8 +22,8 @@
     <div id="tab-bar"></div>
     <div id="progress-bar">
         <div
-            :class="['h-full bg-sky-400 dark:bg-lime-400 transition-all duration-150 ease-linear', progressClass]"
-            :style="`width:${progressPercent}%`"
+            :ref="(el) => $refs.progress = el"
+            class="h-full bg-sky-400 dark:bg-lime-400 transition-all duration-150 ease-linear opacity-0"
         ></div>
     </div>
     <div id="editor">
@@ -104,7 +104,7 @@ import Button from "./components/Button.vue";
 
 // Refs
 
-const $refs = { input: null };
+const $refs = { input: null, progress: null };
 
 // Data
 
@@ -116,8 +116,6 @@ const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
 const output = ref([]);
 const theme = ref('light');
-const progressClass = ref('opacity-0');
-const progressPercent = ref(0);
 
 const tippyConfig = {
     animation: 'fade',
@@ -172,25 +170,55 @@ function download() {
     document.body.removeChild(el);
 }
 
-async function sendRecordMode() {
-    console.log('sendRecordMode');
-    progressPercent.value = 0;
-    progressClass.value = 'opacity-100';
+async function sendRecordModeOld() {
+    console.log('sendRecordModeOld');
+    $refs.progress.style.width = '0';
+    $refs.progress.classList.remove('opacity-0');
     await sendNew();
     await webSerial.write('$');
     const lines = recordModeCode.value.replace("\r", '').split("\n");
     for (let i = 0; i < lines.length; i++) {
         await webSerial.write(lines[i]);
-        progressPercent.value = ((i + 1) / lines.length) * 100;
+        $refs.progress.style.width = Math.trunc((i/lines.length) * 100) + '%';
     }
-    progressPercent.value = 100;
-    setTimeout(() => progressClass.value = 'opacity-0', 200);
+    $refs.progress.style.width = '100%';
+    setTimeout(() => $refs.progress.classList.add('opacity-0'), 500);
+}
+
+async function sendRecordMode() {
+    console.log('sendRecordMode');
+    $refs.progress.style.width = '0';
+    $refs.progress.classList.remove('opacity-0');
+
+    const result = await webSerial.write('pgmstream()', '&');
+    console.log(result);
+
+    const lines = recordModeCode.value.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+    let lineNumber = 0;
+    
+    for (let line of lines) {
+        if (line.trim().length === 0) {
+            line = ' ';
+        }
+        let response = await webSerial.stream(line + '\n');
+        if (response) {
+            output.value.push(response);
+            break;
+        }
+        $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
+    }
+    
+    $refs.progress.style.width = '100%';
+    await webSerial.stream('\0');
+    await webSerial.readUntil();
+    $refs.progress.classList.add('opacity-0');
 }
 
 async function sendDirectMode() {
     console.log('sendDirectMode');
     await webSerial.write('>');
-    const result = await webSerial.write(directModeCode.value);
+    const line = directModeCode.value.replace(/\t/gm, ' ');
+    const result = await webSerial.write(line);
     output.value.push(...result);
     directModeCode.value = '';
     $refs.input.focus();
