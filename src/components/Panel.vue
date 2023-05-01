@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import {nextTick, onMounted, onUnmounted, ref} from 'vue';
 
 // Expose
 
@@ -50,12 +50,16 @@ const isOpen = ref(true);
 // Mounted
 
 onMounted(() => {
-    observer = new MutationObserver(() => $refs.slot.scrollTop = $refs.slot.scrollHeight);
-    observer.observe($refs.slot, {
-        attributes: false,
-        childList: true,
-        characterData: true,
-        subtree: true,
+    nextTick(() => {
+        if ($refs.slot) {
+            observer = new MutationObserver(() => $refs.slot.scrollTop = $refs.slot.scrollHeight);
+            observer.observe($refs.slot, {
+                attributes: false,
+                childList: true,
+                characterData: true,
+                subtree: true,
+            });
+        }
     });
 });
 

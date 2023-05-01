@@ -51,7 +51,6 @@
     <div id="direct-panel">
         <input
             v-model="directModeCode"
-            :disabled="disabled"
             :ref="(el) => $refs.input = el"
             class="w-full xl:w-1/2"
             placeholder="Code to execute immediately..."
@@ -130,10 +129,7 @@ let tippyInstances = [];
 
 // Watch
 
-watch(() => webSerial.isConnected, (bool) => {
-    if (editor) {
-        editor.setReadOnly(!bool);
-    }
+watch(() => webSerial.isConnected, () => {
     const el = document.getElementById('plugBtn');
     if (el) {
         updateTippy(el);
@@ -265,7 +261,6 @@ async function sendEscape() {
 }
 
 function onEditorInit(instance) {
-    instance.setReadOnly(true);
     instance.setOptions({
         fontSize: '16px'
     });
