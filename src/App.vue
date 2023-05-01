@@ -58,7 +58,7 @@
             @keyup.enter="sendDirectMode"
         />
         <Button
-            :disabled="disabled || !directModeCode.length"
+            :disabled="disabled"
             data-tippy-content="Execute"
             @click.native="sendDirectMode"
         >
@@ -261,6 +261,7 @@ async function sendEscape() {
 }
 
 function onEditorInit(instance) {
+    instance.setShowPrintMargin(false);
     instance.setOptions({
         fontSize: '16px'
     });
