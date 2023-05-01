@@ -22,7 +22,6 @@
     <div id="tab-bar"></div>
     <div id="progress-bar">
         <div
-            :ref="(el) => $refs.progress = el"
             class="h-full bg-sky-400 dark:bg-lime-400 transition-all duration-150 ease-linear opacity-0"
         ></div>
     </div>
@@ -51,7 +50,6 @@
     <div id="direct-panel">
         <input
             v-model="directModeCode"
-            :ref="(el) => $refs.input = el"
             class="w-full xl:w-1/2"
             placeholder="Code to execute immediately..."
             type="text"
@@ -103,7 +101,7 @@ import Button from "./components/Button.vue";
 
 // Refs
 
-const $refs = { input: null, progress: null };
+// const $refs = { input: null, progress: null };
 
 // Data
 
@@ -168,23 +166,23 @@ function download() {
 
 async function sendRecordModeOld() {
     console.log('sendRecordModeOld');
-    $refs.progress.style.width = '0';
-    $refs.progress.classList.remove('opacity-0');
+    // $refs.progress.style.width = '0';
+    // $refs.progress.classList.remove('opacity-0');
     await sendNew();
     await webSerial.write('$');
     const lines = recordModeCode.value.replace("\r", '').split("\n");
     for (let i = 0; i < lines.length; i++) {
         await webSerial.write(lines[i]);
-        $refs.progress.style.width = Math.trunc((i/lines.length) * 100) + '%';
+        // $refs.progress.style.width = Math.trunc((i/lines.length) * 100) + '%';
     }
-    $refs.progress.style.width = '100%';
-    setTimeout(() => $refs.progress.classList.add('opacity-0'), 500);
+    // $refs.progress.style.width = '100%';
+    // setTimeout(() => $refs.progress.classList.add('opacity-0'), 500);
 }
 
 async function sendRecordMode() {
     console.log('sendRecordMode');
-    $refs.progress.style.width = '0';
-    $refs.progress.classList.remove('opacity-0');
+    // $refs.progress.style.width = '0';
+    // $refs.progress.classList.remove('opacity-0');
 
     const result = await webSerial.write('pgmstream()', '&');
     console.log(result);
@@ -201,13 +199,13 @@ async function sendRecordMode() {
             output.value.push(response);
             break;
         }
-        $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
+        // $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
     }
     
-    $refs.progress.style.width = '100%';
+    // $refs.progress.style.width = '100%';
     await webSerial.stream('\0');
     await webSerial.readUntil();
-    $refs.progress.classList.add('opacity-0');
+    // $refs.progress.classList.add('opacity-0');
 }
 
 async function sendDirectMode() {
@@ -217,7 +215,7 @@ async function sendDirectMode() {
     const result = await webSerial.write(line);
     output.value.push(...result);
     directModeCode.value = '';
-    $refs.input.focus();
+    // $refs.input.focus();
 }
 
 async function sendNew() {
