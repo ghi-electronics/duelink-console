@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="shortcut icon" type="image/png" href="assets/favicon.d76cdd76.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DUE Console</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+        }
+    </script>
+  <script type="module" crossorigin src="assets/index.8ffe1048.js"></script>
+    <link rel="modulepreload" href="assets/vendor.4c0496dc.js">
+    <link rel="stylesheet" href="assets/index.0c8713d9.css">
+  </head>
+<body>
+    <div id="app"></div>
+    
+</body>
+</html>
