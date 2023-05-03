@@ -2,7 +2,6 @@
     <div
         v-bind="aria"
         v-show="open"
-        :class="{ 'divide-y divide-gray-100': dividers }"
         :id="`menu-${id}`"
         class="min-w-[100px] border rounded shadow-lg z-10
         bg-slate-50 border-slate-300
@@ -14,13 +13,12 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, watch } from 'vue';
 import { createPopper } from '@popperjs/core';
 
 // Props
 
 const props = defineProps({
-    dividers: Boolean,
     id: {
         type: String,
         required: true,
@@ -51,6 +49,12 @@ watch(() => props.open, (newValue) => {
             popper = createPopper(reference, el, {
                 placement: 'bottom-start',
                 modifiers: [
+                    {
+                        name: 'offset',
+                        options: {
+                            offset: [0, 4],
+                        },
+                    },
                     {
                         name: 'preventOverflow',
                         options: {

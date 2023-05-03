@@ -10,24 +10,27 @@
         </Button>
         <Button
             :disabled="disabled || !canRecord"
+            class="record"
             data-tippy-content="Record"
             @click.native="$emit('record')"
         >
-            <i class="fas fa-fw fa-circle text-red-500 dark:text-red-400"></i>
+            <i class="fas fa-fw fa-circle"></i>
         </Button>
         <Button
             :disabled="disabled || !canPlay"
+            class="play"
             data-tippy-content="Play"
             @click.native="$emit('play')"
         >
-            <i class="fas fa-fw fa-play text-green-500 dark:text-green-400"></i>
+            <i class="fas fa-fw fa-play"></i>
         </Button>
         <Button
             :disabled="!isConnected || !disabled"
+            class="stop"
             data-tippy-content="Stop"
             @click.native="$emit('stop')"
         >
-            <i class="fas fa-fw fa-square text-blue-500 dark:text-blue-400"></i>
+            <i class="fas fa-fw fa-square"></i>
         </Button>
         <Button
             :disabled="disabled || !canList"

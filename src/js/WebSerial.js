@@ -317,6 +317,7 @@ export default class WebSerial {
 
             const response = await this.queue.tryPop();
             if (response) {
+                this.output.push(response);
                 return response;
             }
 

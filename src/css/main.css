@@ -2,14 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/*  slate-50 | zinc-950 */
+/* slate-100 | zinc-900 */
+/* slate-200 | zinc-800 */
+/* slate-300 | zinc-700 */
+/* slate-400 | zinc-600 */
+/* slate-500 | zinc-500 */
+/* slate-600 | zinc-400 */
+/* slate-700 | zinc-300 */
+/* slate-800 | zinc-200 */
+/* slate-900 | zinc-100 */
+/* slate-950 | zinc-50 */
+
 html, body {
     height: 100%;
     width: 100%;
 }
 
 body {
-    @apply bg-slate-50 text-slate-900;
-    @apply dark:bg-zinc-900 dark:text-zinc-50;
+    @apply bg-white text-slate-900;
+    @apply dark:bg-black dark:text-zinc-50;
 }
 
 a, .a {
@@ -24,7 +36,7 @@ a, .a {
     display: grid;
     grid-gap: 2px;
     grid-template-columns: 100%;
-    grid-template-rows: 32px 48px 40px 8px 480px auto auto auto;
+    grid-template-rows: 32px 48px 0 8px 480px 64px auto auto;
     grid-template-areas:
     "menu-bar"
     "tool-bar"
@@ -39,7 +51,7 @@ a, .a {
 @screen md {
     #app {
         grid-template-columns: auto 300px;
-        grid-template-rows: 48px 48px 2.5rem 8px auto auto 64px 64px;
+        grid-template-rows: 48px 48px 0 8px auto auto 64px 64px;
         grid-template-areas:
         "menu-bar menu-bar"
         "tool-bar tool-bar"
@@ -54,28 +66,28 @@ a, .a {
 
 #menu-bar {
     grid-area: menu-bar;
-    @apply bg-white dark:bg-zinc-900;
+    @apply bg-slate-50 dark:bg-zinc-950;
 }
 
 #tool-bar {
     grid-area: tool-bar;
-    @apply bg-slate-200 dark:bg-zinc-800;
+    @apply bg-slate-100 dark:bg-zinc-900;
 }
 
 #tab-bar {
     grid-area: tab-bar;
-    @apply bg-slate-200 dark:bg-zinc-800;
+    @apply bg-slate-100 dark:bg-zinc-900;
     @apply overflow-hidden;
 }
 
 #progress-bar {
     grid-area: progress-bar;
-    @apply bg-slate-200 dark:bg-zinc-800;
+    @apply bg-slate-100 dark:bg-zinc-900;
 }
 
 #editor {
     grid-area: editor;
-    @apply bg-slate-200 dark:bg-zinc-800;
+    @apply bg-slate-100 dark:bg-zinc-900;
 }
 
 @screen md {
@@ -86,20 +98,20 @@ a, .a {
 
 #direct-panel {
     grid-area: direct-panel;
-    @apply pl-[42px] pr-2 flex items-center space-x-2;
-    @apply bg-slate-200 dark:bg-zinc-800;
+    @apply py-2 px-2 flex items-center space-x-2 sm:pl-[42px];
+    @apply bg-slate-200 dark:bg-zinc-900;
 }
 
 #side-panel {
     grid-area: side-panel;
-    @apply bg-slate-200 dark:bg-zinc-800;
     @apply overflow-y-auto;
+    @apply bg-slate-100 dark:bg-zinc-900;
 }
 
 #footer {
     grid-area: footer;
-    @apply bg-slate-200 text-slate-500;
-    @apply dark:bg-zinc-800 dark:text-zinc-500;
+    @apply bg-slate-100 text-slate-500;
+    @apply dark:bg-zinc-900 dark:text-zinc-500;
 }
 
 #footer a {
@@ -119,9 +131,9 @@ a, .a {
 }
 
 input[type=text] {
-    @apply outline-0 px-2.5 py-1;
-    @apply bg-white text-slate-900;
-    @apply dark:bg-zinc-950 dark:text-white;
+    @apply outline-0 px-2.5 py-1 rounded;
+    @apply bg-white text-slate-950;
+    @apply dark:bg-black dark:text-zinc-50;
 }
 
 input[type=text]::placeholder {
@@ -138,12 +150,12 @@ input[type=text]::-ms-input-placeholder {
 
 button, .btn {
     @apply outline-0 px-2.5 py-1 rounded transition ease-in-out duration-75;
-    @apply bg-slate-300 text-slate-900;
+    @apply bg-slate-300 text-slate-700;
     @apply dark:bg-zinc-700 dark:text-zinc-300;
 }
 
 button:not(:disabled), .btn:not(:disabled) {
-    @apply hover:bg-slate-400 hover:bg-opacity-50;
+    @apply hover:bg-slate-400;
     @apply dark:hover:bg-zinc-600;
 }
 
@@ -159,4 +171,16 @@ button:disabled, .btn:disabled {
 .btn.connected:hover {
     @apply bg-green-400;
     @apply dark:bg-emerald-600;
+}
+
+.btn.record {
+    @apply text-red-500 dark:text-red-400 !important;
+}
+
+.btn.play {
+    @apply text-green-500 dark:text-green-400 !important;
+}
+
+.btn.stop {
+    @apply text-blue-500 dark:text-blue-400 !important;
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-slate-300 dark:bg-zinc-700">
+    <div class="bg-slate-200 dark:bg-zinc-800">
         <div
             class="flex items-center px-4 py-2 cursor-pointer select-none transition duration-150 ease-in-out"
             @click="isOpen = !isOpen"
@@ -14,7 +14,7 @@
         </div>
         <div
             v-show="isOpen"
-            class="bg-slate-100 border-b-8 border-slate-300 dark:bg-zinc-900 dark:border-zinc-700 max-h-[600px] overflow-y-auto"
+            class="bg-white dark:bg-black border-4 border-t-0 border-slate-200 dark:border-zinc-800 max-h-[600px] overflow-y-auto"
         >
             <slot/>
         </div>

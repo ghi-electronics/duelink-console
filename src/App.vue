@@ -25,7 +25,8 @@
     <div id="tab-bar"></div>
     <div id="progress-bar">
         <div
-            class="h-full bg-sky-400 dark:bg-lime-400 transition-all duration-150 ease-linear opacity-0"
+            :ref="(el) => $refs.progress = el"
+            class="h-full bg-sky-400 dark:bg-lime-400 transition duration-1000 ease-linear opacity-0"
         ></div>
     </div>
     <div id="editor">
@@ -33,9 +34,9 @@
             <v-ace-editor
                 v-model:value="recordModeCode"
                 :lang="language"
+                :ref="(el) => $refs.editor = el"
                 :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'"
                 class="w-full flex-1"
-                ref="editor"
                 @init="onEditorInit"
             />
             <div class="px-4 py-2 pl-[42px]">
@@ -50,8 +51,8 @@
     <div id="direct-panel">
         <input
             v-model="directModeCode"
-            class="w-full xl:w-1/2"
-            placeholder="Code to execute immediately..."
+            class="flex-1 xl:max-w-[50%]"
+            placeholder="Code to run immediately..."
             type="text"
             @keyup.enter="sendDirectMode"
         />
@@ -70,13 +71,8 @@
                     <i class="fas fa-fw fa-ban"></i>
                 </Button>
             </template>
-            <div class="p-2 whitespace-pre-wrap">
-                <template v-if="!output.length">
-                    ...
-                </template>
-                <template v-else>
-                    {{ output }}
-                </template>
+            <div v-if="output.length" class="p-2 whitespace-pre-wrap">
+                {{ output }}
             </div>
         </Panel>
     </div>
@@ -101,7 +97,7 @@ import Button from "./components/Button.vue";
 
 // Refs
 
-// const $refs = { input: null, progress: null };
+const $refs = { editor: null, input: null, progress: null };
 
 // Data
 
@@ -112,7 +108,6 @@ const editorLine = ref(1);
 const editorColumn = ref(1);
 const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
-// const output = ref([]);
 const theme = ref('light');
 
 const tippyConfig = {
@@ -180,8 +175,8 @@ async function sendRecordMode() {
     console.log('sendRecordMode');
     lastRecordModeCode.value = recordModeCode.value;
     
-    // $refs.progress.style.width = '0';
-    // $refs.progress.classList.remove('opacity-0');
+    $refs.progress.style.width = '0';
+    $refs.progress.classList.remove('opacity-0');
 
     const result = await webSerial.write('pgmstream()', '&');
     console.log(result);
@@ -193,40 +188,28 @@ async function sendRecordMode() {
         if (line.trim().length === 0) {
             line = ' ';
         }
-        let response = await webSerial.stream(line + '\n');
-        if (response) {
-            setOutput(response);
-            break;
-        }
-        // $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
+        await webSerial.stream(line + '\n');
+        $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
     }
     
-    // $refs.progress.style.width = '100%';
+    $refs.progress.style.width = '100%';
     await webSerial.stream('\0');
     await webSerial.readUntil();
-    // $refs.progress.classList.add('opacity-0');
+    $refs.progress.classList.add('opacity-0');
 }
 
 async function sendDirectMode() {
     console.log('sendDirectMode');
     await webSerial.write('>');
     const line = directModeCode.value.replace(/\t/gm, ' ');
-    const result = await webSerial.write(line);
-    setOutput(result);
+    await webSerial.write(line);
     directModeCode.value = '';
-    // $refs.input.focus();
-}
-
-async function sendNew() {
-    console.log('sendNew');
-    await webSerial.write('new');
-    output.value = [];
+    $refs.input.focus();
 }
 
 async function sendRun() {
     console.log('sendRun');
-    const result = await webSerial.write('run');
-    setOutput(result);
+    await webSerial.write('run');
 }
 
 async function sendList() {
@@ -254,16 +237,6 @@ async function demoLed() {
 async function sendEscape() {
     console.log('sendEscape');
     await webSerial.escape();
-}
-
-function setOutput(value) {
-    // value = Array.isArray(value) ? value : [value];
-    // for (let i = 0; i < value.length; i++) {
-    //     if (['$', '>', '&'].includes(value[i].substring(0, 1))) {
-    //         continue;
-    //     }
-    //     output.value.push(value[i]);
-    // }
 }
 
 function onEditorInit(instance) {
