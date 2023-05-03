@@ -1,6 +1,6 @@
 {
-  "name": "brainpad-online-loader",
-  "version": "0.0.0",
+  "name": "due-console",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -8,13 +8,13 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@heroicons/vue": "^1.0.4",
     "@popperjs/core": "^2.11.7",
     "@tailwindcss/forms": "^0.3.3",
     "@vitejs/plugin-vue": "^1.6.0",
     "@vue/compiler-sfc": "^3.2.6",
     "ace-builds": "^1.16.0",
     "autoprefixer": "^10.4.14",
+    "click-outside-vue3": "^4.0.1",
     "consumer-queue": "^1.1.0",
     "crc": "^3.8.0",
     "eventemitter3": "^4.0.7",

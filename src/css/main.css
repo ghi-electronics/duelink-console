@@ -12,6 +12,12 @@ body {
     @apply dark:bg-zinc-900 dark:text-zinc-50;
 }
 
+a, .a {
+    @apply cursor-pointer;
+    @apply text-slate-500 hover:text-slate-600;
+    @apply text-zinc-400 dark:hover:text-zinc-300;
+}
+
 #app {
     width: 100%;
     min-height: 100%;
@@ -97,8 +103,8 @@ body {
 }
 
 #footer a {
-    @apply hover:text-slate-600;
-    @apply dark:hover:text-zinc-400;
+    @apply text-slate-500 hover:text-slate-600;
+    @apply dark:text-zinc-500 dark:hover:text-zinc-400;
 }
 
 #logo {

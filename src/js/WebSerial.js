@@ -18,6 +18,7 @@ export default class WebSerial {
         this.mode = '>';
         this.version = null;
         this.str = '';
+        this.output = [];
     }
 
     async connect() {
@@ -25,13 +26,20 @@ export default class WebSerial {
             this.isBusy = true;
 
             this.port = await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
-            await this.port.open({
-                baudRate: 115200,
-                dataBits: 8,
-                parity: 'none',
-                stopBits: 1,
-                flowControl: 'none',
-            });
+
+            try {
+                await this.port.open({
+                    baudRate: 115200,
+                    dataBits: 8,
+                    parity: 'none',
+                    stopBits: 1,
+                    flowControl: 'none',
+                });
+            } catch (error) {
+                alert(error?.message || 'Unable to connect.');
+                this.isBusy = false;
+                return;
+            }
 
             if (this.port?.writable == null) {
                 this.errorLog.push('This is not a writable port.');
@@ -51,6 +59,7 @@ export default class WebSerial {
             await this.synchronize();
 
             this.isConnected = true;
+            this.port.addEventListener('disconnect', () => this.disconnect());
             console.log('ready');
         } finally {
             this.isBusy = false;
@@ -145,13 +154,13 @@ export default class WebSerial {
                 const { value, done } = await this.reader.read();
 
                 console.log('Reading...');
-                this.str += this.decoder.decode(value).replace("\r", '');
+                this.str += this.decoder.decode(value).replace('\r', '');
 
                 if (!this.str) {
                     continue;
                 }
 
-                let index = this.str.indexOf("\n");
+                let index = this.str.indexOf('\n');
 
                 if (index > -1) {
                     this.str.split("\n").forEach((value) => console.log('->', value));
@@ -159,11 +168,27 @@ export default class WebSerial {
                     console.log('->', this.str);
                 }
 
+                if (this.isConnected) {
+                    if (this.output.length && this.str.startsWith(this.output[this.output.length - 1])) {
+                        this.output[this.output.length - 1] = this.str;
+                    } else if (index === -1) {
+                        this.output.push(this.str);
+                    }
+                }
+
                 while (index > -1) {
                     line = this.str.substring(0, index);
                     if (line) {
                         console.log('queued:', line);
                         this.queue.push(line);
+
+                        if (this.isConnected) {
+                            if (this.output.length && this.output[this.output.length - 1].startsWith(line)) {
+                                this.output[this.output.length - 1] = line;
+                            } else {
+                                this.output.push(line);
+                            }
+                        }
                     }
 
                     this.str = this.str.substring(index + 1);
@@ -174,6 +199,7 @@ export default class WebSerial {
                     console.log('queued:', this.str);
                     this.queue.push(this.str);
                     this.str = '';
+                    this.output.push('');
                 }
 
                 if (done) {

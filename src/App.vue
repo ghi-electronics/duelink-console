@@ -1,19 +1,22 @@
 <template>
     <div id="menu-bar">
-        <MenuBar/>
+        <MenuBar @demo-led="demoLed" @demo-count="demoCount"/>
     </div>
     <div id="tool-bar">
         <ToolBar
             v-model:theme="theme"
+            :can-download="recordModeCode.length > 0"
+            :can-list="recordModeCode === ''"
+            :can-play="recordModeCode !== '' && recordModeCode === lastRecordModeCode"
+            :can-record="recordModeCode.length > 0 && recordModeCode !== lastRecordModeCode"
             :disabled="disabled"
-            :has-code="recordModeCode.length > 0"
             :is-connected="webSerial.isConnected"
             @connect="webSerial.connect()"
             @disconnect="webSerial.disconnect()"
             @download="download"
             @play="sendRun"
             @stop="sendEscape"
-            @record="sendRecordModeOld"
+            @record="sendRecordMode"
             @list="sendList"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
@@ -39,9 +42,6 @@
                 <div id="info-bar">
                     <div v-if="webSerial.version">
                         {{ webSerial.version }}
-                    </div>
-                    <div>
-                        {{ `Line ${editorLine}, Column ${editorColumn}` }}
                     </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                     ...
                 </template>
                 <template v-else>
-                    {{ output.join("\n") }}
+                    {{ output }}
                 </template>
             </div>
         </Panel>
@@ -107,11 +107,12 @@ import Button from "./components/Button.vue";
 
 const recordModeCode = ref('');
 const directModeCode = ref('');
+const lastRecordModeCode = ref('');
 const editorLine = ref(1);
 const editorColumn = ref(1);
 const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
-const output = ref([]);
+// const output = ref([]);
 const theme = ref('light');
 
 const tippyConfig = {
@@ -124,6 +125,21 @@ const tippyConfig = {
 
 let editor = null;
 let tippyInstances = [];
+
+// Computed
+
+const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
+
+const output = computed({
+    get() {
+        return webSerial.output
+            .filter((line) => line && ['\n', '$', '>', '&'].every((char) => !line.startsWith(char)))
+            .join('\n');
+    },
+    set(value) {
+        webSerial.output = value;
+    },
+});
 
 // Watch
 
@@ -145,10 +161,6 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
 
 onMounted(() => tippyInstances = tippy('[data-tippy-content]', tippyConfig));
 
-// Computed
-
-const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
-
 // Methods
 
 function download() {
@@ -164,23 +176,10 @@ function download() {
     document.body.removeChild(el);
 }
 
-async function sendRecordModeOld() {
-    console.log('sendRecordModeOld');
-    // $refs.progress.style.width = '0';
-    // $refs.progress.classList.remove('opacity-0');
-    await sendNew();
-    await webSerial.write('$');
-    const lines = recordModeCode.value.replace("\r", '').split("\n");
-    for (let i = 0; i < lines.length; i++) {
-        await webSerial.write(lines[i]);
-        // $refs.progress.style.width = Math.trunc((i/lines.length) * 100) + '%';
-    }
-    // $refs.progress.style.width = '100%';
-    // setTimeout(() => $refs.progress.classList.add('opacity-0'), 500);
-}
-
 async function sendRecordMode() {
     console.log('sendRecordMode');
+    lastRecordModeCode.value = recordModeCode.value;
+    
     // $refs.progress.style.width = '0';
     // $refs.progress.classList.remove('opacity-0');
 
@@ -196,7 +195,7 @@ async function sendRecordMode() {
         }
         let response = await webSerial.stream(line + '\n');
         if (response) {
-            output.value.push(response);
+            setOutput(response);
             break;
         }
         // $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
@@ -213,7 +212,7 @@ async function sendDirectMode() {
     await webSerial.write('>');
     const line = directModeCode.value.replace(/\t/gm, ' ');
     const result = await webSerial.write(line);
-    output.value.push(...result);
+    setOutput(result);
     directModeCode.value = '';
     // $refs.input.focus();
 }
@@ -227,35 +226,44 @@ async function sendNew() {
 async function sendRun() {
     console.log('sendRun');
     const result = await webSerial.write('run');
-    output.value.push(...result);
+    setOutput(result);
 }
 
 async function sendList() {
     console.log('sendList');
     const result = await webSerial.write('list');
-    output.value.push(...result);
-}
-
-async function testPrint() {
-    console.log('testPrint');
-    await webSerial.write('>');
-    const result = await webSerial.write('print("Hello World")');
-    output.value.push(...result);
-}
-
-async function testDigitalWrite() {
-    console.log('testDigitalWrite');
-    const lines = ['for x = 1 to 10', 'DWrite(100,1)', 'Wait(200)', 'DWrite(100,0)', 'Wait(200)', 'next'];
-    await webSerial.write('$');
-    for (const line of lines) {
-        await webSerial.write(line);
+    const code = result.join('\n');
+    if (recordModeCode.value !== code) {
+        recordModeCode.value = code;
+        lastRecordModeCode.value = code;
     }
-    await webSerial.write('run');
+}
+
+async function demoCount() {
+    console.log('testPrint');
+    const lines = ['For i=0 to 10', '  Print(i)', 'Next'];
+    recordModeCode.value = lines.join('\n');
+}
+
+async function demoLed() {
+    console.log('demoLed');
+    const lines = ['@Loop', '  DWrite(108,1) : Wait(250)', '  DWrite(108,0) : Wait(250)', 'Goto Loop'];
+    recordModeCode.value = lines.join('\n');
 }
 
 async function sendEscape() {
     console.log('sendEscape');
     await webSerial.escape();
+}
+
+function setOutput(value) {
+    // value = Array.isArray(value) ? value : [value];
+    // for (let i = 0; i < value.length; i++) {
+    //     if (['$', '>', '&'].includes(value[i].substring(0, 1))) {
+    //         continue;
+    //     }
+    //     output.value.push(value[i]);
+    // }
 }
 
 function onEditorInit(instance) {
