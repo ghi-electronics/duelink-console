@@ -15,10 +15,16 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
         }
+        if (window.document.documentMode) {
+            window.location = '/browser-not-supported';
+        }
     </script>
 </head>
 <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    <noscript>
+        You must enable JavaScript to use this page.
+    </noscript>
 </body>
 </html>

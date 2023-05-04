@@ -7,19 +7,19 @@
         </svg>
         <span class="font-bold italic">BETA</span>
         <div class="pl-8 text-sm flex items-center space-x-2">
-            <a href="https://duelink.com/software/intro.html" target="_blank">Docs</a>
+            <a href="https://duelink.com" target="_blank">Home</a>
             <MenuBarItem id="demo">
                 Demos
-                <template #menu>
+                <template #menu="{ close }">
                     <div
                         class="px-4 py-1 hover:bg-slate-200 dark:hover:bg-zinc-600 cursor-pointer"
-                        @click="$emit('demo-led')"
+                        @click.stop="$emit('demo-led'); close()"
                     >
                         LED
                     </div>
                     <div
                         class="px-4 py-1 hover:bg-slate-200 dark:hover:bg-zinc-600 cursor-pointer"
-                        @click="$emit('demo-count')"
+                        @click.stop="$emit('demo-count'); close()"
                     >
                         Count
                     </div>
@@ -33,4 +33,8 @@
 // Components
 
 import MenuBarItem from './MenuBarItem.vue';
+
+// Emits
+
+defineEmits(['demo-led', 'demo-count']);
 </script>

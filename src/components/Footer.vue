@@ -28,8 +28,7 @@
             </a>
         </div>
         <div class="flex-1 text-center">
-            <div>&copy; GHI Electronics</div>
-            <a href="https://duelink.com">DUELink.com</a>
+            &copy; GHI Electronics
         </div>
         <div class="text-4xl flex space-x-4">
             <a href="https://www.facebook.com/ghielectronics/" target="_blank">

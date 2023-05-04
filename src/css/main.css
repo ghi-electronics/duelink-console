@@ -120,8 +120,7 @@ a, .a {
 }
 
 #logo {
-    @apply text-slate-900;
-    @apply dark:text-white;
+    color: #666;
 }
 
 #info-bar {

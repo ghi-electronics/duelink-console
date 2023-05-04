@@ -15,13 +15,19 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
         }
+        if (window.document.documentMode) {
+            window.location = '/browser-not-supported';
+        }
     </script>
-  <script type="module" crossorigin src="assets/index.6b530e1d.js"></script>
-    <link rel="modulepreload" href="assets/vendor.4c0496dc.js">
-    <link rel="stylesheet" href="assets/index.67b93096.css">
+  <script type="module" crossorigin src="assets/index.2b351d77.js"></script>
+    <link rel="modulepreload" href="assets/vendor.11579ef1.js">
+    <link rel="stylesheet" href="assets/index.4daee999.css">
   </head>
 <body>
     <div id="app"></div>
     
+    <noscript>
+        You must enable JavaScript to use this page.
+    </noscript>
 </body>
 </html>
