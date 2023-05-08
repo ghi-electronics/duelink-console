@@ -52,7 +52,7 @@
     
         <div v-if="isConnected">
             <template v-if="state === 'idle'">
-                <label for="firmware" class="block text-sm font-medium text-gray-700">Firmware</label>
+                <label for="firmware" class="block text-sm font-medium">Firmware</label>
                 <select v-model="firmware" id="firmware" name="firmware" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
                     <option v-for="(option, key) in availableFirmware" :key="key" :value="key">
                         {{ option.title }}
@@ -181,7 +181,7 @@ async function connect() {
         isConnected.value = true;
     } catch (error) {
         // Ignore showing an error when a user cancels the prompt.
-        if (error.indexOf('No port selected by the user.') > -1) {
+        if (typeof error === 'string' && error.indexOf('No port selected by the user.') > -1) {
             return;
         }
         error.value = error;

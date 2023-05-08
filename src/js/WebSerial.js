@@ -41,12 +41,7 @@ export default class WebSerial {
             }
 
             this.port.addEventListener('disconnect', () => {
-                console.log('v1 port disconnected');
-                this.disconnect();
-            });
-
-            navigator.serial.addEventListener('disconnect', (event) => {
-                console.log('v2 port disconnected', event.target);
+                console.log('Port disconnected');
                 this.disconnect();
             });
 
