@@ -1,8 +1,8 @@
 <template>
-    <div class="h-full p-4 flex flex-col items-center space-y-4 md:flex-row md:space-y-0">
-        <div>
+    <div id="footer" class="p-2 sm:p-4 flex flex-col space-y-2">
+        <div class="flex items-center justify-center space-x-8 sm:space-x-0 sm:justify-between">
             <a href="https://ghielectronics.com" target="_blank">
-                <svg class="h-10 w-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 706 297" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <svg class="h-8 w-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 706 297" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                     <g transform="translate(0, 297) scale(0.1, -0.1)" fill="currentColor" stroke="none">
                         <path d="M850 2961 c-62 -7 -94 -22 -106 -48 -5 -10 -9 -90 -9 -178 l0 -160 -34 -70 c-44 -88 -154 -200 -238 -241 -57 -29 -61 -29 -213 -27 -177 3 -226 -6 -240 -43 -13 -34 -12 -360 1 -407 16 -57 48 -67 218 -67 108 0 153 -4 200 -19 122 -38 203 -107 262 -223 32 -62 33 -66 39 -238 6 -182 12 -210 53 -232 27 -15 399 -13 428 2 36 20 43 52 47 203 5 176 -2 228 -32 264 -23 27 -25 27 -192 34 -185 8 -204 12 -294 60 -228 121 -301 454 -152 685 45 70 115 134 180 166 41 20 69 23 221 30 96 4 187 12 203 19 47 19 59 57 65 198 7 161 -1 233 -32 269 -23 27 -23 27 -172 28 -81 1 -173 -1 -203 -5z"/>
                         <path d="M1515 2961 c-40 -17 -43 -31 -47 -221 l-3 -185 -38 -72 c-48 -90 -125 -164 -213 -205 -63 -30 -74 -31 -247 -39 -175 -8 -182 -9 -207 -34 l-25 -25 0 -200 0 -199 28 -28 27 -28 153 -1 c90 0 170 -6 197 -13 184 -53 297 -191 330 -408 31 -197 -81 -399 -270 -490 -67 -33 -85 -37 -176 -41 -84 -4 -114 -1 -172 17 -132 40 -247 138 -306 261 -31 65 -31 66 -31 232 l0 167 -28 28 -27 28 -205 0 c-272 0 -250 22 -250 -250 l0 -205 25 -25 c34 -33 100 -41 206 -25 94 15 153 7 233 -32 60 -29 162 -127 216 -208 l45 -68 1 -158 c1 -266 0 -266 291 -262 174 3 199 5 215 21 16 16 18 39 18 200 0 182 0 182 30 242 40 81 152 193 230 230 59 29 64 29 231 30 187 1 214 8 235 63 6 15 9 103 7 214 -4 247 11 231 -221 239 -109 4 -189 12 -219 22 -158 50 -249 168 -284 369 -41 234 23 385 213 509 l67 44 116 3 c79 3 136 -1 183 -12 248 -58 394 -260 372 -515 -13 -152 -7 -171 62 -197 38 -15 68 -16 216 -10 186 7 211 14 224 64 4 15 8 101 8 192 0 259 -2 261 -247 257 l-163 -2 -60 30 c-69 35 -190 150 -232 222 -27 47 -28 52 -33 240 -7 257 14 237 -253 240 -111 1 -211 -2 -222 -6z"/>
@@ -26,23 +26,26 @@
                     </g>
                 </svg>
             </a>
+            <div class="hidden text-center sm:block">
+                &copy; GHI Electronics {{ new Date().getFullYear() }}
+            </div>
+            <div class="text-4xl flex space-x-4">
+                <a href="https://www.facebook.com/ghielectronics/" target="_blank">
+                    <i class="fab fa-facebook-square"></i>
+                </a>
+                <a href="https://www.twitter.com/GHIElectronics" target="_blank">
+                    <i class="fab fa-twitter-square"></i>
+                </a>
+                <a href="https://www.youtube.com/user/GHIElectronics" target="_blank">
+                    <i class="fab fa-youtube-square"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/ghielectronics/" target="_blank">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
         </div>
-        <div class="flex-1 text-center">
-            &copy; GHI Electronics
-        </div>
-        <div class="text-4xl flex space-x-4">
-            <a href="https://www.facebook.com/ghielectronics/" target="_blank">
-                <i class="fab fa-facebook-square"></i>
-            </a>
-            <a href="https://www.twitter.com/GHIElectronics" target="_blank">
-                <i class="fab fa-twitter-square"></i>
-            </a>
-            <a href="https://www.youtube.com/user/GHIElectronics" target="_blank">
-                <i class="fab fa-youtube-square"></i>
-            </a>
-            <a href="https://www.linkedin.com/company/ghielectronics/" target="_blank">
-                <i class="fab fa-linkedin"></i>
-            </a>
+        <div class="text-center text-sm sm:hidden">
+            &copy; GHI Electronics {{ new Date().getFullYear() }}
         </div>
     </div>
 </template>

@@ -1,40 +1,77 @@
 <template>
-    <div class="h-full flex items-center space-x-1">
-        <svg id="logo" class="h-6 w-auto mx-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 266" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <g transform="translate(0, 266) scale(0.1, -0.1)" fill="currentColor" stroke="none">
-                <path d="M494 2308 c-3 -13 -19 -50 -34 -83 -63 -135 -119 -309 -144 -440 -36 -198 -41 -247 -41 -440 1 -185 6 -247 36 -402 l10 -53 426 0 c468 0 493 3 606 62 115 61 222 210 258 358 8 30 14 105 14 165 0 105 -2 114 -33 177 -37 75 -72 110 -152 147 -50 24 -66 26 -179 26 l-124 0 -22 -110 c-12 -60 -39 -200 -59 -310 -21 -110 -39 -206 -42 -212 -2 -10 -44 -13 -164 -13 l-160 0 6 28 c3 15 10 43 14 62 5 19 21 100 35 180 47 253 73 392 94 499 12 57 21 105 21 106 0 2 18 6 40 10 22 4 52 9 68 11 15 3 113 8 217 11 170 5 201 3 295 -17 266 -56 421 -194 476 -426 23 -97 15 -310 -16 -414 -98 -330 -315 -519 -667 -579 -109 -19 -162 -21 -499 -21 -354 0 -376 -1 -369 -17 4 -10 15 -38 25 -63 10 -25 30 -71 45 -102 l26 -58 2025 0 2024 0 24 48 c69 136 147 377 172 532 9 52 19 113 22 135 9 53 9 449 0 500 -4 22 -12 77 -19 123 l-12 82 -549 0 c-515 0 -548 1 -548 18 0 9 11 69 23 132 l23 115 482 3 c265 1 482 4 482 6 0 11 -32 91 -65 164 l-38 82 -2023 0 -2023 0 -7 -22z m2115 -250 c0 -13 -6 -54 -14 -93 -7 -38 -25 -131 -39 -205 -14 -74 -28 -146 -31 -160 -23 -101 -68 -361 -77 -435 -13 -108 -2 -158 45 -212 41 -47 82 -63 157 -63 102 0 165 40 225 142 43 73 66 153 106 368 42 224 77 410 84 440 3 14 12 63 20 110 9 47 18 95 21 108 4 22 7 22 165 22 148 0 160 -1 156 -17 -3 -10 -9 -36 -13 -58 -4 -22 -8 -44 -9 -50 -2 -5 -14 -73 -29 -150 -14 -77 -28 -151 -31 -165 -3 -14 -17 -83 -30 -155 -77 -414 -106 -504 -211 -651 -62 -88 -145 -145 -267 -185 -89 -30 -298 -38 -387 -15 -188 48 -281 151 -316 351 -20 113 -15 152 76 625 17 91 42 228 56 305 14 77 27 146 29 153 3 9 44 12 160 12 154 0 155 0 154 -22z m1788 -565 c-3 -16 -13 -76 -23 -135 l-18 -108 -255 -2 -256 -3 -11 -60 c-7 -33 -19 -98 -28 -145 -9 -47 -19 -95 -21 -107 l-5 -23 285 0 c268 0 286 -1 281 -17 -3 -10 -12 -61 -21 -113 -8 -52 -18 -105 -20 -118 l-5 -22 -443 2 c-306 2 -441 6 -440 14 1 6 16 84 33 175 17 90 42 223 55 294 13 72 27 141 30 155 3 14 12 63 20 110 9 47 18 95 21 108 l4 22 411 0 412 0 -6 -27z"/>
-            </g>
-        </svg>
-        <span class="font-bold italic">BETA</span>
-        <div class="pl-8 text-sm flex items-center space-x-2">
-            <a href="https://duelink.com" target="_blank">Home</a>
-            <MenuBarItem id="demo">
-                Demos
-                <template #menu="{ close }">
-                    <div
-                        class="px-4 py-1 hover:bg-slate-200 dark:hover:bg-zinc-600 cursor-pointer"
-                        @click.stop="$emit('demo-led'); close()"
-                    >
-                        LED
-                    </div>
-                    <div
-                        class="px-4 py-1 hover:bg-slate-200 dark:hover:bg-zinc-600 cursor-pointer"
-                        @click.stop="$emit('demo-count'); close()"
-                    >
-                        Count
-                    </div>
-                </template>
-            </MenuBarItem>
+    <div id="menu-bar" class="p-2 flex items-center space-x-8">
+        <div class="flex items-center space-x-2">
+            <svg id="logo" class="h-6 w-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 266" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <g transform="translate(0, 266) scale(0.1, -0.1)" fill="currentColor" stroke="none">
+                    <path d="M494 2308 c-3 -13 -19 -50 -34 -83 -63 -135 -119 -309 -144 -440 -36 -198 -41 -247 -41 -440 1 -185 6 -247 36 -402 l10 -53 426 0 c468 0 493 3 606 62 115 61 222 210 258 358 8 30 14 105 14 165 0 105 -2 114 -33 177 -37 75 -72 110 -152 147 -50 24 -66 26 -179 26 l-124 0 -22 -110 c-12 -60 -39 -200 -59 -310 -21 -110 -39 -206 -42 -212 -2 -10 -44 -13 -164 -13 l-160 0 6 28 c3 15 10 43 14 62 5 19 21 100 35 180 47 253 73 392 94 499 12 57 21 105 21 106 0 2 18 6 40 10 22 4 52 9 68 11 15 3 113 8 217 11 170 5 201 3 295 -17 266 -56 421 -194 476 -426 23 -97 15 -310 -16 -414 -98 -330 -315 -519 -667 -579 -109 -19 -162 -21 -499 -21 -354 0 -376 -1 -369 -17 4 -10 15 -38 25 -63 10 -25 30 -71 45 -102 l26 -58 2025 0 2024 0 24 48 c69 136 147 377 172 532 9 52 19 113 22 135 9 53 9 449 0 500 -4 22 -12 77 -19 123 l-12 82 -549 0 c-515 0 -548 1 -548 18 0 9 11 69 23 132 l23 115 482 3 c265 1 482 4 482 6 0 11 -32 91 -65 164 l-38 82 -2023 0 -2023 0 -7 -22z m2115 -250 c0 -13 -6 -54 -14 -93 -7 -38 -25 -131 -39 -205 -14 -74 -28 -146 -31 -160 -23 -101 -68 -361 -77 -435 -13 -108 -2 -158 45 -212 41 -47 82 -63 157 -63 102 0 165 40 225 142 43 73 66 153 106 368 42 224 77 410 84 440 3 14 12 63 20 110 9 47 18 95 21 108 4 22 7 22 165 22 148 0 160 -1 156 -17 -3 -10 -9 -36 -13 -58 -4 -22 -8 -44 -9 -50 -2 -5 -14 -73 -29 -150 -14 -77 -28 -151 -31 -165 -3 -14 -17 -83 -30 -155 -77 -414 -106 -504 -211 -651 -62 -88 -145 -145 -267 -185 -89 -30 -298 -38 -387 -15 -188 48 -281 151 -316 351 -20 113 -15 152 76 625 17 91 42 228 56 305 14 77 27 146 29 153 3 9 44 12 160 12 154 0 155 0 154 -22z m1788 -565 c-3 -16 -13 -76 -23 -135 l-18 -108 -255 -2 -256 -3 -11 -60 c-7 -33 -19 -98 -28 -145 -9 -47 -19 -95 -21 -107 l-5 -23 285 0 c268 0 286 -1 281 -17 -3 -10 -12 -61 -21 -113 -8 -52 -18 -105 -20 -118 l-5 -22 -443 2 c-306 2 -441 6 -440 14 1 6 16 84 33 175 17 90 42 223 55 294 13 72 27 141 30 155 3 14 12 63 20 110 9 47 18 95 21 108 l4 22 411 0 412 0 -6 -27z"/>
+                </g>
+            </svg>
+            <span class="font-bold italic">BETA</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a href="https://duelink.com" target="_blank">Docs</a>
+            <Menu :options="demoOptions" id="demo">Demos</Menu>
+            <a @click.prevent="$emit('firmware')">Firmware</a>
+            <a
+                class="text-sm"
+                :data-tippy-content="theme === 'dark' ? 'Light' : 'Dark'"
+                @click.prevent="toggleDarkMode"
+            >
+                <i :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'" class="fas fa-fw pointer-events-none"></i>
+            </a>
         </div>
     </div>
 </template>
 
 <script setup>
+import demos from '../js/demos.js';
+
 // Components
 
-import MenuBarItem from './MenuBarItem.vue';
+import Menu from './Menu.vue';
+import Button from './Button.vue';
 
 // Emits
 
-defineEmits(['demo-led', 'demo-count']);
+const $emit = defineEmits(['demo', 'firmware', 'update:theme', 'updateTippy']);
+
+// Props
+
+const props = defineProps({
+    theme: String,
+});
+
+// Setup
+
+const demoOptions = demos.map((demo) => {
+    if (demo?.url) {
+        return {
+            label: demo.label,
+            click: () => window.open(demo.url, '_blank'),
+            href: demo.url,
+        };
+    } else {
+        return {
+            label: demo.label,
+            click: () => $emit('demo', demo.code),
+        };
+    }
+});
+
+// Methods
+
+function toggleDarkMode(event) {
+    if (props.theme === 'dark') {
+        $emit('update:theme', 'light');
+        localStorage.theme = 'light';
+        document.documentElement.style.colorScheme = 'light';
+        document.documentElement.classList.remove('dark');
+    } else {
+        $emit('update:theme', 'dark');
+        localStorage.theme = 'dark';
+        document.documentElement.style.colorScheme = 'dark';
+        document.documentElement.classList.add('dark');
+    }
+    $emit('updateTippy', event.target, true);
+}
 </script>

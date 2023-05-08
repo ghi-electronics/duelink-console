@@ -1,16 +1,16 @@
 <template>
-    <div class="h-full mx-2 flex items-center space-x-1">
+    <div id="tool-bar" class="p-2 flex items-center space-x-2">
         <Button
             id="plugBtn"
-            :class="isConnected ? 'connected' : ''"
+            :class="['tool', isConnected ? 'connected' : '']"
             :data-tippy-content="isConnected ? 'Disconnect' : 'Connect'"
             @click.native="onPlug"
         >
-            <i class="fas fa-fw fa-plug"></i>
+            <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i>
         </Button>
         <Button
             :disabled="disabled || !canRecord"
-            class="record"
+            class="tool record"
             data-tippy-content="Record"
             @click.native="$emit('record')"
         >
@@ -18,7 +18,7 @@
         </Button>
         <Button
             :disabled="disabled || !canPlay"
-            class="play"
+            class="tool play"
             data-tippy-content="Play"
             @click.native="$emit('play')"
         >
@@ -26,7 +26,7 @@
         </Button>
         <Button
             :disabled="!isConnected || !disabled"
-            class="stop"
+            class="tool stop"
             data-tippy-content="Stop"
             @click.native="$emit('stop')"
         >
@@ -34,24 +34,28 @@
         </Button>
         <Button
             :disabled="disabled || !canList"
+            class="tool"
             data-tippy-content="List"
-            @click.native="$emit('list')"
+            @click.native="$emit('list', $event.target)"
         >
             <i class="fas fa-fw fa-list"></i>
         </Button>
         <Button
             :disabled="!canDownload"
+            class="tool"
             data-tippy-content="Download"
             @click.native="$emit('download')"
         >
             <i class="fas fa-fw fa-download"></i>
         </Button>
-        <Button
-            :data-tippy-content="(theme === 'light' ? 'Dark' : 'Light') + ' Theme'"
-            @click.native="toggleDarkMode"
+        <label
+            class="btn primary tool text-center cursor-pointer"
+            data-tippy-content="Load"
+            for="file"
         >
-            <i :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'" class="fas fa-fw"></i>
-        </Button>
+            <i class="fas fa-fw fa-upload"></i>
+            <input id="file" type="file" class="hidden" @change="onLoad" />
+        </label>
     </div>
 </template>
 
@@ -70,8 +74,7 @@ const $emit = defineEmits([
     'stop',
     'record',
     'list',
-    'update:theme',
-    'updateTippy'
+    'load',
 ]);
 
 // Props
@@ -79,35 +82,32 @@ const $emit = defineEmits([
 const props = defineProps({
     canDownload: Boolean,
     canList: Boolean,
+    canLoad: Boolean,
     canPlay: Boolean,
     canRecord: Boolean,
     disabled: Boolean,
     isConnected: Boolean,
-    theme: String,
 });
 
 // Methods
 
-function onPlug(event) {
+function onLoad(event) {
+    if (!event.target.files.length) {
+        return;
+    }
+    const fr = new FileReader();
+    fr.onload = function () {
+        $emit('load', fr.result.replace(/\r/gm, '').replace(/\t/gm, ' ').split('\n'));
+        event.target.value = '';
+    }
+    fr.readAsText(event.target.files[0]);
+}
+
+function onPlug() {
     if (props.isConnected) {
         $emit('disconnect');
     } else {
         $emit('connect');
     }
-}
-
-function toggleDarkMode(event) {
-    if (props.theme === 'dark') {
-        $emit('update:theme', 'light');
-        localStorage.theme = 'light';
-        document.documentElement.style.colorScheme = 'light';
-        document.documentElement.classList.remove('dark');
-    } else {
-        $emit('update:theme', 'dark');
-        localStorage.theme = 'dark';
-        document.documentElement.style.colorScheme = 'dark';
-        document.documentElement.classList.add('dark');
-    }
-    $emit('updateTippy', event.target, true);
 }
 </script>

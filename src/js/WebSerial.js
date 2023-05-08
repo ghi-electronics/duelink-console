@@ -24,8 +24,7 @@ export default class WebSerial {
     async connect() {
         try {
             this.isBusy = true;
-
-            this.port = await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
+            this.port = await navigator.serial.requestPort({usbVendorId: 0x1B9F});
 
             try {
                 await this.port.open({
@@ -40,6 +39,16 @@ export default class WebSerial {
                 this.isBusy = false;
                 return;
             }
+
+            this.port.addEventListener('disconnect', () => {
+                console.log('v1 port disconnected');
+                this.disconnect();
+            });
+
+            navigator.serial.addEventListener('disconnect', (event) => {
+                console.log('v2 port disconnected', event.target);
+                this.disconnect();
+            });
 
             if (this.port?.writable == null) {
                 this.errorLog.push('This is not a writable port.');
@@ -59,8 +68,9 @@ export default class WebSerial {
             await this.synchronize();
 
             this.isConnected = true;
-            this.port.addEventListener('disconnect', () => this.disconnect());
             console.log('ready');
+        } catch (error) {
+            // Do nothing
         } finally {
             this.isBusy = false;
         }
@@ -70,7 +80,11 @@ export default class WebSerial {
         await this.stopReadLoop();
         await this.writer.releaseLock();
         await this.reader.releaseLock();
-        await this.port.close();
+        try {
+            await this.port.close();
+        } catch (error) {
+            // Do nothing
+        }
         this.isConnected = false;
         this.version = null;
     }

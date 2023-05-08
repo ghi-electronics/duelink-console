@@ -1,12 +1,12 @@
 <template>
-    <div class="bg-slate-200 dark:bg-zinc-800">
+    <div>
         <div
-            class="flex items-center px-4 py-2 cursor-pointer select-none transition duration-150 ease-in-out"
+            class="panel-bar flex items-center px-4 py-2 cursor-pointer select-none transition duration-150 ease-in-out"
             @click="isOpen = !isOpen"
         >
             <div class="flex-1 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <i class="fas" :class="isOpen ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                    <i class="fas fa-fw" :class="isOpen ? 'fa-angle-down' : 'fa-angle-right'"></i>
                     <span>{{ title }}</span>
                 </div>
                 <slot name="buttons" />
@@ -14,7 +14,7 @@
         </div>
         <div
             v-show="isOpen"
-            class="bg-white dark:bg-black border-4 border-t-0 border-slate-200 dark:border-zinc-800 max-h-[600px] overflow-y-auto"
+            class="panel-content max-h-[600px] overflow-y-auto"
         >
             <slot/>
         </div>

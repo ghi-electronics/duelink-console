@@ -1,5 +1,16 @@
 <template>
-    <button class="btn">
-        <span class="pointer-events-none"><slot/></span>
+    <button :class="['btn', type]" type="button">
+        <slot />
     </button>
 </template>
+
+<script setup>
+// Props
+
+defineProps({
+    type: {
+        type: String,
+        default: 'primary',
+    },
+});
+</script>
