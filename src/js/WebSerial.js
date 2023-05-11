@@ -72,11 +72,11 @@ export default class WebSerial {
     }
 
     async disconnect() {
-        await this.stopReadLoop();
-        await this.writer.releaseLock();
-        await this.reader.releaseLock();
         try {
-            await this.port.close().catch(() => {});
+            await this.stopReadLoop();
+            await this.writer.releaseLock();
+            await this.reader.releaseLock();
+            await this.port.close();
         } catch (error) {
             // Do nothing
         } finally {
