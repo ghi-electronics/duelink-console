@@ -79,9 +79,10 @@ export default class WebSerial {
             await this.port.close();
         } catch (error) {
             // Do nothing
+        } finally {
+            this.isConnected = false;
+            this.version = null;
         }
-        this.isConnected = false;
-        this.version = null;
     }
 
     async synchronize() {

@@ -76,13 +76,13 @@
             </div>
             <div v-else-if="state === 'erasing'" class="firmware-progress-box">
                 <div class="w-full">
-                    <div class="mb-2 text-sky-400 dark:text-lime-400">Erasing...</div>
+                    <div class="mb-2 text-sky-600 dark:text-lime-400">Erasing...</div>
                     <div class="w-full h-2 bg-slate-300 dark:bg-zinc-700"></div>
                 </div>
             </div>
             <div v-else-if="state === 'writing'" class="firmware-progress-box">
                 <div class="w-full">
-                    <div class="mb-2 text-sky-400 dark:text-lime-400">Loading... {{ percent }}%</div>
+                    <div class="mb-2 text-sky-600 dark:text-lime-400">Loading... {{ percent }}%</div>
                     <div class="w-full h-2 bg-slate-300 dark:bg-zinc-700">
                         <div class="h-2 bg-sky-500 dark:bg-lime-500" :style="`width:${percent}%`"></div>
                     </div>
@@ -90,7 +90,7 @@
             </div>
             <div v-else-if="state === 'complete'" class="firmware-progress-box">
                 <div class="w-full">
-                    <div class="mb-2 text-sky-400 dark:text-lime-400">Loading... 100%</div>
+                    <div class="mb-2 text-sky-600 dark:text-lime-400">Loading... 100%</div>
                     <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
                 </div>
             </div>
