@@ -76,7 +76,7 @@ export default class WebSerial {
         await this.writer.releaseLock();
         await this.reader.releaseLock();
         try {
-            await this.port.close();
+            await this.port.close().catch(() => {});
         } catch (error) {
             // Do nothing
         } finally {
