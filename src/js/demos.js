@@ -25,11 +25,11 @@ export default [
         code: [
             '@Loop',
             '  For i=0 to 1000 Step 100',
-            '    AWrite("L", i)',
+            '    AWrite(\'L\', i)',
             '    Wait(100)',
             '  Next',
             '  For i=1000 to 0 Step -100',
-            '    AWrite("L", i)',
+            '    AWrite(\'L\', i)',
             '    Wait(100)',
             '  Next',
             'Goto Loop',
@@ -38,9 +38,9 @@ export default [
     {
         label: 'Read Button',
         code: [
-            'BtnEnable("A", 1)',
+            'BtnEnable(\'A\', 1)',
             '@Loop',
-            '  x=BtnDown("A")',
+            '  x=BtnDown(\'A\')',
             '  If x=1',
             '    PrintLn("Button A")',
             '  End',

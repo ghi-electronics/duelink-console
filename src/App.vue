@@ -23,7 +23,7 @@
             :is-connected="webSerial.isConnected"
             @connect="webSerial.connect()"
             @disconnect="webSerial.disconnect()"
-            @download="download"
+            @download="downloadModal.start()"
             @play="sendRun"
             @stop="sendEscape"
             @record="sendRecordMode"
@@ -45,7 +45,7 @@
                         <div class="relative">
                             <div
                                 class="absolute right-0 inset-y-0 p-1 flex items-center justify-center rounded-r-md"
-                                @click="directModeCode = ''; $refs.input.$el.focus();"
+                                @click="directModeCode = ''; $refs.input.focus();"
                             >
                                 <div
                                     :class="[directModeCode.length
@@ -57,7 +57,7 @@
                                     <i class="fas fa-fw fa-xmark"></i>
                                 </div>
                             </div>
-                            <Input
+                            <input
                                 v-model="directModeCode"
                                 :ref="(el) => $refs.input = el"
                                 placeholder="Code to run immediately..."
@@ -76,38 +76,8 @@
                 </div>
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
-                <Panel title="Output">
-                    <template #buttons>
-                        <Button :disabled="!output.length" data-tippy-content="Clear" @click.native.stop="output = []">
-                            <i class="fas fa-fw fa-eraser"></i>
-                        </Button>
-                    </template>
-                    <div class="p-2 whitespace-pre-wrap">
-                        {{ output ? output : '&nbsp;' }}
-                    </div>
-                </Panel>
-                <Panel title="About">
-                    <div class="p-2 text-sm divide-y divide-slate-300 dark:divide-zinc-700">
-                        <div class="px-2 py-1 flex justify-between">
-                            <div>Console</div>
-                            <div>
-                                v1.0.0
-                            </div>
-                        </div>
-                        <div class="px-2 py-1 flex justify-between">
-                            <div>Latest firmware</div>
-                            <div>
-                                {{ latestFirmwareVersion ? latestFirmwareVersion : '...'  }}
-                            </div>
-                        </div>
-                        <div class="px-2 py-1 flex justify-between">
-                            <div>Device firmware</div>
-                            <div>
-                                {{ webSerial.version ? webSerial.version : '...'  }}
-                            </div>
-                        </div>
-                    </div>
-                </Panel>
+                <OutputPanel v-model:output="webSerial.output" />
+                <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version" />
             </div>
         </div>
         <div id="spacer"></div>
@@ -118,7 +88,8 @@
         <template #title>
             Heads up!
         </template>
-        You already have code in the editor. Do you want to replace it?
+        <div>You already have code in the editor.</div>
+        <div>Do you want to replace it?</div>
         <template #buttons>
             <div class="flex space-x-2">
                 <Button class="w-full" @click.native="alreadyHasCodeModal.yes()">
@@ -126,6 +97,33 @@
                 </Button>
                 <Button class="w-full" type="secondary" @click.native="alreadyHasCodeModal.no()">
                     No
+                </Button>
+            </div>
+        </template>
+    </Modal>
+    
+    <Modal :open="downloadModal.open">
+        <template #title>
+            Download
+        </template>
+        <div>
+            <div class="mb-2">What would you like to name the file?</div>
+            <label for="filename">File name</label>
+            <input
+                v-model="filename"
+                :ref="(el) => $refs.filename = el"
+                class="mt-2"
+                id="filename"
+                type="text"
+            />
+        </div>
+        <template #buttons>
+            <div class="flex space-x-2">
+                <Button :disabled="filename.length === 0" class="w-full" @click.native="downloadModal.download()">
+                    Download
+                </Button>
+                <Button class="w-full" type="secondary" @click.native="downloadModal.cancel()">
+                    Cancel
                 </Button>
             </div>
         </template>
@@ -142,25 +140,30 @@
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import tippy from 'tippy.js';
 import firmware from './js/firmware.js';
+import { VAceEditor } from 'vue3-ace-editor';
+import WebSerial from './js/WebSerial.js';
 
 // Components
 
-import { VAceEditor } from 'vue3-ace-editor';
-import WebSerial from './js/WebSerial';
 import MenuBar from './components/MenuBar.vue';
 import ToolBar from './components/ToolBar.vue';
-import Panel from './components/Panel.vue';
 import Footer from './components/Footer.vue';
 import Button from './components/Button.vue';
 import Modal from './components/Modal.vue';
 import FirmwareModal from './components/FirmwareModal.vue';
-import Input from './components/Input.vue';
+import OutputPanel from "./components/OutputPanel.vue";
+import AboutPanel from "./components/AboutPanel.vue";
 
 // Refs
 
-const $refs = { editor: null, input: null, progress: null };
+const $refs = { editor: null, filename: null, input: null, progress: null };
 
 // Data
+
+Object.keys(firmware).forEach((key) => {
+    firmware[key].isGlb = false;
+    firmware[key].image = null;
+});
 
 const availableFirmware = reactive(firmware);
 const recordModeCode = ref('');
@@ -168,6 +171,7 @@ const directModeCode = ref('');
 const lastRecordModeCode = ref('');
 const editorLine = ref(1);
 const editorColumn = ref(1);
+const filename = ref('');
 const language = ref('javascript');
 const webSerial = reactive(new WebSerial());
 const theme = ref('light');
@@ -178,6 +182,7 @@ const tippyConfig = {
     placement: 'bottom',
     theme: 'light',
 };
+
 const alreadyHasCodeModal = reactive({
     lines: [],
     list: false,
@@ -214,6 +219,7 @@ const alreadyHasCodeModal = reactive({
         }
     },
 });
+
 const firmwareModal = reactive({
     open: false,
     start() {
@@ -224,34 +230,28 @@ const firmwareModal = reactive({
     },
 });
 
+const downloadModal = reactive({
+    open: false,
+    start() {
+        this.open = true;
+        nextTick(() => $refs.filename.focus());
+    },
+    download() {
+        download(filename.value);
+        this.cancel();
+    },
+    cancel() {
+        filename.value = '';
+        this.open = false;
+    },
+});
+
 let editor = null;
 let tippyInstances = [];
 
 // Computed
 
 const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
-
-const latestFirmwareVersion = computed(() => {
-    if (webSerial.version) {
-        const lastChar = webSerial.version.substring(webSerial.version.length - 1, webSerial.version.length);
-        const firmware = Object.values(availableFirmware).find((firmware) => firmware.boards.includes(lastChar));
-        if (firmware) {
-            return firmware.title;
-        }
-    }
-    return null;
-});
-
-const output = computed({
-    get() {
-        return webSerial.output
-            .filter((line) => line && ['\n', '$', '>', '&'].every((char) => !line.startsWith(char)))
-            .join('\n');
-    },
-    set(value) {
-        webSerial.output = value;
-    },
-});
 
 // Watch
 
@@ -297,14 +297,14 @@ async function demo(lines) {
     }
 }
 
-function download() {
-    if (!recordModeCode.value.length) {
+function download(filename) {
+    if (!recordModeCode.value.length || !filename.length) {
         return;
     }
     const blob = new Blob([recordModeCode.value], { type: 'text/csv' });
     const el = window.document.createElement('a');
     el.href = window.URL.createObjectURL(blob);
-    el.download = 'due-code.txt';
+    el.download = `${filename}.txt`;
     document.body.appendChild(el);
     el.click();
     document.body.removeChild(el);

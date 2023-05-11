@@ -51,27 +51,44 @@
         </div>
     
         <div v-if="isConnected">
-            <template v-if="state === 'idle'">
-                <label for="firmware" class="block text-sm font-medium">Firmware</label>
-                <select v-model="firmware" id="firmware" name="firmware" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md">
-                    <option v-for="(option, key) in availableFirmware" :key="key" :value="key">
-                        {{ option.title }}
-                    </option>
-                </select>
-            </template>
-            <div v-else-if="state === 'erasing'">
-                <div class="mb-2">Erasing...</div>
-                <div class="w-full h-2"></div>
-            </div>
-            <div v-else-if="state === 'writing'">
-                <div class="mb-2">Loading... {{ percent }}%</div>
-                <div class="w-full h-2 bg-[#f08000] bg-opacity-25">
-                    <div class="h-2 bg-[#f08000]" :style="`width:${percent}%`"></div>
+            <div v-if="state === 'idle'" class="grid grid-cols-6 gap-2">
+                <div class="col-span-4">
+                    <label for="firmware">Firmware</label>
+                    <select v-model="firmware" id="firmware" class="mt-2">
+                        <option value="" disabled>Select</option>
+                        <option v-for="(option, key) in availableFirmware" :key="key" :value="key">
+                            {{ option.name }} ({{ option.boards.map((board) => board.name).join(', ') }})
+                        </option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label for="version">Version</label>
+                    <select v-model="version" :disabled="!firmware" id="version" class="mt-2">
+                        <option v-for="(option, key) in (availableFirmware?.[firmware]?.versions || [])" :key="key" :value="key">
+                            {{ option.name }}
+                        </option>
+                    </select>
                 </div>
             </div>
-            <div v-else-if="state === 'complete'">
-                <div class="mb-2">Loading is complete.</div>
-                <div class="w-full h-2 bg-[#f08000]"></div>
+            <div v-else-if="state === 'erasing'" class="firmware-progress-box">
+                <div class="w-full">
+                    <div class="mb-2 text-sky-400 dark:text-lime-400">Erasing...</div>
+                    <div class="w-full h-2 bg-slate-300 dark:bg-zinc-700"></div>
+                </div>
+            </div>
+            <div v-else-if="state === 'writing'" class="firmware-progress-box">
+                <div class="w-full">
+                    <div class="mb-2 text-sky-400 dark:text-lime-400">Loading... {{ percent }}%</div>
+                    <div class="w-full h-2 bg-slate-300 dark:bg-zinc-700">
+                        <div class="h-2 bg-sky-500 dark:bg-lime-500" :style="`width:${percent}%`"></div>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="state === 'complete'" class="firmware-progress-box">
+                <div class="w-full">
+                    <div class="mb-2 text-sky-400 dark:text-lime-400">Loading... 100%</div>
+                    <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
+                </div>
             </div>
         </div>
         
@@ -79,19 +96,30 @@
             <div class="flex space-x-2">
                 <template v-if="isConnected">
                     <template v-if="state === 'idle'">
-                        <Button @click.native="writeFirmware" :disabled="!firmware || !availableFirmware[firmware].image">
-                            Load
+                        <Button
+                            :disabled="!firmware || !availableFirmware[firmware].image"
+                            @click.native="writeFirmware"
+                        >
+                            Update
                         </Button>
-                        <Button @click.native="connect">
+                        <Button type="secondary" @click.native="disconnect">
+                            Disconnect
+                        </Button>
+                    </template>
+                    <template v-if="state === 'erasing' || state === 'writing'">
+                        <Button disabled>
+                            Update
+                        </Button>
+                        <Button disabled type="secondary">
                             Disconnect
                         </Button>
                     </template>
                     <template v-else-if="state === 'complete'">
-                        <Button @click.native="state = 'idle'">
-                            Start Over
+                        <Button @click.native="done">
+                            Done
                         </Button>
-                        <Button @click.native="connect">
-                            Disconnect
+                        <Button type="secondary" @click.native="restart">
+                            Restart
                         </Button>
                     </template>
                 </template>
@@ -99,7 +127,7 @@
                     <Button @click.native="connect">
                         Connect
                     </Button>
-                    <Button @click.native="$emit('close')" type="secondary">
+                    <Button type="secondary" @click.native="$emit('close')">
                         Close
                     </Button>
                 </template>
@@ -109,13 +137,17 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import GHILoader from '../js/GHILoader';
 
 // Components
 
 import Modal from './Modal.vue';
 import Button from './Button.vue';
+
+// Emits
+
+const $emit = defineEmits(['close']);
 
 // Props
 
@@ -129,7 +161,8 @@ const props = defineProps({
 
 // Data
 
-const firmware = ref(null);
+const firmware = ref('');
+const version = ref('');
 const ghiLoader = new GHILoader();
 const isConnected = ref(false);
 const error = ref(null);
@@ -141,11 +174,8 @@ let port = undefined;
 
 // Watch
 
-watch(() => firmware.value, async (key) => {
-    if (!key) {
-        return;
-    }
-    const url = props.availableFirmware[key].url;
+watch(() => version.value, async (key) => {
+    const url = props.availableFirmware[firmware.value].versions[key].url;
     console.log('Firmware selected', url);
     const hashedKey = await sha256(url);
     const saveAs = `download_${hashedKey}`;
@@ -155,39 +185,59 @@ watch(() => firmware.value, async (key) => {
         blob = await response.blob();
         const data = await blob.arrayBuffer();
         await saveFirmwareImage(saveAs, blob);
-        props.availableFirmware[key].image = data;
+        props.availableFirmware[firmware.value].image = data;
         console.log('Firmware ready');
     } else {
         error.value = `Unable to download the firmware (${response.status}).`;
-        props.availableFirmware[key].image = null;
+        props.availableFirmware[firmware.value].image = null;
         console.log('Firmware error');
     }
 });
 
 // Methods
 
+function catchError(error) {
+    // Ignore showing an error when a user cancels the prompt.
+    if (typeof error === 'string' && error.indexOf('No port selected by the user.') > -1) {
+        return;
+    }
+    error.value = error;
+    isConnected.value = false;
+    port = undefined;
+}
+
 async function connect() {
+    if (isConnected.value) {
+        return;
+    }
     error.value = null;
     try {
-        if (isConnected.value) {
-            await ghiLoader.close();
-            isConnected.value = false;
-            port = undefined;
-            state.value = 'idle';
-            return;
-        }
         port = await navigator.serial.requestPort({});
         await ghiLoader.open(port);
         isConnected.value = true;
     } catch (error) {
-        // Ignore showing an error when a user cancels the prompt.
-        if (typeof error === 'string' && error.indexOf('No port selected by the user.') > -1) {
-            return;
-        }
-        error.value = error;
+        catchError(error);
+    }
+}
+
+async function disconnect() {
+    if (!isConnected.value) {
+        return;
+    }
+    error.value = null;
+    try {
+        await ghiLoader.close();
         isConnected.value = false;
         port = undefined;
+        state.value = 'idle';
+    } catch (error) {
+        catchError(error);
     }
+}
+
+async function done() {
+    await disconnect();
+    $emit('close');
 }
 
 async function sha256(message) {
@@ -207,6 +257,12 @@ function progress(current, total) {
     if (percent.value >= 100) {
         state.value = 'complete';
     }
+}
+
+function restart() {
+    state.value = 'idle';
+    firmware.value = '';
+    version.value = '';
 }
 
 async function saveFirmwareImage(saveAs, resp) {

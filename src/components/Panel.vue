@@ -14,7 +14,8 @@
         </div>
         <div
             v-show="isOpen"
-            class="panel-content max-h-[600px] overflow-y-auto"
+            :ref="(el) => $refs.slot = el"
+            class="panel-content max-h-[400px] overflow-y-auto"
         >
             <slot/>
         </div>
@@ -22,7 +23,7 @@
 </template>
 
 <script setup>
-import {nextTick, onMounted, onUnmounted, ref} from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 // Expose
 
@@ -30,41 +31,41 @@ defineExpose({ open });
 
 // Refs
 
-// const $refs = { slot: null };
+const $refs = { slot: null };
 
 // Props
 
-defineProps({
+const props = defineProps({
+    autoScroll: Boolean,
     title: String,
 });
 
 // Setup
 
-// let observer = null;
+let observer = null;
 
 // Data
 
 const isOpen = ref(true);
 
-// Mounted
+// Mounted / Unmounted
 
-// onMounted(() => {
-//     nextTick(() => {
-//         if ($refs.slot) {
-//             observer = new MutationObserver(() => $refs.slot.scrollTop = $refs.slot.scrollHeight);
-//             observer.observe($refs.slot, {
-//                 attributes: false,
-//                 childList: true,
-//                 characterData: true,
-//                 subtree: true,
-//             });
-//         }
-//     });
-// });
-
-// Unmounted
-
-// onUnmounted(() => observer.disconnect());
+if (props.autoScroll) {
+    onMounted(() => {
+        nextTick(() => {
+            if ($refs.slot) {
+                observer = new MutationObserver(() => $refs.slot.scrollTop = $refs.slot.scrollHeight);
+                observer.observe($refs.slot, {
+                    attributes: false,
+                    childList: true,
+                    characterData: true,
+                    subtree: true,
+                });
+            }
+        });
+    });
+    onUnmounted(() => observer.disconnect());
+}
 
 // Methods
 

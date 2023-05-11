@@ -21,7 +21,7 @@ Note: If you install additional npm packages, doing `npm run dev` might error ou
 # Adding firmware to code
 
 1. Place new firmware files within the `public/firmware` folder.
-2. Firmware is now held in the `src/js/firmware.js` file. Simply add a new object, updating its `boards`, `title` and `url` properties to match the new firmware file.
+2. Firmware is now held in the `src/js/firmware.json` file. Simply add a new object, updating its `boards`, `title` and `url` properties to match the new firmware file.
    - `boards` is an array of board characters the firmware applies to. These are the last character returned when getting a board's version. E.g. `P` stands for BrainPad Pulse.
 3. Done.
 
