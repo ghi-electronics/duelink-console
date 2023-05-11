@@ -64,7 +64,11 @@
                 <div class="col-span-2">
                     <label for="version">Version</label>
                     <select v-model="version" :disabled="!firmware" id="version" class="mt-2">
-                        <option v-for="(option, key) in (availableFirmware?.[firmware]?.versions || [])" :key="key" :value="key">
+                        <option
+                            v-for="(option, key) in (availableFirmware?.[firmware]?.versions.sort((a, b) => b.id - a.id) || [])"
+                            :key="key"
+                            :value="key"
+                        >
                             {{ option.name }}
                         </option>
                     </select>
