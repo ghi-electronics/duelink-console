@@ -21,18 +21,30 @@ Note: If you install additional npm packages, doing `npm run dev` might error ou
 # Adding firmware to code
 
 1. Place new firmware files within the `public/firmware` folder.
-2. Firmware is now held in the `src/js/firmware.json` file. Simply add a new object, updating its `boards`, `title` and `url` properties to match the new firmware file.
-   - `boards` is an array of board characters the firmware applies to. These are the last character returned when getting a board's version. E.g. `P` stands for BrainPad Pulse.
+2. Firmware is now held in the `src/js/firmware.js` file. Simply add a new object, updating its properties (`name`, `versions`, `boards`).
+   - `versions` is an array of objects. Each object has an `id`, `name` and `url` property.
+      - `id` is used to sort descending. The highest `id` will be considered the latest firmware.
+      - `name` is self-explanatory.
+      - `url` is the path to the file.
+   - `boards` is an array of objects. Each object has a `name` and `id` property.
+      - `name` is self-explanatory.
+      - `id` is the character assigned to each board. E.g. `P` stands for BrainPad Pulse.
 3. Done.
 
 ```
-'Due_SC13_100': {
-   boards: ['P'],
-   title: 'Due_SC13 (v1.0.0)',
-   url: 'firmware/due_sc13_v100.ghi',
-   isGlb: false,
-   image: null,
-},
+ 'Due_SC13': {
+     name: 'SC13',
+     // All the versions.
+     versions: [
+         { id: 1, name: 'v1.0.0', url: 'firmware/due_sc13_v100.ghi' },
+     ],
+     // All the boards that use this firmware.
+     boards: [
+         { name: 'FEZ Flea', id: 'F' },
+         { name: 'FEZ Pico', id: 'I' },
+         { name: 'BrainPad Pulse', id: 'P' },
+     ],
+ },
 ```
 
 # Updating demos.
