@@ -12,7 +12,8 @@ Before starting, you need to install [Node.js](https://nodejs.org/en/) on your c
 **Note: Building locally is no longer necessary.**
 
 1. Commit changes and push to Github.
-2. Done.
+2. Github Actions will compile the JavaScript, build and deploy the page.
+3. Done.
 
 # Adding firmware to code
 
@@ -26,12 +27,14 @@ Before starting, you need to install [Node.js](https://nodejs.org/en/) on your c
       - `name` is self-explanatory.
       - `id` is the character assigned to each board. E.g. `P` stands for BrainPad Pulse.
 3. Commit changes and push to Github.
-4. Done.
+4. Github Actions will compile the JavaScript, build and deploy the page.
+5. Done.
 
 # Updating demos.
 
 1. Go to `public/demos.json`.
-2. Simply add a new object with `label` and `code` properties.
+2. Simply edit or add a new object with `label` and `code` properties.
 3. Commit changes and push to Github.
-4. Done.
+4. Github Actions will compile the JavaScript, build and deploy the page.
+5. Done.
 
