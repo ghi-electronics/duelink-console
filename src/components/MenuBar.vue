@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import demos from '../js/demos.js';
+import { ref } from 'vue';
 
 // Components
 
@@ -41,24 +41,39 @@ const props = defineProps({
     theme: String,
 });
 
-// Setup
+// Data
 
-const demoOptions = demos.map((demo) => {
-    if (demo?.url) {
-        return {
-            label: demo.label,
-            click: () => window.open(demo.url, '_blank'),
-            href: demo.url,
-        };
-    } else {
-        return {
-            label: demo.label,
-            click: () => $emit('demo', demo.code),
-        };
-    }
-});
+const demoOptions = ref([]);
+
+// Created
+
+loadDemos();
 
 // Methods
+
+async function loadDemos() {
+    try {
+        const response = await fetch('/demos.json');
+        const jsonData = await response.json();
+    
+        demoOptions.value = jsonData.map((demo) => {
+            if (demo?.url) {
+                return {
+                    label: demo.label,
+                    click: () => window.open(demo.url, '_blank'),
+                    href: demo.url,
+                };
+            } else {
+                return {
+                    label: demo.label,
+                    click: () => $emit('demo', demo.code),
+                };
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 function toggleDarkMode(event) {
     if (props.theme === 'dark') {

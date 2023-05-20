@@ -65,7 +65,7 @@ const deviceVersion = computed(() => {
     return null;
 });
 
-const firmware = computed(() => Object.values(props.availableFirmware).find((firmware) => firmware.boards.find((board) => board.id === deviceChar.value)));
+const firmware = computed(() => Object.values(props.availableFirmware).find((firmware) => (firmware?.boards || []).find((board) => board.id === deviceChar.value)));
 
 const device = computed(() => {
     if (firmware.value) {

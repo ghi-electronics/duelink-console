@@ -139,7 +139,6 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import tippy from 'tippy.js';
-import firmware from './js/firmware.js';
 import { VAceEditor } from 'vue3-ace-editor';
 import WebSerial from './js/WebSerial.js';
 
@@ -160,12 +159,7 @@ const $refs = { editor: null, filename: null, input: null, progress: null };
 
 // Data
 
-Object.keys(firmware).forEach((key) => {
-    firmware[key].isGlb = false;
-    firmware[key].image = null;
-});
-
-const availableFirmware = reactive(firmware);
+const availableFirmware = reactive({});
 const recordModeCode = ref('');
 const directModeCode = ref('');
 const lastRecordModeCode = ref('');
@@ -273,6 +267,8 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
     tippyConfig.theme = 'dark';
 }
 
+loadFirmware();
+
 // Mounted
 
 onMounted(() => {
@@ -308,6 +304,21 @@ function download(filename) {
     document.body.appendChild(el);
     el.click();
     document.body.removeChild(el);
+}
+
+async function loadFirmware() {
+    try {
+        const response = await fetch('/demos.json');
+        const jsonData = await response.json();
+        
+        Object.keys(jsonData).forEach((key) => {
+            availableFirmware[key] = jsonData[key];
+            availableFirmware[key].isGlb = false;
+            availableFirmware[key].image = null;
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 function onLoad(lines) {
