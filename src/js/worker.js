@@ -1,3 +1,4 @@
+console.log('worker');
 import ConsumerQueue from 'consumer-queue';
 
 const decoder = new TextDecoder();
@@ -15,7 +16,7 @@ let str = '';
 let writer = null;
 const queue = new ConsumerQueue();
 
-onmessage = (e) => {
+self.addEventListener('message', (e) => {
     switch (e.data.task) {
         case 'connect':
             connect();
@@ -39,7 +40,7 @@ onmessage = (e) => {
             stop();
             break;
     }
-};
+});
 
 // ACTIONS
 
