@@ -4,7 +4,7 @@ const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 let isConnected = false;
 let isEchoing = true;
-let isLogging = true;
+let isLogging = false;
 let mode = '>';
 let output = '';
 let port = null;
@@ -45,7 +45,6 @@ addEventListener('message', (e) => {
 // ACTIONS
 
 async function connect() {
-    log('worker: connect');
     [port] = await navigator.serial.getPorts();
     try {
         await port.open({
