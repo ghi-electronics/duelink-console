@@ -1,5 +1,4 @@
-console.log('worker');
-import ConsumerQueue from './ConsumerQueue.js';
+importScripts('./ConsumerQueue.js');
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
@@ -16,7 +15,8 @@ let str = '';
 let writer = null;
 const queue = new ConsumerQueue();
 
-self.addEventListener('message', (e) => {
+addEventListener('message', (e) => {
+    log(e.data.task);
     switch (e.data.task) {
         case 'connect':
             connect();
@@ -372,7 +372,6 @@ async function turnOffEcho() {
     isEchoing = false;
 }
 
-// 'ESC' should not be sent through this write function.
 async function write(command, terminator = null, lineEnd = '\n', skipReading = false) {
     try {
         log('----- write -----');

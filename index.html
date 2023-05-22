@@ -17,11 +17,11 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
         }
-        if (window.document.documentMode) {
-            window.location = '/browser-not-supported';
+        if (window.document.documentMode || !navigator.serial) {
+            window.location = '/browser-not-supported.html';
         }
     </script>
-  <script type="module" crossorigin src="./assets/index.e4e039fa.js"></script>
+  <script type="module" crossorigin src="./assets/index.3d4bdad0.js"></script>
     <link rel="modulepreload" href="./assets/vendor.acdda351.js">
     <link rel="stylesheet" href="./assets/index.6e730570.css">
   </head>
