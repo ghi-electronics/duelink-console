@@ -35,6 +35,7 @@ export default function useWebSerial($refs) {
             return;
         }
 
+        console.log('connect sent');
         worker.postMessage({ task: 'connect' });
     }
 

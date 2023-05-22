@@ -44,6 +44,7 @@ onmessage = (e) => {
 // ACTIONS
 
 async function connect() {
+    log('worker: connect');
     [port] = await navigator.serial.getPorts();
     try {
         await port.open({
