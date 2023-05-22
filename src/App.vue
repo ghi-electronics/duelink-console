@@ -20,7 +20,7 @@
             :can-play="recordModeCode !== '' && recordModeCode === lastRecordModeCode"
             :can-record="recordModeCode.length > 0 && recordModeCode !== lastRecordModeCode"
             :disabled="disabled"
-            :is-connected="webSerial.isConnected"
+            :is-connected="webSerial.isConnected.value"
             @connect="webSerial.connect()"
             @disconnect="webSerial.disconnect()"
             @download="downloadModal.start()"
@@ -76,8 +76,9 @@
                 </div>
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
-                <OutputPanel v-model:output="webSerial.output" />
-                <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version" />
+                <OutputPanel v-model:output="webSerial.output.value" />
+                <LogPanel v-model:logs="webSerial.logs.value" />
+                <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version.value" />
             </div>
         </div>
         <div id="spacer"></div>
@@ -140,7 +141,7 @@
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import tippy from 'tippy.js';
 import { VAceEditor } from 'vue3-ace-editor';
-import WebSerial from './js/WebSerial.js';
+import useWebSerial from './js/useWebSerial.js';
 
 // Components
 
@@ -150,8 +151,9 @@ import Footer from './components/Footer.vue';
 import Button from './components/Button.vue';
 import Modal from './components/Modal.vue';
 import FirmwareModal from './components/FirmwareModal.vue';
-import OutputPanel from "./components/OutputPanel.vue";
-import AboutPanel from "./components/AboutPanel.vue";
+import OutputPanel from './components/OutputPanel.vue';
+import LogPanel from './components/LogPanel.vue';
+import AboutPanel from './components/AboutPanel.vue';
 
 // Refs
 
@@ -167,7 +169,7 @@ const editorLine = ref(1);
 const editorColumn = ref(1);
 const filename = ref('');
 const language = ref('javascript');
-const webSerial = reactive(new WebSerial());
+const webSerial = useWebSerial($refs);
 const theme = ref('light');
 const tippyConfig = {
     animation: 'fade',
@@ -245,7 +247,7 @@ let tippyInstances = [];
 
 // Computed
 
-const disabled = computed(() => !webSerial.isConnected || webSerial.isBusy || webSerial.isTalking);
+const disabled = computed(() => !webSerial.isConnected.value || webSerial.isBusy.value || webSerial.isTalking.value);
 
 // Watch
 
@@ -333,28 +335,12 @@ function onLoad(lines) {
 async function sendRecordMode() {
     console.log('sendRecordMode');
     lastRecordModeCode.value = recordModeCode.value;
-    
-    $refs.progress.style.width = '0';
-    $refs.progress.classList.remove('opacity-0');
-
-    const result = await webSerial.write('pgmstream()', '&');
-    console.log(result);
-
-    const lines = recordModeCode.value.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
-    let lineNumber = 0;
-    
-    for (let line of lines) {
-        if (line.trim().length === 0) {
-            line = ' ';
-        }
-        await webSerial.stream(line + '\n');
-        $refs.progress.style.width = Math.trunc((++lineNumber/lines.length) * 100) + '%';
-    }
-    
-    $refs.progress.style.width = '100%';
-    await webSerial.stream('\0');
-    await webSerial.readUntil();
-    $refs.progress.classList.add('opacity-0');
+    webSerial.record(
+        recordModeCode.value
+            .replace(/\r/gm, '')
+            .replace(/\t/gm, ' ')
+            .split(/\n/)
+    );
 }
 
 async function sendDirectMode() {
@@ -365,9 +351,9 @@ async function sendDirectMode() {
     await webSerial.write(line);
 }
 
-async function sendRun() {
+function sendRun() {
     console.log('sendRun');
-    await webSerial.write('run');
+    webSerial.write('run');
 }
 
 async function sendList(target) {
@@ -377,12 +363,13 @@ async function sendList(target) {
         alreadyHasCodeModal.list = true;
         alreadyHasCodeModal.open = true;
     } else {
-        const result = await webSerial.write('list');
-        const code = result.join('\n');
-        if (recordModeCode.value !== code) {
-            recordModeCode.value = code;
-            lastRecordModeCode.value = code;
-        }
+        webSerial.write('list', (result) => {
+            const code = result.join('\n');
+            if (recordModeCode.value !== code) {
+                recordModeCode.value = code;
+                lastRecordModeCode.value = code;
+            }
+        });
     }
 }
 

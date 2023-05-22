@@ -24,8 +24,8 @@
         >
             <i class="fas fa-fw fa-play"></i>
         </Button>
+        {{ !isConnected }} / {{ !disabled }}
         <Button
-            :disabled="!isConnected || !disabled"
             class="tool stop"
             data-tippy-content="Stop"
             @click.native="$emit('stop')"
