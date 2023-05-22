@@ -1,4 +1,4 @@
-importScripts('./ConsumerQueue.js?url');
+importScripts('../consumer-queue.min.js');
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
