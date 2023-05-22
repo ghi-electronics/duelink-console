@@ -22,9 +22,7 @@ export default function useWebSerial($refs) {
     const callbacks = {};
 
     worker.addEventListener('message', (e) => onWorkerMessage(e.data));
-    worker.addEventListener('error', (e) => {
-        console.log(e.message + ' (' + e.filename + ':' + e.lineno + ')');
-    });
+    worker.addEventListener('error', (e) => console.log(e));
 
     // Methods - Toolbar
 
