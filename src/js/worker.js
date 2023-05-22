@@ -1,5 +1,5 @@
 console.log('worker');
-//import ConsumerQueue from 'consumer-queue';
+import ConsumerQueue from './ConsumerQueue.js';
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();

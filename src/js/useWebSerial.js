@@ -22,7 +22,10 @@ export default function useWebSerial($refs) {
     const callbacks = {};
 
     worker.addEventListener('message', (e) => onWorkerMessage(e.data));
-    worker.addEventListener('error', (e) => console.log(e));
+    worker.addEventListener('error', (e) => {
+        console.log(e);
+        worker.terminate();
+    });
 
     // Methods - Toolbar
 
