@@ -1,7 +1,7 @@
 
 import { ref } from 'vue';
 
-const worker = new Worker(new URL('worker.js', import.meta.url + '/js/'), { type: 'module' });
+const worker = new Worker(new URL('worker.js', import.meta.url), { type: 'module' });
 
 export default function useWebSerial($refs) {
     // Data
