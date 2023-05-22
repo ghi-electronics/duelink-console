@@ -5,14 +5,10 @@
                 <i class="fas fa-fw fa-eraser"></i>
             </Button>
         </template>
-        <div class="p-2 whitespace-pre-wrap">
+        <div class="p-2 whitespace-pre-wrap text-sm">
             <template v-for="log in logs">
-                <div v-if="log?.error" class="text-red-600 dark:text-red-400">
-                    {{ log.error }}
-                </div>
-                <div v-else-if="log?.event" class="text-green-700 dark:text-green-400">
-                    {{ log.event }}
-                </div>
+                <div v-if="log?.error" v-html="log.error" class="text-red-600 dark:text-red-400"></div>
+                <div v-else-if="log?.event"  v-html="log.event"></div>
             </template>
         </div>
     </Panel>

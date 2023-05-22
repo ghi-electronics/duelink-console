@@ -24,8 +24,8 @@
         >
             <i class="fas fa-fw fa-play"></i>
         </Button>
-        {{ !isConnected }} / {{ !disabled }}
         <Button
+            :disabled="disabled || !canStop"
             class="tool stop"
             data-tippy-content="Stop"
             @click.native="$emit('stop')"
@@ -85,6 +85,7 @@ const props = defineProps({
     canLoad: Boolean,
     canPlay: Boolean,
     canRecord: Boolean,
+    canStop: Boolean,
     disabled: Boolean,
     isConnected: Boolean,
 });

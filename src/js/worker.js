@@ -1,10 +1,12 @@
 import ConsumerQueue from 'consumer-queue';
 
 const decoder = new TextDecoder();
-let done = false;
 const encoder = new TextEncoder();
+let isConnected = false;
 let isEchoing = true;
+let isLogging = false;
 let mode = '>';
+let output = '';
 let port = null;
 let readLoopActive = true;
 let readLoopPromise = null;
@@ -21,17 +23,25 @@ onmessage = (e) => {
         case 'disconnect':
             disconnect();
             break;
-        case 'escape':
-            escape();
+        case 'execute':
+            execute(e.data.line);
+            break;
+        case 'list':
+            list(e.data.callbackId);
+            break;
+        case 'play':
+            play();
             break;
         case 'record':
             record(e.data.lines);
             break;
-        case 'write':
-            write(e.data.id, e.data.command, e.data.terminator, e.data.lineEnd);
+        case 'stop':
+            stop();
             break;
     }
 };
+
+// ACTIONS
 
 async function connect() {
     [port] = await navigator.serial.getPorts();
@@ -61,169 +71,50 @@ async function connect() {
 
     writer = port.writable.getWriter();
     reader = port.readable.getReader();
-
-    postMessage({ event: 'connected' });
-
-    readLoopPromise = readLoop();
-
+    
+    startReadLoop();
     await sleep(100);
     await synchronize();
+
+    isConnected = true;
+    postMessage({ event: 'connected' });
 }
 
 async function disconnect() {
     try {
-        // await this.stopReadLoop();
+        await stopReadLoop();
         await writer.releaseLock();
         await reader.releaseLock();
         await port.close();
+        isConnected = false;
         postMessage({ event: 'disconnected' });
+        postMessage({ event: 'logEvent', message: 'Port disconnected.' });
     } catch (error) {
         postMessage({ event: 'logError', message: error?.message || 'There were problems disconnecting.' });
     }
 }
 
-async function escape() {
-    done = true;
-    await sleep(10);
-    queue.cancelWait(new Error('Escape'));
-    await writeWithin('\x1B', '');
-    postMessage({ event: 'logEvent', message: 'Stopped program.' });
-
-    readLoopPromise = readLoop();
+async function execute(line) {
+    await write('>');
+    await write(line);
+    postMessage({ event: 'logEvent', message: `Executed: &nbsp;<code>${line}</code>` });
 }
 
-async function flush() {
-    return new Promise(async (resolve) => {
-        const result = [];
-        let line;
-        do {
-            line = await queue.tryPop();
-            if (line) {
-                result.push(line);
-            }
-        } while (line);
-
-        // Clear read loop string.
-        if (!result.length) {
-            str = '';
-        }
-
-        console.log('flushed', result);
-        resolve(result);
-    });
+async function list(callbackId) {
+    const result = await write('list');
+    postMessage({ event: 'writeResult', callbackId, result });
+    postMessage({ event: 'logEvent', message: 'Listed program code.' });
 }
 
-async function getVersion() {
-    const result = await writeWithin('version()');
-    for (const line of result) {
-        console.log('line', line, (line.match(/\./g) || []).length);
-        if (line.startsWith('v') && (line.match(/\./g) || []).length === 2) {
-            return line;
-        }
-    }
-    return undefined;
-}
-
-async function readLoop() {
-    let line;
-    readLoopActive = true;
-
-    while (readLoopActive) {
-        try {
-            const { value, done } = await reader.read();
-
-            console.log('Reading...');
-            str += decoder.decode(value).replace('\r', '');
-
-            if (!str) {
-                continue;
-            }
-
-            let index = str.indexOf('\n');
-
-            if (index > -1) {
-                str.split("\n").forEach((value) => console.log('->', value));
-            } else {
-                console.log('->', str);
-            }
-
-            // if (this.isConnected) {
-            //     if (this.output.length && str.startsWith(this.output[this.output.length - 1])) {
-            //         this.output[this.output.length - 1] = str;
-            //     } else if (index === -1) {
-            //         this.output.push(str);
-            //     }
-            // }
-
-            while (index > -1) {
-                line = str.substring(0, index);
-                if (line) {
-                    console.log('queued:', line);
-                    queue.push(line);
-
-                    // if (this.isConnected) {
-                    //     if (this.output.length && this.output[this.output.length - 1].startsWith(line)) {
-                    //         this.output[this.output.length - 1] = line;
-                    //     } else {
-                    //         this.output.push(line);
-                    //     }
-                    // }
-                }
-
-                str = str.substring(index + 1);
-                index = str.indexOf('\n');
-            }
-
-            if (str === '>' || str === '$' || str === '&') {
-                console.log('queued:', str);
-                queue.push(str);
-                str = '';
-                // this.output.push('');
-            }
-
-            if (done) {
-                readLoopActive = false;
-            }
-
-            await sleep(1);
-        } catch (error) {
-            console.error(error);
-        }
-    }
-}
-
-function readUntil(terminator = null) {
-    if (!terminator) {
-        terminator = mode;
-    }
-    return new Promise(async (resolve) => {
-        const result = [];
-        let line;
-        do {
-            line = await queue.pop().catch(() => {
-                console.log('read until', 'queue waiter terminated', result);
-                resolve(result);
-            });
-            if (line) {
-                result.push(line);
-                if (line.startsWith('!')) {
-                    console.log('Error:', line);
-                    break;
-                }
-            }
-        } while (line !== terminator);
-        console.log('read until found', result);
-        if (result.length > 1) {
-            result.pop();
-        }
-        resolve(result);
-    });
+async function play() {
+    await write('run', null, '\n', true);
+    postMessage({ event: 'playing' });
 }
 
 async function record(lines) {
     postMessage({ event: 'recording', percent: 0 });
 
-    await writeWithin('pgmstream()', '&');
+    await write('pgmstream()', '&');
 
     let lineNumber = 0;
     for (let line of lines) {
@@ -240,10 +131,175 @@ async function record(lines) {
     await readUntil();
 
     postMessage({ event: 'recorded' });
+    postMessage({ event: 'logEvent', message: 'Recorded ' + lines.length + ' line(s) of code...' });
+}
+
+async function stop() {
+    // Cancel any queue promises.
+    queue.cancelWait(new Error('Stop'));
+    // Write the escape character.
+    writer.write(encoder.encode('\x1B'));
+    // Log it.
+    postMessage({ event: 'stopped' });
+}
+
+// UTILITIES
+
+function flush() {
+    return new Promise(async (resolve) => {
+        const result = [];
+        let line;
+        do {
+            line = await queue.tryPop();
+            if (line) {
+                result.push(line);
+            }
+        } while (line);
+
+        // Clear read loop string.
+        if (!result.length) {
+            str = '';
+        }
+
+        log('flushed', result);
+        resolve(result);
+    });
+}
+
+async function getVersion() {
+    const result = await write('version()');
+    for (const line of result) {
+        log('line', line, (line.match(/\./g) || []).length);
+        if (line.startsWith('v') && (line.match(/\./g) || []).length === 2) {
+            return line;
+        }
+    }
+    return undefined;
+}
+
+async function readLoop() {
+    let line, postOutput = true;
+    readLoopActive = true;
+
+    while (readLoopActive) {
+        try {
+            const { value, done } = await reader.read();
+
+            log('Reading...', done);
+            const finalValue = decoder.decode(value).replace('\r', '');
+
+            if (isConnected) {
+                output += finalValue;
+                if (output.length > 2000) {
+                    if (finalValue.length < output.length) {
+                        output = output.substring(finalValue.length, output.length);
+                        const index = output.indexOf('\n');
+                        if (index > -1) {
+                            output = output.substring(index + 1, output.length);
+                        }
+                        postOutput = true;
+                    } else {
+                        output = '';
+                        postMessage({ event: 'output', value: 'Maximum output limit reached.' });
+                        postOutput = false;
+                    }
+                }
+                if (postOutput) {
+                    postMessage({ event: 'output', value: output });
+                }
+            }
+
+            str += finalValue;
+
+            if (!str) {
+                continue;
+            }
+
+            let index = str.indexOf('\n');
+
+            if (index > -1) {
+                str.split("\n").forEach((value) => log('->', value));
+            } else {
+                log('->', str);
+            }
+
+            while (index > -1) {
+                line = str.substring(0, index);
+                if (line) {
+                    log('queued:', line);
+                    queue.push(line);
+                }
+
+                str = str.substring(index + 1);
+                index = str.indexOf('\n');
+            }
+
+            if (str === '>' || str === '$' || str === '&') {
+                log('queued:', str);
+                queue.push(str);
+                str = '';
+            }
+
+            if (done) {
+                readLoopActive = false;
+            }
+
+            await sleep(2);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}
+
+function log() {
+    if (isLogging) {
+        console.log(...arguments);
+    }
+}
+
+function readUntil(terminator = null) {
+    if (!terminator) {
+        terminator = mode;
+    }
+    return new Promise(async (resolve) => {
+        const result = [];
+        let line;
+        do {
+            line = await queue.pop().catch(() => {
+                log('read until', 'queue waiter terminated', result);
+                resolve(result);
+            });
+            if (line) {
+                result.push(line);
+                if (line.startsWith('!')) {
+                    log('Error:', line);
+                    break;
+                }
+            }
+        } while (line !== terminator);
+        log('read until found', result);
+        if (result.length > 1) {
+            result.pop();
+        }
+        resolve(result);
+    });
 }
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function startReadLoop() {
+    readLoopPromise = readLoop();
+}
+
+async function stopReadLoop() {
+    readLoopActive = false;
+    if (readLoopPromise) {
+        await reader.cancel();
+        await readLoopPromise;
+        readLoopPromise = null;
+    }
 }
 
 async function stream(data) {
@@ -274,18 +330,18 @@ async function stream(data) {
 async function synchronize() {
     // Escape the current program.
     writer.write(encoder.encode('\x1B'));
-    console.log('wrote escape');
+    log('wrote escape');
 
     await sleep(100);
 
     let result = await flush();
 
-    console.log('escape result', result);
+    log('escape result', result);
     if (result.length === 1) {
         result = result.pop();
         if (result === '>' || result === '$') {
             mode = result;
-            console.log('mode set to', result);
+            log('mode set to', result);
         }
     }
 
@@ -310,41 +366,34 @@ async function turnOffEcho() {
     if (!isEchoing) {
         return;
     }
-    await writeWithin('echo(0)');
+    await write('echo(0)');
     isEchoing = false;
 }
 
-function write(id, command, terminator = null, lineEnd = '\n') {
-    console.log('----- write -----');
-    flush().then(() => {
+// 'ESC' should not be sent through this write function.
+async function write(command, terminator = null, lineEnd = '\n', skipReading = false) {
+    try {
+        log('----- write -----');
+        postMessage({ event: 'isTalking', value: true });
+
+        await flush();
+
         writer.write(encoder.encode(command + lineEnd));
-        console.log('wrote', command);
+        log('wrote', command);
 
         if (command === '>' || command === '$') {
             mode = command;
         }
 
-        console.log('write is reading');
-        readUntil(terminator ? terminator : mode)
-            .then((result) => {
-                console.log('write result', result);
-                postMessage({ event: 'writeResult', id, result });
-            });
-    });
-}
-
-async function writeWithin(command, terminator = null, lineEnd = '\n') {
-    console.log('----- write within -----');
-
-    await flush();
-
-    writer.write(encoder.encode(command + lineEnd));
-    console.log('wrote', command);
-
-    if (command === '>' || command === '$') {
-        mode = command;
+        if (!skipReading) {
+            log('write is sleeping');
+            await sleep(50);
+            log('write is reading until', terminator ? terminator : mode);
+            const result = await readUntil(terminator ? terminator : mode);
+            log('write result', result);
+            return result;
+        }
+    } finally {
+        postMessage({ event: 'isTalking', value: false });
     }
-
-    console.log('write is reading');
-    return await readUntil(terminator ? terminator : mode);
 }

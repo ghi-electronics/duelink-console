@@ -8,9 +8,11 @@ export default function useWebSerial($refs) {
 
     const isBusy = ref(false);
     const isConnected = ref(false);
+    const isPlaying = ref(false);
+    const isStopped = ref(true);
     const isTalking = ref(false);
     const logs = ref([]);
-    const output = ref([]);
+    const output = ref('');
     const version = ref(null);
 
     // Setup
@@ -20,15 +22,7 @@ export default function useWebSerial($refs) {
 
     worker.addEventListener('message', (e) => onWorkerMessage(e.data));
 
-    // Methods
-
-    function logError(message) {
-        logs.value.push({ error: message });
-    }
-
-    function logEvent(message) {
-        logs.value.push({ event: message });
-    }
+    // Methods - Toolbar
 
     async function connect() {
         isBusy.value = true;
@@ -48,8 +42,34 @@ export default function useWebSerial($refs) {
         worker.postMessage({ task: 'disconnect' });
     }
 
-    function escape() {
-        worker.postMessage({ task: 'escape' });
+    function record(lines) {
+        worker.postMessage({ task: 'record', lines });
+    }
+
+    function play() {
+        worker.postMessage({ task: 'play' });
+    }
+
+    function stop() {
+        worker.postMessage({ task: 'stop' });
+    }
+
+    function list(callback = null) {
+        worker.postMessage({ task: 'list', callbackId: storeCallback(callback) });
+    }
+
+    function execute(line) {
+        worker.postMessage({ task: 'execute', line });
+    }
+
+    // Methods - Utilities
+
+    function logError(message) {
+        logs.value.push({ error: message });
+    }
+
+    function logEvent(message) {
+        logs.value.push({ event: message });
     }
 
     function onWorkerMessage(data) {
@@ -63,6 +83,9 @@ export default function useWebSerial($refs) {
                 isConnected.value = false;
                 logEvent('Port disconnected.');
                 break;
+            case 'isTalking':
+                isTalking.value = data.value;
+                break;
             case 'logError':
                 logError(data.message);
                 if (data.message.toLowerCase().indexOf('port') > -1) {
@@ -71,6 +94,14 @@ export default function useWebSerial($refs) {
                 break;
             case 'logEvent':
                 logEvent(data.message);
+                break;
+            case 'output':
+                output.value = data.value;
+                break;
+            case 'playing':
+                isStopped.value = false;
+                isPlaying.value = true;
+                logEvent('Program started.');
                 break;
             case 'recording':
                 if (data.percent === 0) {
@@ -84,35 +115,30 @@ export default function useWebSerial($refs) {
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
                 break;
+            case 'stopped':
+                isPlaying.value = false;
+                isStopped.value = true;
+                logEvent('Program stopped.');
+                break;
             case 'version':
                 version.value = data.result;
                 break;
             case 'writeResult':
-                if (callbacks[data.id]) {
-                    callbacks[data.id](data.result);
-                    delete callbacks[data.id];
+                if (callbacks[data.callbackId]) {
+                    callbacks[data.callbackId](data.result);
+                    delete callbacks[data.callbackId];
                 }
                 break;
         }
     }
 
-    function record(lines) {
-        worker.postMessage({ task: 'record', lines });
-    }
-
-    /**
-     * @param {String} command
-     * @param {Function} [callback=null]
-     * @param {String} [terminator=null]
-     * @param {String} [lineEnd='\n']
-     */
-    function write(command, callback = null, terminator = null, lineEnd = '\n') {
+    function storeCallback(callback) {
         let id = null;
         if (callback) {
             id = ++uid;
             callbacks[id] = callback;
         }
-        worker.postMessage({ task: 'write', id, command, terminator, lineEnd });
+        return id;
     }
 
     // Export
@@ -120,6 +146,8 @@ export default function useWebSerial($refs) {
         // Data
         isBusy,
         isConnected,
+        isPlaying,
+        isStopped,
         isTalking,
         logs,
         output,
@@ -127,8 +155,10 @@ export default function useWebSerial($refs) {
         // Methods
         connect,
         disconnect,
-        escape,
+        execute,
+        list,
+        play,
         record,
-        write,
+        stop,
     };
 }

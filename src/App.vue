@@ -14,18 +14,19 @@
             @updateTippy="updateTippy"
         />
         <ToolBar
-            :can-download="recordModeCode.length > 0"
+            :can-download="canDownload"
             :can-list="true"
             :can-load="true"
-            :can-play="recordModeCode !== '' && recordModeCode === lastRecordModeCode"
-            :can-record="recordModeCode.length > 0 && recordModeCode !== lastRecordModeCode"
+            :can-play="canPlay"
+            :can-record="canRecord"
+            :can-stop="canStop"
             :disabled="disabled"
             :is-connected="webSerial.isConnected.value"
             @connect="webSerial.connect()"
             @disconnect="webSerial.disconnect()"
             @download="downloadModal.start()"
-            @play="sendRun"
-            @stop="sendEscape"
+            @play="webSerial.play()"
+            @stop="webSerial.stop()"
             @record="sendRecordMode"
             @list="sendList"
             @load="onLoad"
@@ -77,7 +78,7 @@
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
                 <OutputPanel v-model:output="webSerial.output.value" />
-                <LogPanel v-model:logs="webSerial.logs.value" />
+                <LogPanel v-model:logs="webSerial.logs.value" closed />
                 <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version.value" />
             </div>
         </div>
@@ -161,6 +162,8 @@ const $refs = { editor: null, filename: null, input: null, progress: null };
 
 // Data
 
+const webSerial = useWebSerial($refs);
+
 const availableFirmware = reactive({});
 const recordModeCode = ref('');
 const directModeCode = ref('');
@@ -169,8 +172,8 @@ const editorLine = ref(1);
 const editorColumn = ref(1);
 const filename = ref('');
 const language = ref('javascript');
-const webSerial = useWebSerial($refs);
 const theme = ref('light');
+
 const tippyConfig = {
     animation: 'fade',
     appendTo: document.body,
@@ -187,7 +190,11 @@ const alreadyHasCodeModal = reactive({
     async yes() {
         if (this.list) {
             this.list = false;
-            this.lines = await webSerial.write('list');
+            webSerial.list((lines) => {
+                if (lines.length) {
+                    recordModeCode.value = lines.join('\n');
+                }
+            });
         }
         if (this.lines.length) {
             recordModeCode.value = this.lines.join('\n');
@@ -200,7 +207,7 @@ const alreadyHasCodeModal = reactive({
         if (this.list) {
             this.list = false;
             // This call will create output.
-            await webSerial.write('list');
+            webSerial.list();
         }
         this.open = false;
         this.fixTippy();
@@ -247,6 +254,10 @@ let tippyInstances = [];
 
 // Computed
 
+const canDownload = computed(() => recordModeCode.value.length > 0);
+const canPlay = computed(() => recordModeCode.value !== '' && recordModeCode.value === lastRecordModeCode.value && !webSerial.isPlaying.value);
+const canRecord = computed(() => recordModeCode.value.length > 0 && recordModeCode.value !== lastRecordModeCode.value);
+const canStop = computed(() => !webSerial.isStopped.value);
 const disabled = computed(() => !webSerial.isConnected.value || webSerial.isBusy.value || webSerial.isTalking.value);
 
 // Watch
@@ -323,6 +334,19 @@ async function loadFirmware() {
     }
 }
 
+function onEditorInit(instance) {
+    instance.setShowPrintMargin(false);
+    instance.setOptions({
+        fontSize: '16px'
+    });
+    instance.session.selection.on('changeCursor', () => {
+        const pos = instance.getCursorPosition();
+        editorLine.value = pos.row + 1;
+        editorColumn.value = pos.column + 1;
+    });
+    editor = instance;
+}
+
 function onLoad(lines) {
     if (recordModeCode.value) {
         alreadyHasCodeModal.lines = lines.slice(0);
@@ -345,15 +369,7 @@ async function sendRecordMode() {
 
 async function sendDirectMode() {
     console.log('sendDirectMode');
-    await webSerial.write('>');
-    const line = directModeCode.value.replace(/\t/gm, ' ');
-    webSerial.output.push(line);
-    await webSerial.write(line);
-}
-
-function sendRun() {
-    console.log('sendRun');
-    webSerial.write('run');
+    webSerial.execute(directModeCode.value.replace(/\t/gm, ' '));
 }
 
 async function sendList(target) {
@@ -363,7 +379,7 @@ async function sendList(target) {
         alreadyHasCodeModal.list = true;
         alreadyHasCodeModal.open = true;
     } else {
-        webSerial.write('list', (result) => {
+        webSerial.list((result) => {
             const code = result.join('\n');
             if (recordModeCode.value !== code) {
                 recordModeCode.value = code;
@@ -371,24 +387,6 @@ async function sendList(target) {
             }
         });
     }
-}
-
-async function sendEscape() {
-    console.log('sendEscape');
-    await webSerial.escape();
-}
-
-function onEditorInit(instance) {
-    instance.setShowPrintMargin(false);
-    instance.setOptions({
-        fontSize: '16px'
-    });
-    instance.session.selection.on('changeCursor', () => {
-        const pos = instance.getCursorPosition();
-        editorLine.value = pos.row + 1;
-        editorColumn.value = pos.column + 1;
-    });
-    editor = instance;
 }
 
 function updateTippy(target, show = false) {
