@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 console.log(new URL('worker.js', import.meta.url));
-const worker = new Worker(new URL('worker.js', import.meta.url), { type: 'module' });
+const worker = new Worker(new URL('worker.js', import.meta.url));
 
 export default function useWebSerial($refs) {
     // Data
@@ -30,6 +30,7 @@ export default function useWebSerial($refs) {
     // Methods - Toolbar
 
     async function connect() {
+        console.log('connect');
         isBusy.value = true;
 
         try {

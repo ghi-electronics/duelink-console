@@ -1,4 +1,4 @@
-export default class ConsumerQueue {
+class ConsumerQueue {
     constructor() {
         this._head = null;
         this._tail = null;

@@ -30,7 +30,13 @@ const props = defineProps({
 const finalOutput = computed(() => {
     return props.output
         .split('\n')
-        .filter((line) => line && ['$', '>', '&'].every((char) => !line.startsWith(char)))
+        .map((line) => {
+            if (line.startsWith('$') || line.startsWith('>') || line.startsWith('&')) {
+                return line.substring(1);
+            }
+            return line;
+        })
+        .filter((line) => line)
         .join('\n')
 });
 </script>
