@@ -14,7 +14,6 @@ export default function useWebSerial($refs) {
     const logs = ref([]);
     const output = ref('');
     const version = ref(null);
-    const workerURL = new URL('worker.js', import.meta.url).toString();
 
     // Setup
 
@@ -157,7 +156,6 @@ export default function useWebSerial($refs) {
         logs,
         output,
         version,
-        workerURL,
         // Methods
         connect,
         disconnect,
