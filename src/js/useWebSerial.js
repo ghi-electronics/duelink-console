@@ -1,7 +1,6 @@
 
 import { ref } from 'vue';
 
-console.log(new URL('worker.js', import.meta.url));
 const worker = new Worker(new URL('worker.js', import.meta.url));
 
 export default function useWebSerial($refs) {
@@ -15,6 +14,7 @@ export default function useWebSerial($refs) {
     const logs = ref([]);
     const output = ref('');
     const version = ref(null);
+    const workerURL = new URL('worker.js', import.meta.url).toString();
 
     // Setup
 
@@ -30,7 +30,6 @@ export default function useWebSerial($refs) {
     // Methods - Toolbar
 
     async function connect() {
-        console.log('connect');
         isBusy.value = true;
 
         try {
@@ -41,7 +40,6 @@ export default function useWebSerial($refs) {
             return;
         }
 
-        console.log('connect sent');
         worker.postMessage({ task: 'connect' });
     }
 
@@ -159,6 +157,7 @@ export default function useWebSerial($refs) {
         logs,
         output,
         version,
+        workerURL,
         // Methods
         connect,
         disconnect,

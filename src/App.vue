@@ -80,6 +80,7 @@
                 <OutputPanel v-model:output="webSerial.output.value" />
                 <LogPanel v-model:logs="webSerial.logs.value" closed />
                 <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version.value" />
+                {{ webSerial.workerURL }}
             </div>
         </div>
         <div id="spacer"></div>
