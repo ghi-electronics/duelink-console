@@ -15,7 +15,7 @@
         <div
             v-show="isOpen"
             :ref="(el) => $refs.slot = el"
-            class="panel-content max-h-[400px] overflow-y-auto"
+            class="panel-content max-h-[380px] overflow-y-auto"
         >
             <slot/>
         </div>
@@ -37,6 +37,7 @@ const $refs = { slot: null };
 
 const props = defineProps({
     autoScroll: Boolean,
+    closed: Boolean,
     title: String,
 });
 
@@ -46,7 +47,7 @@ let observer = null;
 
 // Data
 
-const isOpen = ref(true);
+const isOpen = ref(!props.closed);
 
 // Mounted / Unmounted
 
