@@ -42,10 +42,6 @@ self.addEventListener('message', (e) => {
     }
 });
 
-self.addEventListener('error', (e) => {
-    log(e.message + ' (' + e.filename + ':' + e.lineno + ')');
-});
-
 // ACTIONS
 
 async function connect() {
