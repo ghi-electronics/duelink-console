@@ -55,18 +55,21 @@ async function connect() {
             flowControl: 'none',
         });
     } catch (error) {
-        postMessage({ event: 'logError', message: error?.message || 'Unable to open port.' });
+        logError(error?.message || 'Unable to open port.');
         return;
     }
 
-    port.addEventListener('disconnect', disconnect);
+    port.addEventListener('disconnect', () => {
+        log('Port disconnected');
+        disconnect();
+    });
 
     if (port?.writable == null) {
-        postMessage({ event: 'logError', message: 'Port is not a writable.' });
+        logError('Port is not a writable.');
         return;
     }
     if (port?.readable == null) {
-        postMessage({ event: 'logError', message: 'Port is not a readable.' });
+        logError('Port is not a readable.');
         return;
     }
 
@@ -87,24 +90,26 @@ async function disconnect() {
         await writer.releaseLock();
         await reader.releaseLock();
         await port.close();
+        logEvent('Port disconnected.');
+    } catch (error) {
+        logError(error?.message || 'There were problems disconnecting.');
+    } finally {
         isConnected = false;
         postMessage({ event: 'disconnected' });
-        postMessage({ event: 'logEvent', message: 'Port disconnected.' });
-    } catch (error) {
-        postMessage({ event: 'logError', message: error?.message || 'There were problems disconnecting.' });
+        postMessage({ event: 'version', value: null });
     }
 }
 
 async function execute(line) {
     await write('>');
     await write(line);
-    postMessage({ event: 'logEvent', message: `Executed: &nbsp;<code>${line}</code>` });
+    logEvent(`Executed: &nbsp;<code>${line}</code>`);
 }
 
 async function list(callbackId) {
     const result = await write('list');
     postMessage({ event: 'writeResult', callbackId, result });
-    postMessage({ event: 'logEvent', message: 'Listed program code.' });
+    logEvent('Listed program code.');
 }
 
 async function play() {
@@ -134,7 +139,7 @@ async function record(lines) {
     await readUntil();
 
     postMessage({ event: 'recorded' });
-    postMessage({ event: 'logEvent', message: 'Recorded ' + lines.length + ' line(s) of code...' });
+    logEvent('Recorded ' + lines.length + ' line(s) of code...');
 }
 
 async function stop() {
@@ -261,6 +266,14 @@ function log() {
     }
 }
 
+function logError(message) {
+    postMessage({ event: 'logError', message });
+}
+
+function logEvent(message) {
+    postMessage({ event: 'logEvent', message });
+}
+
 function readUntil(terminator = null) {
     if (!terminator) {
         terminator = mode;
@@ -358,7 +371,7 @@ async function synchronize() {
         await sleep(100);
         const result = await getVersion();
         if (typeof result === 'string') {
-            postMessage({ event: 'version', result });
+            postMessage({ event: 'version', value: result });
             break;
         }
         tryCount--;

@@ -9,7 +9,7 @@
             <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i>
         </Button>
         <Button
-            :disabled="disabled || !canRecord"
+            :disabled="isBusy || !isConnected || isTalking || !canRecord"
             class="tool record"
             data-tippy-content="Record"
             @click.native="$emit('record')"
@@ -17,7 +17,7 @@
             <i class="fas fa-fw fa-circle"></i>
         </Button>
         <Button
-            :disabled="disabled || !canPlay"
+            :disabled="isBusy || !isConnected || isTalking || !canPlay"
             class="tool play"
             data-tippy-content="Play"
             @click.native="$emit('play')"
@@ -25,7 +25,7 @@
             <i class="fas fa-fw fa-play"></i>
         </Button>
         <Button
-            :disabled="disabled || !canStop"
+            :disabled="isBusy || !isConnected || !canStop"
             class="tool stop"
             data-tippy-content="Stop"
             @click.native="$emit('stop')"
@@ -33,7 +33,7 @@
             <i class="fas fa-fw fa-square"></i>
         </Button>
         <Button
-            :disabled="disabled || !canList"
+            :disabled="isBusy || !isConnected || isTalking || !canList"
             class="tool"
             data-tippy-content="List"
             @click.native="$emit('list', $event.target)"
@@ -86,8 +86,9 @@ const props = defineProps({
     canPlay: Boolean,
     canRecord: Boolean,
     canStop: Boolean,
-    disabled: Boolean,
+    isBusy: Boolean,
     isConnected: Boolean,
+    isTalking: Boolean,
 });
 
 // Methods

@@ -127,7 +127,7 @@ export default function useWebSerial($refs) {
                 logEvent('Program stopped.');
                 break;
             case 'version':
-                version.value = data.result;
+                version.value = data.value;
                 break;
             case 'writeResult':
                 if (callbacks[data.callbackId]) {

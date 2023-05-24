@@ -37,6 +37,9 @@ const finalOutput = computed(() => {
             if (line.startsWith('&')) {
                 line = line.substring(1);
             }
+            if ('>'.repeat(line.length) === line) {
+                line = '';
+            }
             return line;
         })
         .filter((line) => line)
