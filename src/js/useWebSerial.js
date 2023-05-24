@@ -1,5 +1,5 @@
 
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const worker = new Worker(new URL('worker.js', import.meta.url));
 
@@ -24,6 +24,12 @@ export default function useWebSerial($refs) {
     worker.addEventListener('error', (e) => {
         console.log(e);
         worker.terminate();
+    });
+
+    watch(() => output.value, (newValue) => {
+        if (newValue === '') {
+            worker.postMessage({ task: 'clearOutput' });
+        }
     });
 
     // Methods - Toolbar
