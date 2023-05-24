@@ -1,4 +1,4 @@
-importScripts('../../public/consumer-queue.min.js');
+importScripts('../consumer-queue.min.js');
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
