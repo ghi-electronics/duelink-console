@@ -16,8 +16,11 @@ let writer = null;
 const queue = new ConsumerQueue();
 
 addEventListener('message', (e) => {
-    log(e.data.task);
+    log(`----- ${e.data.task} -----`);
     switch (e.data.task) {
+        case 'clearOutput':
+            output = '';
+            break;
         case 'connect':
             connect();
             break;
