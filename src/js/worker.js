@@ -185,6 +185,20 @@ async function getVersion() {
     return undefined;
 }
 
+function log() {
+    if (isLogging) {
+        console.log(...arguments);
+    }
+}
+
+function logError(message) {
+    postMessage({ event: 'logError', message });
+}
+
+function logEvent(message) {
+    postMessage({ event: 'logEvent', message });
+}
+
 async function readLoop() {
     let line, postOutput = true;
     readLoopActive = true;
@@ -194,7 +208,7 @@ async function readLoop() {
             const { value, done } = await reader.read();
 
             log('Reading...', done);
-            const finalValue = decoder.decode(value).replace('\r', '');
+            const finalValue = decoder.decode(value).replace(/\r/gm, '');
 
             if (isConnected) {
                 output += finalValue;
@@ -258,20 +272,6 @@ async function readLoop() {
             break;
         }
     }
-}
-
-function log() {
-    if (isLogging) {
-        console.log(...arguments);
-    }
-}
-
-function logError(message) {
-    postMessage({ event: 'logError', message });
-}
-
-function logEvent(message) {
-    postMessage({ event: 'logEvent', message });
 }
 
 function readUntil(terminator = null) {
@@ -387,7 +387,7 @@ async function turnOffEcho() {
     isEchoing = false;
 }
 
-async function write(command, terminator = null, lineEnd = '\n', skipReading = false) {
+async function write(command, terminator = null, lineEnd = '\n') {
     try {
         log('----- write -----');
         postMessage({ event: 'isTalking', value: true });
@@ -401,14 +401,12 @@ async function write(command, terminator = null, lineEnd = '\n', skipReading = f
             mode = command;
         }
 
-        if (!skipReading) {
-            log('write is sleeping');
-            await sleep(50);
-            log('write is reading until', terminator ? terminator : mode);
-            const result = await readUntil(terminator ? terminator : mode);
-            log('write result', result);
-            return result;
-        }
+        log('write is sleeping');
+        await sleep(50);
+        log('write is reading until', terminator ? terminator : mode);
+        const result = await readUntil(terminator ? terminator : mode);
+        log('write result', result);
+        return result;
     } finally {
         postMessage({ event: 'isTalking', value: false });
     }
