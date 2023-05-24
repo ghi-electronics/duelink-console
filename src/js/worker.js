@@ -1,10 +1,10 @@
-importScripts('../consumer-queue.min.js');
+importScripts('../../public/consumer-queue.min.js');
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 let isConnected = false;
 let isEchoing = true;
-let isLogging = false;
+let isLogging = true;
 let mode = '>';
 let output = '';
 let port = null;
@@ -108,8 +108,9 @@ async function list(callbackId) {
 }
 
 async function play() {
-    await write('run', null, '\n', true);
     postMessage({ event: 'playing' });
+    await write('run');
+    postMessage({ event: 'stopped' });
 }
 
 async function record(lines) {
@@ -117,6 +118,7 @@ async function record(lines) {
 
     await write('pgmstream()', '&');
 
+    lines = lines.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
     let lineNumber = 0;
     for (let line of lines) {
         if (line.trim().length === 0) {
@@ -247,7 +249,8 @@ async function readLoop() {
 
             await sleep(2);
         } catch (error) {
-            console.error(error);
+            postMessage({ event: 'logError', message: error?.message || 'There were problems reading.' });
+            break;
         }
     }
 }
@@ -316,7 +319,6 @@ async function stream(data) {
 
         const response = await queue.tryPop();
         if (response) {
-            // this.output.push(response);
             return response;
         }
 

@@ -359,12 +359,7 @@ function onLoad(lines) {
 async function sendRecordMode() {
     console.log('sendRecordMode');
     lastRecordModeCode.value = recordModeCode.value;
-    webSerial.record(
-        recordModeCode.value
-            .replace(/\r/gm, '')
-            .replace(/\t/gm, ' ')
-            .split(/\n/)
-    );
+    webSerial.record(recordModeCode.value);
 }
 
 async function sendDirectMode() {

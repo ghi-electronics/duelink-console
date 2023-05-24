@@ -108,6 +108,8 @@ export default function useWebSerial($refs) {
                 logEvent('Program started.');
                 break;
             case 'recording':
+                isPlaying.value = false;
+                isStopped.value = true;
                 if (data.percent === 0) {
                     $refs.progress.style.width = '0';
                     $refs.progress.classList.remove('opacity-0');
