@@ -31,8 +31,11 @@ const finalOutput = computed(() => {
     return props.output
         .split('\n')
         .map((line) => {
-            if (line.startsWith('$') || line.startsWith('>') || line.startsWith('&')) {
-                return line.substring(1);
+            if (line.startsWith('$') || line.startsWith('>')) {
+                line = line.substring(1);
+            }
+            if (line.startsWith('&')) {
+                line = line.substring(1);
             }
             return line;
         })
