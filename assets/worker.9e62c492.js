@@ -371,6 +371,7 @@ async function synchronize() {
         await sleep(100);
         const result = await getVersion();
         if (typeof result === 'string') {
+            log('version found', result);
             postMessage({ event: 'version', value: result });
             break;
         }
