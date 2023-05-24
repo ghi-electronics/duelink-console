@@ -4,7 +4,7 @@
             <div class="px-2 py-1 flex justify-between">
                 <div class="font-medium">Console</div>
                 <div>
-                    v1.0.0
+                    v{{ appVersion }}
                 </div>
             </div>
             <div class="px-2 py-1 flex justify-between">
@@ -48,6 +48,10 @@ const props = defineProps({
     availableFirmware: Object,
     version: String,
 });
+
+// Setup
+
+const appVersion = APP_VERSION;
 
 // Computed
 
