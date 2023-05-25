@@ -108,8 +108,8 @@
       "  x=x+a:y=y+b        # Move the ball",
       "  # Check if the ball hit one of the edges",
       "  # If it did, then reverse the direction and make a sound",
-      "  If x<r || x>=(128-r):a=-a:sound(500,16,100):End",
-      "  If y<r || y>=(64-r):b=-b:sound(2000,16,100):End",
+      "  If x<r || x>=(128-r):a=-a:freq('p',500,16,100):End",
+      "  If y<r || y>=(64-r):b=-b:freq('p',2000,16,100):End",
       "Goto Loop"
     ]
   },
