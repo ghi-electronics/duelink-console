@@ -136,6 +136,76 @@
     ]
   },
   {
+    "label": "DUE Cheat Sheet",
+    "code": [
+      "# AWrite(pin, dutyCycle)",
+      "#   pin: pin number - dutyCycle: 0 to 100",
+      "# ARead(pin)",
+      "#   pin: pin number - Returns: 0 to 100",
+      "# Beep(pin,frequency,duration)",
+      "#   pin: pin number or 'p' - frequency: Hz max 10KHz - duration: milliseconds",
+      "# BtnEnable(pin,enable)",
+      "#   pin: pin number, 'a' or 'b' - enable: 1 = enable 0 = disabled",
+      "# BtnUp(pin)",
+      "# BtnDown(pin)",
+      "# Cos(number) ",
+      "# DRead(pin, pull)",
+      "# DWrite(pin, state)",
+      "# Echo(enable)",
+      "# Fmt()",
+      "# Freq(frequency, duration, dutyCycle)",
+      "# GetCh()",
+      "# GetNum()",
+      "# Humidity(pin, type)",
+      "# I2cBytes(address, arrayWrite, writeCount, arrayRead, readCount)",
+      "# IrEnable(enable)",
+      "# IrRead()",
+      "# LcdConfig(output,address)",
+      "# LcdClear(color)",
+      "# LcdShow()",
+      "# LcdLine(color, x1,y1,x2,y2)",
+      "# LcdPixel(color, x, y)",
+      "# LcdCircle(color, x,y,radius)",
+      "# LcdRect(color, x, y, width, height)",
+      "# LcdFill(color, x, y, width, height)",
+      "# LcdText(\"text\", color, x, y)",
+      "# LcdTextS(\"text\", color, x, y, scaleWidth,scaleHeight)",
+      "# LcdImg(array,x, y, transform)",
+      "# LED(high, low, count)",
+      "# NeoClear()",
+      "# NeoSet(index, red, green, blue)",
+      "# NeoShow(pin, count)",
+      "# Print(\"text\" or variable)",
+      "# PrintLn(\"text\" or variable)",
+      "# ReadDistance(pin, state)",
+      "# Reset(loader)",
+      "# Rnd(max)",
+      "# ServoSet(pin, degree)",
+      "# Sin(number)",
+      "# SpiByte(byte) ",
+      "# SpiCfg(mode,frequency)",
+      "# Sqrt(number)",
+      "# Str(number)",
+      "# Tan(number) ",
+      "# Temp(pin, type)",
+      "# TickMs()",
+      "# TickUs()",
+      "# TouchRead(pin) ",
+      "# Trunc(number)",
+      "# Version",
+      "# Wait(duration)"
+
+
+
+    ]
+  },
+
+
+
+
+
+
+  {
     "label": "More Samples",
     "url": "https://duelink.com/software/due-script/samples/samples.html"
   }
