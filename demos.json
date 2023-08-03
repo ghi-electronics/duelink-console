@@ -2,10 +2,13 @@
   {
     "label": "Hello World",
     "code": [
-      "# Log to output",
-      "Log(\"Hello World\")",
-      "# Print to screen, if available",
-      "Print(\"Hello World!\")",
+      "# Print to output",
+      "Print(\"Hello World\")",
+      "# Print to display, if available",
+      "# Will cause an error when using BrainPad Edge (SC007)",
+      "LcdClear(0)",
+      "LcdText(\"Hello World!\", 1, 30, 30)",
+      "LcdShow()"
     ]
   },
   {
@@ -42,18 +45,16 @@
       "  b=BtnDown('B')",
       "  If a=1",
       "    PrintLn(\"Button A\")",
-      "    LogLn(\"Button A\")",
       "  End",
       "  If b=1",
       "    PrintLn(\"Button B\")",
-      "    LogLn(\"Button B\")",
       "  End",
       "  Wait(200)",
       "Goto Loop"
     ]
   },
   {
-    "label": "Display Graphics",
+    "label": "Image Arrays",
     "code": [
       "Dim i[2+(8*8)] = [8,8,",
       "0, 0, 0, 1, 1, 0, 0, 0,",
@@ -65,14 +66,7 @@
       "0, 1, 0, 1, 1, 0, 1, 0,",
       "1, 0, 1, 0, 0, 1, 0, 1]",
       "LcdClear(0)",
-      "LcdLine(1, 0, 10, 125, 10)",
-      "LcdRect(1, 0, 0, 125, 60)",
-      "LcdPixel(1, 64, 5)",
-      "LcdCircle(1, 20, 30, 14)",
-      "LcdFill(1, 95, 20, 20, 20)",
-      "LcdTextS(\"DUE\",1,48, 23, 2, 2)",
-      "LcdText(\"is Awesome\", 1, 35,45)",
-      "LcdImgS(a, 13, 22, 2, 2, 0)",
+      "LcdImgS(i,50,30,3,3,0)",
       "LcdShow()"
     ]
   },
@@ -86,7 +80,7 @@
       "# See https://duelink.com/software/due-script/corelib/touch.html",
       "@Loop",
       "  a=TouchRead(0)",
-      "  If a>0:PrintLn(\"pin 0\"):LogLn(\"pin 0\"):End",
+      "  If a>0:PrintLn(\"pin 0\"):End",
       "  Wait(100)",
       "Goto Loop"
     ]
@@ -96,7 +90,6 @@
     "code": [
       "For i=0 to 10",
       "  PrintLn(i)",
-      "  LogLn(i)",
       "Next"
     ]
   },
@@ -105,10 +98,8 @@
     "code": [
       "If x=1",
       "  PrintLn(\"one\")",
-      "  LogLn(\"one\")",
       "Else",
       "  PrintLn(\"not one\")",
-      "  LogLn(\"not one\")",
       "End"
     ]
   },
@@ -117,7 +108,6 @@
     "code": [
       "@Go",
       "  Print(\"I am going!\")",
-      "  Log(\"I am going!\")",
       "Return",
       "# You can now execute Go() from the code",
       "# And also can execute it from immediate mode",
@@ -213,10 +203,6 @@
       "#   same as LcdText() adds scale",
       "# LcdShow()",
       "#   sends the display buffer to the LCD",
-      "# Log(\"text\" or variable)",
-      "#   Shows the value of it's argument in the Output window",
-      "# LogLn(\"text\" or variable)",
-      "#   Shows the value of it's argument with line breaks in the Output window",
       "# LED(high, low, count)",
       "#   high: duration on in milliseconds, low: duration off in milliseconds, count: number of times to blink",
       "# NeoClear()",
@@ -226,9 +212,9 @@
       "# NeoShow(pin, count)",
       "#   pin: pin number - count: number of LEDs to update",
       "# Print(\"text\" or variable)",
-      "#   Displays the value of it's argument",
+      "#   returns the value of it's argument",
       "# PrintLn(\"text\" or variable)",
-      "#   Displays the value of it's argument with line breaks",
+      "#   Returns the value of it's argument with line breaks",
       "# ReadDistance(trigger, echo)",
       "#   trigger: pin number of trigger - echo: pin number of echo, -1 for single pin - Returns: distance in centimeters",
       "# Reset(loader)",
