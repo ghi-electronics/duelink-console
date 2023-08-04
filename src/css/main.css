@@ -171,3 +171,9 @@ select {
 .firmware-progress-box {
     @apply h-[68px] flex items-center;
 }
+
+kbd {
+    @apply font-mono font-bold px-2 py-0.5 rounded;
+    @apply bg-slate-200 text-slate-600;
+    @apply dark:bg-zinc-700 dark:text-zinc-300;
+}

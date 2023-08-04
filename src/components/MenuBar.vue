@@ -20,6 +20,9 @@
                 <i :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'" class="fas fa-fw pointer-events-none"></i>
             </a>
         </div>
+        <div class="flex-1 flex justify-end">
+            <div><kbd>CTRL</kbd> + <kbd>+</kbd> to zoom in. <kbd>CTRL</kbd> + <kbd>-</kbd> to zoom out.</div>
+        </div>
     </div>
 </template>
 
