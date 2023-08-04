@@ -297,6 +297,9 @@ function readUntil(terminator = null) {
                     log('Error:', line);
                     break;
                 }
+            } else {
+                // The waiter was canceled so we break
+                break;
             }
         } while (line !== terminator);
         log('read until found', result);
