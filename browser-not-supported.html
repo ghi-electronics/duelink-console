@@ -17,10 +17,14 @@
         window.onload = function () {
             if (window.document.documentMode) {
                 document.getElementById('p').innerHTML =
-                    'Your browser version is not supported. Please upgrade to a modern browser such as Google Chrome or Microsoft Edge.';
+                    'Your browser version is not supported. Please upgrade to a modern browser such as ' +
+                    '<a href="https://www.google.com/chrome/dr/download/" target="_blank">Google Chrome</a> or ' +
+                    '<a href="https://www.microsoft.com/en-us/edge/download" target="_blank">Microsoft Edge</a>.';
             } else if (!navigator.serial) {
                 document.getElementById('p').innerHTML =
-                    'Your browser does not support serial communication.<br>Please switch to Google Chrome or Microsoft Edge.';
+                    'Your browser does not support serial communication.<br>Please switch to ' +
+                    '<a href="https://www.google.com/chrome/dr/download/" target="_blank">Google Chrome</a> or ' +
+                    '<a href="https://www.microsoft.com/en-us/edge/download" target="_blank">Microsoft Edge</a>.';
             }
         }
     </script>
