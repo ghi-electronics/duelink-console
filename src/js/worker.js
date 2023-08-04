@@ -14,9 +14,10 @@ let reader = null;
 let str = '';
 let writer = null;
 const queue = new ConsumerQueue();
+const ignoreChars = ['>', '$', '&'];
 
 addEventListener('message', (e) => {
-    log(`----- ${e.data.task} -----`);
+    log(`---- on "message", do task: ${e.data.task} ----`);
     switch (e.data.task) {
         case 'clearOutput':
             output = '';
@@ -132,6 +133,7 @@ async function record(lines) {
         if (line.trim().length === 0) {
             line = ' ';
         }
+        console.log('line', `"${line}"`);
         await stream(line + '\n');
         postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
     }
@@ -210,10 +212,10 @@ async function readLoop() {
         try {
             const { value, done } = await reader.read();
 
-            log('Reading...', done);
+            log('Reading... Done?', done);
             const finalValue = decoder.decode(value).replace(/\r/gm, '');
 
-            if (isConnected) {
+            if (isConnected && !ignoreChars.includes(finalValue.substring(-1, 1))) {
                 output += finalValue;
                 if (output.length > 2000) {
                     if (finalValue.length < output.length) {
