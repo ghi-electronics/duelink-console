@@ -11,6 +11,7 @@ let port = null;
 let readLoopActive = true;
 let readLoopPromise = null;
 let reader = null;
+let stopped = true;
 let str = '';
 let writer = null;
 const queue = new ConsumerQueue();
@@ -117,9 +118,13 @@ async function list(callbackId) {
 }
 
 async function play() {
+    stopped = false;
     postMessage({ event: 'playing' });
     await write('run');
-    postMessage({ event: 'stopped' });
+    if (!stopped) {
+        stopped = true;
+        postMessage({ event: 'stopped' });
+    }
 }
 
 async function record(lines) {
@@ -144,14 +149,16 @@ async function record(lines) {
     await readUntil();
 
     postMessage({ event: 'recorded' });
-    logEvent('Recorded ' + lines.length + ' line(s) of code...');
+    logEvent('Recorded ' + lines.length + ' line(s) of code.');
 }
 
 async function stop() {
+    stopped = true;
     // Cancel any queue promises.
     queue.cancelWait(new Error('Stop'));
     // Write the escape character.
     writer.write(encoder.encode('\x1B'));
+    // No longer playing.
     // Log it.
     postMessage({ event: 'stopped' });
 }
