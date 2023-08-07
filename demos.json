@@ -42,9 +42,11 @@
       "  b=BtnDown('B')",
       "  If a=1",
       "    PrintLn(\"Button A\")",
+      "    LogLn(\"Button A\")",
       "  End",
       "  If b=1",
       "    PrintLn(\"Button B\")",
+      "    LogLn(\"Button B\")",
       "  End",
       "  Wait(200)",
       "Goto Loop"
