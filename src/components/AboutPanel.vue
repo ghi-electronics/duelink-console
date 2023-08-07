@@ -83,17 +83,24 @@ const device = computed(() => {
 
 const deviceFirmwareVersion = computed(() => {
     if (firmware.value && deviceVersion.value) {
-        return `${firmware.value.name} ${deviceVersion.value}`;
+        return `${deviceVersion.value}`;
+        // return `${firmware.value.name} ${deviceVersion.value}`;
     }
     return null;
 });
 
 const latestFirmwareVersion = computed(() => {
-    if (firmware.value) {
-        const maxId = Math.max(...firmware.value.versions.map((version) => version.id));
-        const version = firmware.value.versions.find((version) => version.id === maxId);
-        return `${firmware.value.name} ${version.name}`;
+    if (Object.values(props.availableFirmware).length) {
+        const key = Object.keys(props.availableFirmware)[0];
+        const maxId = Math.max(...props.availableFirmware[key].versions.map((version) => version.id));
+        const version = props.availableFirmware[key].versions.find((version) => version.id === maxId);
+        return `${version.name}`;
     }
+    // if (firmware.value) {
+    //     const maxId = Math.max(...firmware.value.versions.map((version) => version.id));
+    //     const version = firmware.value.versions.find((version) => version.id === maxId);
+    //     return `${firmware.value.name} ${version.name}`;
+    // }
     return null;
 });
 </script>

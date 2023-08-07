@@ -240,6 +240,9 @@ export default class WebSerial {
                         console.log('Error:', line);
                         break;
                     }
+                } else {
+                    // The waiter was canceled so we break
+                    break;
                 }
             } while (line !== terminator);
             console.log('read until found', result);
