@@ -6,11 +6,7 @@
       "Print(\"Hello World\")",
       "# Print to output",
       "Log(\"Hello World\")",
-      "# Print to display, if available",
-      "# Will cause an error when using BrainPad Edge (SC007)",
-      "LcdClear(0)",
-      "LcdText(\"Hello World!\", 1, 30, 30)",
-      "LcdShow()"
+      "# Print to display, if available"
     ]
   },
   {
