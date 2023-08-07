@@ -2,8 +2,10 @@
   {
     "label": "Hello World",
     "code": [
-      "# Print to output",
+      "# Print to display",
       "Print(\"Hello World\")",
+      "# Print to output",
+      "Log(\"Hello World\")",
       "# Print to display, if available",
       "# Will cause an error when using BrainPad Edge (SC007)",
       "LcdClear(0)",
