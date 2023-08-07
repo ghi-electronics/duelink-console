@@ -2,11 +2,10 @@
   {
     "label": "Hello World",
     "code": [
-      "# Print to display",
+      "# Print to display, if available",
       "Print(\"Hello World\")",
-      "# Print to output",
-      "Log(\"Hello World\")",
-      "# Print to display, if available"
+      "# Print to output window",
+      "Log(\"Hello World\")"
     ]
   },
   {
