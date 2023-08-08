@@ -5,14 +5,13 @@ const worker = new Worker(new URL('worker.js', import.meta.url));
 
 export default function useWebSerial($refs) {
     // Data
-
+    const history = ref([]);
     const isBusy = ref(false);
     const isConnected = ref(false);
     const isPlaying = ref(false);
     const isStopped = ref(true);
     const isTalking = ref(false);
-    const logs = ref([]);
-    const output = ref('');
+    const log = ref('');
     const version = ref(null);
 
     // Setup
@@ -26,7 +25,7 @@ export default function useWebSerial($refs) {
         worker.terminate();
     });
 
-    watch(() => output.value, (newValue) => {
+    watch(() => log.value, (newValue) => {
         if (newValue === '') {
             worker.postMessage({ task: 'clearOutput' });
         }
@@ -75,11 +74,11 @@ export default function useWebSerial($refs) {
     // Methods - Utilities
 
     function logError(message) {
-        logs.value.push({ error: message });
+        history.value.push({ date: new Date(), error: message });
     }
 
     function logEvent(message) {
-        logs.value.push({ event: message });
+        history.value.push({ date: new Date(), event: message });
     }
 
     function onWorkerMessage(data) {
@@ -106,7 +105,7 @@ export default function useWebSerial($refs) {
                 logEvent(data.message);
                 break;
             case 'output':
-                output.value = data.value;
+                log.value = data.value;
                 break;
             case 'playing':
                 isStopped.value = false;
@@ -156,13 +155,13 @@ export default function useWebSerial($refs) {
     // Export
     return {
         // Data
+        history,
         isBusy,
         isConnected,
         isPlaying,
         isStopped,
         isTalking,
-        logs,
-        output,
+        log,
         version,
         // Methods
         connect,

@@ -78,8 +78,8 @@
                 </div>
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
-                <OutputPanel v-model:output="webSerial.output.value" />
-                <LogPanel v-model:logs="webSerial.logs.value" closed />
+                <LogPanel v-model:log="webSerial.log.value" />
+                <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version.value" />
             </div>
         </div>
@@ -153,8 +153,8 @@ import Footer from './components/Footer.vue';
 import Button from './components/Button.vue';
 import Modal from './components/Modal.vue';
 import FirmwareModal from './components/FirmwareModal.vue';
-import OutputPanel from './components/OutputPanel.vue';
 import LogPanel from './components/LogPanel.vue';
+import HistoryPanel from './components/HistoryPanel.vue';
 import AboutPanel from './components/AboutPanel.vue';
 
 // Refs
