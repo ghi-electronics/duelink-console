@@ -98,8 +98,10 @@
     "code": [
       "If x=1",
       "  PrintLn(\"one\")",
+      "  LogLn(\"one\")",
       "Else",
       "  PrintLn(\"not one\")",
+      "  LogLn(\"not one\")",
       "End"
     ]
   },
