@@ -2,13 +2,10 @@
   {
     "label": "Hello World",
     "code": [
-      "# Print to output",
-      "Print(\"Hello World\")",
       "# Print to display, if available",
-      "# Will cause an error when using BrainPad Edge (SC007)",
-      "LcdClear(0)",
-      "LcdText(\"Hello World!\", 1, 30, 30)",
-      "LcdShow()"
+      "Print(\"Hello World\")",
+      "# Print to output window",
+      "Log(\"Hello World\")"
     ]
   },
   {
@@ -45,9 +42,11 @@
       "  b=BtnDown('B')",
       "  If a=1",
       "    PrintLn(\"Button A\")",
+      "    LogLn(\"Button A\")",
       "  End",
       "  If b=1",
       "    PrintLn(\"Button B\")",
+      "    LogLn(\"Button B\")",
       "  End",
       "  Wait(200)",
       "Goto Loop"
@@ -90,6 +89,7 @@
     "code": [
       "For i=0 to 10",
       "  PrintLn(i)",
+      "  LogLn(i)",
       "Next"
     ]
   },
@@ -98,8 +98,10 @@
     "code": [
       "If x=1",
       "  PrintLn(\"one\")",
+      "  LogLn(\"one\")",
       "Else",
       "  PrintLn(\"not one\")",
+      "  LogLn(\"not one\")",
       "End"
     ]
   },
@@ -108,6 +110,7 @@
     "code": [
       "@Go",
       "  Print(\"I am going!\")",
+      "  Log(\"I am going!\")",
       "Return",
       "# You can now execute Go() from the code",
       "# And also can execute it from immediate mode",
@@ -203,6 +206,10 @@
       "#   same as LcdText() adds scale",
       "# LcdShow()",
       "#   sends the display buffer to the LCD",
+      "# Log()",
+      "#   sends content to the output on the same line",
+      "# LogLn()",
+      "#   sends content to the output on a new line",
       "# LED(high, low, count)",
       "#   high: duration on in milliseconds, low: duration off in milliseconds, count: number of times to blink",
       "# NeoClear()",

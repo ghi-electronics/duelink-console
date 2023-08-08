@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\public"
   ],
-  "SelectedNode": "\\D:\\Repos\\due-console",
+  "SelectedNode": "\\package-lock.json",
   "PreviewInSolutionExplorer": false
 }
