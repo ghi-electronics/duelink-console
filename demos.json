@@ -110,6 +110,7 @@
     "code": [
       "@Go",
       "  Print(\"I am going!\")",
+      "  Log(\"I am going!\")",
       "Return",
       "# You can now execute Go() from the code",
       "# And also can execute it from immediate mode",
