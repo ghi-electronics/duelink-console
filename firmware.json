@@ -2,7 +2,7 @@
  "Due_SC13": {
     "name": "SC13",
     "versions": [
-      { "id": 1, "name": "v1.0.3", "url": "firmware/due_sc13_v103.ghi" }
+      { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc13_v110.ghi" }
     ],
     "boards": [
       { "name": "FEZ Flea", "id": "F" },
@@ -13,10 +13,11 @@
   "Due_SC007": {
     "name": "SC007",
     "versions": [
-      { "id": 1, "name": "v1.0.3", "url": "firmware/due_sc007_v103.ghi" }
+      { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc007_v110.ghi" }
     ],
     "boards": [
-      { "name": "BrainPad Edge", "id": "E" }
+      { "name": "BrainPad Edge", "id": "E" },
+	  { "name": "BrainPad Tick", "id": "T" }
     ]
   }
 }
