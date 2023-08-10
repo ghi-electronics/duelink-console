@@ -20,7 +20,7 @@
             :can-play="canPlay"
             :can-record="canRecord"
             :can-stop="canStop"
-            :can-text-size-plus="textSize < 20"
+            :can-text-size-plus="textSize < 40"
             :can-text-size-minus="textSize > 12"
             :is-busy="webSerial.isBusy.value"
             :is-connected="webSerial.isConnected.value"
@@ -412,15 +412,15 @@ function updateTippyTheme() {
 }
 
 function textSizePlus() {
-    textSize.value++;
-    if (textSize.value > 20) {
-        textSize.value = 20;
+    textSize.value += 4;
+    if (textSize.value > 40) {
+        textSize.value = 40;
     }
     editor.setOptions({ fontSize: textSize.value + 'px' });
 }
 
 function textSizeMinus() {
-    textSize.value--;
+    textSize.value -= 4;
     if (textSize.value < 12) {
         textSize.value = 12;
     }
