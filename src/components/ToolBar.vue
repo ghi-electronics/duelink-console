@@ -1,5 +1,5 @@
 <template>
-    <div id="tool-bar" class="p-2 flex items-center space-x-2">
+    <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
         <Button
             id="plugBtn"
             :class="['tool', isConnected ? 'connected' : '']"
@@ -56,6 +56,22 @@
             <i class="fas fa-fw fa-upload"></i>
             <input id="file" type="file" class="hidden" @change="onLoad" />
         </label>
+        <Button
+            :disabled="!canTextSizePlus"
+            class="tool"
+            data-tippy-content="Increase text size"
+            @click.native="$emit('text-size-plus')"
+        >
+            <i class="fas fa-fw fa-magnifying-glass-plus"></i>
+        </Button>
+        <Button
+            :disabled="!canTextSizeMinus"
+            class="tool"
+            data-tippy-content="Decrease text size"
+            @click.native="$emit('text-size-minus')"
+        >
+            <i class="fas fa-fw fa-magnifying-glass-minus"></i>
+        </Button>
     </div>
 </template>
 
@@ -86,6 +102,8 @@ const props = defineProps({
     canPlay: Boolean,
     canRecord: Boolean,
     canStop: Boolean,
+    canTextSizePlus: Boolean,
+    canTextSizeMinus: Boolean,
     isBusy: Boolean,
     isConnected: Boolean,
     isTalking: Boolean,

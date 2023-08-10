@@ -20,6 +20,8 @@
             :can-play="canPlay"
             :can-record="canRecord"
             :can-stop="canStop"
+            :can-text-size-plus="textSize < 20"
+            :can-text-size-minus="textSize > 12"
             :is-busy="webSerial.isBusy.value"
             :is-connected="webSerial.isConnected.value"
             :is-talking="webSerial.isTalking.value"
@@ -31,6 +33,8 @@
             @record="sendRecordMode"
             @list="sendList"
             @load="onLoad"
+            @text-size-plus="textSizePlus"
+            @text-size-minus="textSizeMinus"
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -174,6 +178,7 @@ const editorColumn = ref(1);
 const filename = ref('');
 const language = ref('python');
 const theme = ref('light');
+const textSize = ref(16);
 
 const tippyConfig = {
     animation: 'fade',
@@ -338,7 +343,7 @@ async function loadFirmware() {
 function onEditorInit(instance) {
     instance.setShowPrintMargin(false);
     instance.setOptions({
-        fontSize: '16px'
+        fontSize: textSize.value + 'px'
     });
     instance.session.selection.on('changeCursor', () => {
         const pos = instance.getCursorPosition();
@@ -404,5 +409,21 @@ function updateTippy(target, show = false) {
 
 function updateTippyTheme() {
     tippyInstances.forEach((instance) => instance.setProps({ theme: theme.value }));
+}
+
+function textSizePlus() {
+    textSize.value++;
+    if (textSize.value > 20) {
+        textSize.value = 20;
+    }
+    editor.setOptions({ fontSize: textSize.value + 'px' });
+}
+
+function textSizeMinus() {
+    textSize.value--;
+    if (textSize.value < 12) {
+        textSize.value = 12;
+    }
+    editor.setOptions({ fontSize: textSize.value + 'px' });
 }
 </script>
