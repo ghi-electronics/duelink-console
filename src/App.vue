@@ -172,7 +172,7 @@ const lastRecordModeCode = ref('');
 const editorLine = ref(1);
 const editorColumn = ref(1);
 const filename = ref('');
-const language = ref('javascript');
+const language = ref('python');
 const theme = ref('light');
 
 const tippyConfig = {
