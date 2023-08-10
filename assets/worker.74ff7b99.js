@@ -92,12 +92,17 @@ async function connect() {
 async function disconnect() {
     try {
         await stopReadLoop();
-        await writer.releaseLock();
-        await reader.releaseLock();
+        if (writer) {
+            await writer.releaseLock();
+        }
+        if (reader) {
+            await reader.releaseLock();
+        }
         await port.close();
         logEvent('Port disconnected.');
     } catch (error) {
-        logError(error?.message || 'There were problems disconnecting.');
+        logEvent('There was an error while disconnecting.');
+        logError(error?.message || 'Unknown error.');
     } finally {
         isConnected = false;
         postMessage({ event: 'disconnected' });
