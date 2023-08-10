@@ -1,5 +1,5 @@
 {
- "Due_SC13": {
+ "sc13xxx": {
     "name": "SC13",
     "versions": [
       { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc13_v110.ghi" }
@@ -10,7 +10,7 @@
       { "name": "BrainPad Pulse", "id": "P" }
     ]
   },
-  "Due_SC007": {
+  "sc007": {
     "name": "SC007",
     "versions": [
       { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc007_v110.ghi" }
