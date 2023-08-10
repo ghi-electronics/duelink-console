@@ -9,14 +9,14 @@
             <li>
                 On your board, hold down the <kbd>A</kbd> button while pressing and releasing the <kbd>RESET</kbd> button once.
                 <span class="font-semibold">Keep holding the <kbd>A</kbd> button down,</span> wait for a second, and then release it.
-                <ul class="mt-2 ul-reset text-[#f08000]">
+                <ul class="mt-2 ul-reset text-amber-300">
                     <li>This will put restart your board in bootloader mode.</li>
                 </ul>
             </li>
             <li>Click the connect button below and select the <em>GHI Bootloader Interface</em>.</li>
             <li>
                 Select the desired firmware and click <em>Load</em>.
-                <ul class="mt-2 ul-reset text-[#f08000]">
+                <ul class="mt-2 ul-reset text-amber-300">
                     <li>This will completely erase your board.</li>
                 </ul>
             </li>
@@ -56,7 +56,7 @@
                     <label for="firmware">Firmware</label>
                     <select v-model="firmware" id="firmware" class="mt-2">
                         <option value="" disabled>Select</option>
-                        <option v-for="(option, key) in availableFirmware" :key="key" :value="key">
+                        <option v-for="(option, key) in availableFirmware" :key="key" :selected="key === firmware" :value="key">
                             {{ option.name }} ({{ option.boards.map((board) => board.name).join(', ') }})
                         </option>
                     </select>
@@ -64,11 +64,7 @@
                 <div class="col-span-2">
                     <label for="version">Version</label>
                     <select v-model="version" :disabled="!firmware" id="version" class="mt-2">
-                        <option
-                            v-for="(option, key) in (availableFirmware?.[firmware]?.versions.sort((a, b) => b.id - a.id) || [])"
-                            :key="key"
-                            :value="key"
-                        >
+                        <option v-for="(option, key) in availableVersions" :key="key" :selected="key === version" :value="key">
                             {{ option.name }}
                         </option>
                     </select>
@@ -141,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import GHILoader from '../js/GHILoader';
 
 // Components
@@ -175,6 +171,10 @@ const operation = ref(null);
 const percent = ref(0);
 
 let port = undefined;
+
+// Computed
+
+const availableVersions = computed(() => props.availableFirmware?.[firmware.value]?.versions.sort((a, b) => b.id - a.id) || []);
 
 // Watch
 
@@ -221,6 +221,13 @@ async function connect() {
         isConnected.value = true;
     } catch (error) {
         catchError(error);
+    }
+    const response = await ghiLoader.sendAndExpect('n', 'OK.');
+    const keys = Object.keys(props.availableFirmware);
+    const index = keys.findIndex((key) => key === response[0].toLowerCase());
+    if (index > -1) {
+        firmware.value = keys[index];
+        version.value = '0';
     }
 }
 
