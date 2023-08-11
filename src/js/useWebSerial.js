@@ -34,6 +34,10 @@ export default function useWebSerial($refs) {
     // Methods - Toolbar
 
     async function connect() {
+        if (window.document.documentMode || !navigator.serial) {
+            window.location = '/browser-not-supported.html';
+        }
+
         isBusy.value = true;
 
         try {

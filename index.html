@@ -17,9 +17,6 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
         }
-        if (window.document.documentMode || !navigator.serial) {
-            window.location = '/browser-not-supported.html';
-        }
     </script>
 </head>
 <body>
