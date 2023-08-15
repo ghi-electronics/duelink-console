@@ -79,7 +79,7 @@
       "# See https://duelink.com/software/due-script/corelib/touch.html",
       "@Loop",
       "  a=TouchRead(0)",
-      "  If a>0:PrintLn(\"pin 0\"):End",
+      "  If a>0:PrintLn(\"pin 0\"):LogLn(\"pin 0\"):End",
       "  Wait(100)",
       "Goto Loop"
     ]
