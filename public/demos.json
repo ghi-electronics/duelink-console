@@ -70,6 +70,30 @@
     ]
   },
   {
+    "label": "Display Graphics",
+    "code": [
+      "Dim i[2+(8*8)] = [8,8,",
+      "0, 0, 0, 1, 1, 0, 0, 0,",
+      "0, 0, 1, 1, 1, 1, 0, 0,",
+      "0, 1, 1, 1, 1, 1, 1, 0,",
+      "1, 1, 0, 1, 1, 0, 1, 1,",
+      "1, 1, 1, 1, 1, 1, 1, 1,",
+      "0, 0, 1, 0, 0, 1, 0, 0,",
+      "0, 1, 0, 1, 1, 0, 1, 0,",
+      "1, 0, 1, 0, 0, 1, 0, 1]",
+      "LcdClear(0)",
+      "LcdLine(1, 0, 10, 125, 10)",
+      "LcdRect(1, 0, 0, 125, 60)",
+      "LcdPixel(1, 64, 5)",
+      "LcdCircle(1, 20, 30, 14)",
+      "LcdFill(1, 95, 20, 20, 20)",
+      "LcdTextS(\"DUE\",1,48, 23, 2, 2)",
+      "LcdText(\"is Awesome\", 1, 35,45)",
+      "LcdImgS(a, 13, 22, 2, 2, 0)",
+      "LcdShow()"
+    ]
+  },
+  {
     "label": "Cap Touch Sense",
     "code": [
       "# This sample reads pin 0 as a capacitive touch.",
@@ -117,6 +141,7 @@
       "# Enter Go() in the immediate window"
     ]
   },
+
   {
     "label": "BrainPad Pulse",
     "code": [
