@@ -89,7 +89,7 @@
       "LcdFill(1, 95, 20, 20, 20)",
       "LcdTextS(\"DUE\",1,48, 23, 2, 2)",
       "LcdText(\"is Awesome\", 1, 35,45)",
-      "LcdImgS(a, 13, 22, 2, 2, 0)",
+      "LcdImgS(i, 13, 22, 2, 2, 0)",
       "LcdShow()"
     ]
   },
