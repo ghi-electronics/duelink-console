@@ -2,7 +2,9 @@
  "sc13xxx": {
     "name": "SC13",
     "versions": [      
-	  { "id": 1, "name": "v1.1.1", "url": "firmware/due_sc13_v111.ghi" }
+	  { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc13_v110.ghi" }
+	  { "id": 2, "name": "v1.1.1", "url": "firmware/due_sc13_v111.ghi" }
+	  { "id": 3, "name": "v1.1.2", "url": "firmware/due_sc13_v112.ghi" }
     ],
     "boards": [
       { "name": "FEZ Flea", "id": "F" },
