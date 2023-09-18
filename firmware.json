@@ -15,7 +15,8 @@
   "sc007": {
     "name": "SC007",
     "versions": [
-      { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc007_v110.ghi" }
+      { "id": 1, "name": "v1.1.0", "url": "firmware/due_sc007_v110.ghi" },
+	  { "id": 2, "name": "v1.1.2", "url": "firmware/due_sc007_v112.ghi" }
     ],
     "boards": [
       { "name": "BrainPad Edge", "id": "E" },
