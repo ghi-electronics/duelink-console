@@ -109,6 +109,22 @@
     ]
   },
   {
+    "label": "Touch Screen",
+    "code": [
+      "# This sample reads the x & y position on a touch screen.",
+      "# Touch screen with finger to read",
+      "# BrainPad already has the required R/C",
+      "# Other pins need R/C to work",
+      "@Loop",
+      "  x = TouchRead('x')",
+      "  y = TouchRead('y')",
+      "  LogLn(x)",
+      "  LogLn(y)",
+      "  Wait(100)",
+      "Goto Loop"
+    ]
+  },
+  {
     "label": "For Loop",
     "code": [
       "For i=0 to 10",
@@ -276,7 +292,9 @@
       "# TickUs()",
       "#   Read system ticks in microseconds",
       "# TouchRead(pin) ",
-      "#   pin: pin number - Returns: 0 = not touched or 1 = touched",
+      "#   pin: pin number, 'x' or 'y'",
+      "#   Pin Returns: 0 = pin not touched or pin 1 = touched ",
+      "#   Touch Screen Returns: -1 = not touched or x and y position",
       "# Trunc(number)",
       "#   Returns the truncated value of it's argument",
       "# Version",
