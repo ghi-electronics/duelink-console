@@ -113,8 +113,6 @@
     "code": [
       "# This sample reads the x & y position on a touch screen.",
       "# Touch screen with finger to read",
-      "# BrainPad already has the required R/C",
-      "# Other pins need R/C to work",
       "@Loop",
       "  x = TouchRead('x')",
       "  y = TouchRead('y')",
