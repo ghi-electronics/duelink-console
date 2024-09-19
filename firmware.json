@@ -1,4 +1,13 @@
 {
+ "duelink": {
+    "name": "DUElink",
+    "versions": [      
+	  { "id": 1, "name": "v1.1.5", "url": "firmware/duelink_v115.ghi" }
+    ],
+    "boards": [
+      { "name": "DUELink Spider", "id": "D" }
+    ]
+  },
  "sc13xxx": {
     "name": "SC13",
     "versions": [      
