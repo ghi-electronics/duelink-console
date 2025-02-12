@@ -135,7 +135,7 @@ async function play() {
 async function record(lines) {
     postMessage({ event: 'recording', percent: 0 });
 
-    await write('pgmstream()', '&');
+    await write('pgmbrst()', '&');
 
     lines = lines.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
     let lineNumber = 0;
