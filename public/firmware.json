@@ -1,11 +1,25 @@
 {
- "sc13xxx": {
+  "latest": {
+    "name": "latest",
+    "versions": {
+      "1": { "name": "v00.12", "url": "/firmware/duelink_fw_v12.bin" }
+    },
+    "boards": [{ "name": "DUELink", "id": "e" }]
+  },
+  "DUELink": {
     "name": "DUELink",
-    "versions": [      
-	  { "id": 1, "name": "v1.1.6", "url": "firmware/due_sc13_v116.ghi" }
-    ],
+    "versions": {
+      "1": { "name": "v00.11", "url": "/firmware/duelink_fw_v011.bin" }
+    },
+    "boards": [{ "name": "DUELink", "id": "E" }]
+  },
+  "sc13xxx": {
+    "name": "SC13",
+    "versions": {
+      "1": { "name": "v1.1.6", "url": "/firmware/due_sc13_v116.ghi" }
+    },
     "boards": [
-	  { "name": "DUELink Spider", "id": "F" },
+      { "name": "DUELink Spider", "id": "F" },
       { "name": "FEZ Flea", "id": "F" },
       { "name": "FEZ Pico", "id": "I" },
       { "name": "BrainPad Pulse", "id": "P" }
@@ -13,12 +27,12 @@
   },
   "sc007": {
     "name": "SC007",
-    "versions": [
-	  { "id": 1, "name": "v1.1.4", "url": "firmware/due_sc007_v114.ghi" }
-    ],
+    "versions": {
+      "1": { "name": "v1.1.4", "url": "/firmware/due_sc007_v114.ghi" }
+    },
     "boards": [
       { "name": "BrainPad Edge", "id": "E" },
-	  { "name": "BrainPad Tick", "id": "T" }
+      { "name": "BrainPad Tick", "id": "T" }
     ]
   }
 }
