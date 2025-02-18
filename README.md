@@ -19,13 +19,13 @@ Before starting, you need to install [Node.js](https://nodejs.org/en/) on your c
 
 1. Place new firmware files within the `public/firmware` folder.
 2. Firmware is now held in the `public/firmware.json` file. Simply add a new object, updating its properties (`name`, `versions`, `boards`).
-   - `versions` is an array of objects. Each object has an `id`, `name` and `url` property.
-      - `id` is used to sort descending. The highest `id` will be considered the latest firmware.
-      - `name` is self-explanatory.
-      - `url` is the path to the file.
+   - `versions` is an object whose keys are the ids of different firmware versions. Each key has an object with an `id`, `name` and `url` property.
+     - `id` is used to sort descending. The highest `id` will be considered the latest firmware.
+     - `name` is self-explanatory.
+     - `url` is the path to the file.
    - `boards` is an array of objects. Each object has a `name` and `id` property.
-      - `name` is self-explanatory.
-      - `id` is the character assigned to each board. E.g. `P` stands for BrainPad Pulse.
+     - `name` is self-explanatory.
+     - `id` is the character assigned to each board. E.g. `P` stands for BrainPad Pulse.
 3. Commit changes and push to Github.
 4. Github Actions will compile the JavaScript, build and deploy the page.
 5. Done.
@@ -37,4 +37,3 @@ Before starting, you need to install [Node.js](https://nodejs.org/en/) on your c
 3. Commit changes and push to Github.
 4. Github Actions will compile the JavaScript, build and deploy the page.
 5. Done.
-
