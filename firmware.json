@@ -1,6 +1,15 @@
 {
- "sc13xxx": {
+  "DUELink": {
     "name": "DUELink",
+    "versions": [      
+	  { "id": 1, "name": "v.0.1.4", "url": "firmware/duelink_fw_v014.ghi" }
+    ],
+    "boards": [
+	  { "name": "DUELink", "id": "D" }     
+    ]
+  },
+ "sc13xxx": {
+    "name": "sc13xxx",
     "versions": [      
 	  { "id": 1, "name": "v1.1.6", "url": "firmware/due_sc13_v116.ghi" }
     ],
