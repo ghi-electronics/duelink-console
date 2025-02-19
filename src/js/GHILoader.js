@@ -200,8 +200,15 @@ export default class GHILoader {
         } else {
             await this.sendConfirmAndExpect("X", "Waiting...");
         }
-        await this.detach(); // stop the read loop and detach, but this leaves the readers in a bad state
-        await this.attach(); // attach again without the read loop running
+        //await this.detach(); // stop the read loop and detach, but this leaves the readers in a bad state
+        //await this.attach(); // attach again without the read loop running
+		
+		await this.reader.cancel();
+		await this.writer.close();
+
+		this.writer = this.port.writable.getWriter();
+		this.reader = this.port.readable.getReader();
+
         try {
             await this.xmodem.send(this.reader, this.writer, data, progressFn)
         } catch (err) {
