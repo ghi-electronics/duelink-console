@@ -2,7 +2,7 @@
   "DUELink": {
     "name": "DUELink",
     "versions": [      
-	  { "id": 1, "name": "v.0.1.8", "url": "firmware/duelink_fw_v018.ghi" }
+	  { "id": 1, "name": "v.0.2.0", "url": "firmware/duelink_fw_v020.ghi" }
     ],
     "boards": [
 	  { "name": "DUELink", "id": "D" }     
