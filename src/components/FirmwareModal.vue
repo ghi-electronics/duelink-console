@@ -29,7 +29,7 @@
       </li>
 
       <li>
-        Click the connect button below and select the
+        Click the <kbd>Connect</kbd> button below and select
         <em>GHI Electronics Loader</em>.
         <ul class="mt-2 ul-reset text-amber-300">
           <li>
@@ -39,7 +39,7 @@
         </ul>
       </li>
 
-      <li>Select the desired firmware and click <em>Load</em>.</li>
+      <li>Select the desired firmware and click <kbd>Load</kbd>.</li>
       <li>
         Once <span class="font-semibold">Loading is complete</span>,
         <kbd>RESET</kbd> or <kbd>Power Cycle</kbd> the board.
