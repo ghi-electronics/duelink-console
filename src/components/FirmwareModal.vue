@@ -32,7 +32,7 @@
       <li>
         Click the <kbd>Connect</kbd> button below and select
         <em>GHI Electronics Loader</em>.
-        <ul class="mt-2 ul-reset text-amber-300">
+        <ul class="mt-2 ul-reset text-blue-600">
           <li>
             Go back to first step if you do not see
             <em>GHI Electronics Loader</em>.
