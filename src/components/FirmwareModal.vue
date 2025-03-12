@@ -7,7 +7,7 @@
       <li>
         On your board, find <kbd>A or LDR</kbd> button. If not found, insert a
         paper clip in the 2 small holes. Images and instructions are found on
-        the <a href="https://www.duelink.com/docs/loader">Loader</a>page.
+        the <a href="https://www.duelink.com/docs/loader">Loader</a> page.
         <span class="font-semibold"
           >Keep holding the button down or keep the paper clip in</span
         >
