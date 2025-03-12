@@ -80,7 +80,7 @@
       "Pixel(1, 64, 5)",
       "Circle(1, 20, 30, 14)",
       "Fill(1, 10, 40, 20, 15)",
-      "TextT(\"Hello World\", 1, 2,42)",
+      "TextT(\"Hello World\", 1, 2, 2)",
       "TextS(\"DUELink\",1,40, 20, 2, 2)",
       "Text(\"is Awesome!!\", 1, 45,40)",
       "ImgS(a1, 13, 22, 8, 8, 2,2,0)",
