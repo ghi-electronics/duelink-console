@@ -8,20 +8,20 @@
         On your board, find <kbd>A</kbd> or <kbd>LDR</kbd> button. If not found,
         insert a paper clip in the 2 small holes. Images and instructions are
         found on the
-        <a href="https://www.duelink.com/docs/loader">Loader</a> page.
+        <a href="https://www.duelink.com/docs/loader"> Loader</a> page.
         <span class="font-semibold"
           >Keep holding the button down or keep the paper clip in</span
         >
         and <kbd>RESET</kbd> the board. If you do not have a reset button then
         <kbd>power cycle</kbd> the module.
 
-        <ul class="mt-2 ul-reset text-amber-300">
+        <ul class="mt-2 ul-reset text-red-600">
           <li>
             Important! Remember to keep on holding the button or keep the clip
             in while resetting or power cycling the board.
           </li>
         </ul>
-        <ul class="mt-2 ul-reset text-amber-300">
+        <ul class="mt-2 ul-reset text-blue-600">
           <li>This will put restart your board in bootloader mode.</li>
         </ul>
       </li>
