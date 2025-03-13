@@ -22,7 +22,7 @@
           </li>
         </ul>
         <ul class="mt-2 ul-reset text-blue-600">
-          <li>This will put restart your board in bootloader mode.</li>
+          <li>This will put your board in bootloader mode.</li>
         </ul>
       </li>
       <li>
