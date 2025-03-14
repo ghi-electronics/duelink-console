@@ -6,7 +6,8 @@
 	  { "id": 2, "name": "v0.20", "url": "firmware/duelink_fw_v020.ghi" },
 	  { "id": 3, "name": "v0.22", "url": "firmware/duelink_fw_v022.ghi" },
 	  { "id": 4, "name": "v0.23", "url": "firmware/duelink_fw_v023.ghi" },
-	  { "id": 5, "name": "v0.24", "url": "firmware/duelink_fw_v024.ghi" }
+	  { "id": 5, "name": "v0.24", "url": "firmware/duelink_fw_v024.ghi" },
+	  { "id": 6, "name": "v0.25", "url": "firmware/duelink_fw_v025.ghi" }
     ],
     "boards": [
 	  { "name": "DUELink", "id": "D" }     
