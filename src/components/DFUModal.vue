@@ -156,14 +156,14 @@
               :disabled=false
               @click.native="writeFirmware"
             >
-              Update
+              Load
             </Button>
             <Button type="secondary" @click.native="disconnect">
               Disconnect
             </Button>
           </template>
           <template v-if="state === 'erasing' || state === 'writing'">
-            <Button disabled> Update </Button>
+            <Button disabled> Load </Button>
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
           <template v-else-if="state === 'complete'">
