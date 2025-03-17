@@ -153,7 +153,7 @@
         <template v-if="isConnected">
           <template v-if="state === 'idle'">
             <Button
-              :disabled=false
+              :disabled="!dfu"
               @click.native="writeFirmware"
             >
               Load

@@ -237,7 +237,7 @@ const alreadyHasCodeModal = reactive({
     },
 });
 
-let legacy = false
+
 const firmwareModal = reactive({
     open: false,
     start() {
@@ -245,7 +245,7 @@ const firmwareModal = reactive({
             webSerial.disconnect();
         }
         this.open = true;
-        legacy = true;
+
 
     },
 });
@@ -257,7 +257,7 @@ const dfuModal = reactive({
             webSerial.disconnect();
         }
         this.open = true;
-        legacy = false;
+
     },
 });
 
@@ -308,10 +308,7 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
     tippyConfig.theme = 'dark';
 }
 
-if (!legacy)
-    loadFirmware();
-else 
-    loadFirmwareLegacy();
+loadFirmware()
 
 // Mounted
 
@@ -364,20 +361,7 @@ async function loadFirmware() {
         console.log(error);
     }
 }
-async function loadFirmwareLegacy() {
-    try {
-        const response = await fetch('/legacy.json');
-        const jsonData = await response.json();
-        
-        Object.keys(jsonData).forEach((key) => {
-            availableFirmware[key] = jsonData[key];
-            availableFirmware[key].isGlb = false;
-            availableFirmware[key].image = null;
-        });
-    } catch (error) {
-        console.log(error);
-    }
-}
+
 
 function onEditorInit(instance) {
     instance.setShowPrintMargin(false);
