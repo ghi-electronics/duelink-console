@@ -141,7 +141,7 @@
       <div v-else-if="state === 'complete'" class="firmware-progress-box">
         <div class="w-full">
           <div class="mb-2 text-sky-600 dark:text-lime-400">
-            Loading... 100%
+            Updated... 100%
           </div>
           <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
         </div>
@@ -230,7 +230,7 @@ const availableVersions = computed(
 watch(
   () => version.value,
   async (key) => {
-    const url = props.availableFirmware[dfu.value].versions[key].url;
+    const url = availableVersions.value[key].url;
     console.log("DFU selected", url);
     const hashedKey = await sha256(url);
     const saveAs = `download_${hashedKey}`;
@@ -280,7 +280,7 @@ async function connect() {
   const index = keys.findIndex((key) => key === "DUELink");
   if (index > -1) {
     dfu.value = keys[index];
-    version.value = "0";
+    version.value = 0;
   }
 }
 
@@ -378,6 +378,7 @@ async function writeFirmware() {
           log("Device connected; DFU interface claimed.");
           document.getElementById("startUpdate").disabled = false;
       } catch (error) {
+          error.value = "Connection error: " + error;      
           log("Connection error: " + error);
       }
   }
