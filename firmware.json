@@ -1,38 +1,22 @@
 {
   "DUELink": {
     "name": "DUELink",
-    "versions": [      
-	  { "id": 1, "name": "v0.18", "url": "firmware/duelink_fw_v018.ghi" },
-	  { "id": 2, "name": "v0.20", "url": "firmware/duelink_fw_v020.ghi" },
-	  { "id": 3, "name": "v0.22", "url": "firmware/duelink_fw_v022.ghi" },
-	  { "id": 4, "name": "v0.23", "url": "firmware/duelink_fw_v023.ghi" },
-	  { "id": 5, "name": "v0.24", "url": "firmware/duelink_fw_v024.ghi" },
-	  { "id": 6, "name": "v0.25", "url": "firmware/duelink_fw_v025.ghi" }
+    "versions": [      	
+	  { "id": 1, "name": "v0.26", "url": "firmware/duelink_fw_v026.ghi" }
     ],
     "boards": [
-	  { "name": "DUELink", "id": "D" }     
+	  { "name": "Standard", "id": "D" }     
     ]
   },
- "sc13xxx": {
-    "name": "sc13xxx",
+  "MicroBlock": {
+    "name": "MicroBlock",
     "versions": [      
-	  { "id": 1, "name": "v1.1.6", "url": "firmware/due_sc13_v116.ghi" }
+	  { "id": 1, "name": "v002", "url": "firmware/duelink_microblocks_v002.ghi" }	  
     ],
     "boards": [
-	  { "name": "DUELink Spider", "id": "F" },
-      { "name": "FEZ Flea", "id": "F" },
-      { "name": "FEZ Pico", "id": "I" },
-      { "name": "BrainPad Pulse", "id": "P" }
-    ]
-  },
-  "sc007": {
-    "name": "SC007",
-    "versions": [
-	  { "id": 1, "name": "v1.1.4", "url": "firmware/due_sc007_v114.ghi" }
-    ],
-    "boards": [
-      { "name": "BrainPad Edge", "id": "E" },
-	  { "name": "BrainPad Tick", "id": "T" }
+	  { "name": "CincoBit", "id": "D" }     
     ]
   }
+
+
 }
