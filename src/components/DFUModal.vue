@@ -1,6 +1,6 @@
 <template>
   <Modal :open="open" max-width-class="sm:max-w-xl">
-    <template #title> DFU Firmware Update Steps </template>
+    <template #title> Firmware Update Steps </template>
 
     <ol class="mb-4 ol-reset space-y-2 leading-loose">
       <li>Connect your board to the computer.</li>
@@ -22,7 +22,7 @@
           </li>
         </ul>
         <ul class="mt-2 ul-reset text-blue-600">
-          <li>This will put your board in bootloader mode.</li>
+          <li>This will put your board in loader mode.</li>
         </ul>
       </li>
       <li>
@@ -31,11 +31,11 @@
 
       <li>
         Click the <kbd>Connect</kbd> button below and select
-        <em>GHI Electronics Loader</em>.
+        <em>DFU in FS mode</em>.
         <ul class="mt-2 ul-reset text-blue-600">
           <li>
             Go back to first step if you do not see
-            <em>GHI Electronics Loader</em>.
+            <em>DFU in FS mode</em>.
           </li>
         </ul>
       </li>
@@ -78,7 +78,7 @@
     <div v-if="isConnected">
       <div v-if="state === 'idle'" class="grid grid-cols-6 gap-2">      
         <div class="col-span-4">
-          <label for="dfu">DFU</label>
+          <label for="dfu">Firmware</label>
           <select v-model="dfu" id="dfu" class="mt-2">
             <option value="" disabled>Select</option>
             <option
@@ -153,7 +153,7 @@
         <template v-if="isConnected">
           <template v-if="state === 'idle'">
             <Button
-              :disabled="!dfu || !availableFirmware[dfu].image"
+              :disabled=false
               @click.native="writeFirmware"
             >
               Update

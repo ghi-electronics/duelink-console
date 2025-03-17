@@ -237,6 +237,7 @@ const alreadyHasCodeModal = reactive({
     },
 });
 
+let legacy = false
 const firmwareModal = reactive({
     open: false,
     start() {
@@ -244,6 +245,8 @@ const firmwareModal = reactive({
             webSerial.disconnect();
         }
         this.open = true;
+        legacy = true;
+
     },
 });
 
@@ -254,6 +257,7 @@ const dfuModal = reactive({
             webSerial.disconnect();
         }
         this.open = true;
+        legacy = false;
     },
 });
 
@@ -304,7 +308,10 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
     tippyConfig.theme = 'dark';
 }
 
-loadFirmware();
+if (!legacy)
+    loadFirmware();
+else 
+    loadFirmwareLegacy();
 
 // Mounted
 
@@ -346,6 +353,20 @@ function download(filename) {
 async function loadFirmware() {
     try {
         const response = await fetch('/firmware.json');
+        const jsonData = await response.json();
+        
+        Object.keys(jsonData).forEach((key) => {
+            availableFirmware[key] = jsonData[key];
+            availableFirmware[key].isGlb = false;
+            availableFirmware[key].image = null;
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function loadFirmwareLegacy() {
+    try {
+        const response = await fetch('/legacy.json');
         const jsonData = await response.json();
         
         Object.keys(jsonData).forEach((key) => {
