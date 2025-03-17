@@ -22,6 +22,7 @@
             <a href="https://duelink.com" target="_blank">Docs</a>
             <Menu :options="demoOptions" id="demo">Demos</Menu>
             <a @click.prevent="$emit('firmware')">Firmware</a>
+            <a @click.prevent="$emit('dfu')">DFU</a>
             <a
                 class="text-sm"
                 :data-tippy-content="theme === 'dark' ? 'Light' : 'Dark'"
@@ -43,7 +44,7 @@ import Button from './Button.vue';
 
 // Emits
 
-const $emit = defineEmits(['demo', 'firmware', 'update:theme', 'updateTippy']);
+const $emit = defineEmits(['demo', 'firmware', 'dfu', 'update:theme', 'updateTippy']);
 
 // Props
 

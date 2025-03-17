@@ -10,6 +10,7 @@
             v-model:theme="theme"
             @demo="demo"
             @firmware="firmwareModal.start()"
+            @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
         />
@@ -141,6 +142,12 @@
         :open="firmwareModal.open"
         @close="firmwareModal.open = false"
     />
+
+    <DFUModal
+        :available-firmware="availableFirmware"
+        :open="dfuModal.open"
+        @close="dfuModal.open = false"
+    />
 </template>
 
 <script setup>
@@ -157,6 +164,7 @@ import Footer from './components/Footer.vue';
 import Button from './components/Button.vue';
 import Modal from './components/Modal.vue';
 import FirmwareModal from './components/FirmwareModal.vue';
+import DFUModal from './components/DFUModal.vue';
 import LogPanel from './components/LogPanel.vue';
 import HistoryPanel from './components/HistoryPanel.vue';
 import AboutPanel from './components/AboutPanel.vue';
@@ -230,6 +238,16 @@ const alreadyHasCodeModal = reactive({
 });
 
 const firmwareModal = reactive({
+    open: false,
+    start() {
+        if (webSerial.isConnected) {
+            webSerial.disconnect();
+        }
+        this.open = true;
+    },
+});
+
+const dfuModal = reactive({
     open: false,
     start() {
         if (webSerial.isConnected) {
