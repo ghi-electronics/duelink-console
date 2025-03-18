@@ -144,7 +144,7 @@
     />
 
     <DFUModal
-        :available-firmware="availableFirmware"
+        :available-dfu="availableDfu"
         :open="dfuModal.open"
         @close="dfuModal.open = false"
     />
@@ -178,6 +178,7 @@ const $refs = { editor: null, filename: null, input: null, progress: null };
 const webSerial = useWebSerial($refs);
 
 const availableFirmware = reactive({});
+const availableDfu = reactive({});
 const recordModeCode = ref('');
 const directModeCode = ref('');
 const lastRecordModeCode = ref('');
@@ -309,6 +310,7 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
 }
 
 loadFirmware()
+loadDfu()
 
 // Mounted
 
@@ -356,6 +358,21 @@ async function loadFirmware() {
             availableFirmware[key] = jsonData[key];
             availableFirmware[key].isGlb = false;
             availableFirmware[key].image = null;
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function loadDfu() {
+    try {
+        const response = await fetch('/dfu.json');
+        const jsonData = await response.json();
+        
+        Object.keys(jsonData).forEach((key) => {
+            availableDfu[key] = jsonData[key];
+            availableDfu[key].isGlb = false;
+            availableDfu[key].image = null;
         });
     } catch (error) {
         console.log(error);

@@ -82,14 +82,15 @@
           <select v-model="dfu" id="dfu" class="mt-2">
             <option value="" disabled>Select</option>
             <option
-              v-for="(option, key) in availableFirmware"
+              v-for="(option, key) in availableDfu"
+              
               :key="key"
               :selected="key === dfu"
               :value="key"
-            >
+            >            
               {{ option.name }} ({{
                 option.boards.map((board) => board.name).join(", ")
-              }})
+              }})              
             </option>
           </select>
         </div>
@@ -197,7 +198,7 @@ const $emit = defineEmits(["close"]);
 // Props
 
 const props = defineProps({
-  availableFirmware: {
+  availableDfu: {
     type: Object,
     required: true,
   },
@@ -220,7 +221,7 @@ let port = undefined;
 
 const availableVersions = computed(
   () =>
-    props.availableFirmware?.[dfu.value]?.versions.sort(
+    props.availableDfu?.[dfu.value]?.versions.sort(
       (a, b) => b.id - a.id
     ) || []
 );
@@ -239,11 +240,11 @@ async () => {
         blob = await response.blob();
         const data = await blob.arrayBuffer();
         await saveFirmwareImage(saveAs, blob);
-        props.availableFirmware[dfu.value].image = data;
+        props.availableDfu[dfu.value].image = data;
         console.log("Firmware ready");
       } else {
         error.value = `Unable to download the firmware (${response.status}).`;
-        props.availableFirmware[dfu.value].image = null;
+        props.availableDfu[dfu.value].image = null;
         console.log("Firmware error");
       }
   }
@@ -274,7 +275,7 @@ async function connect() {
   } catch (error) {
     catchError(error);
   }
-  const keys = Object.keys(props.availableFirmware);
+  const keys = Object.keys(props.availableDfu);
   const index = keys.findIndex((key) => key === "DUELink");
   if (index > -1) {
     dfu.value = keys[index];
@@ -342,11 +343,11 @@ async function saveFirmwareImage(saveAs, resp) {
 async function writeFirmware() {
   error.value = null;
   percent.value = 0;
-  if (!props.availableFirmware[dfu.value].image) {
+  if (!props.availableDfu[dfu.value].image) {
     error.value =
       "Failed to load firmware from the server &mdash; cannot program the device.";
   }
-  performDfuFirmwareUpgrade(props.availableFirmware[dfu.value].image);
+  performDfuFirmwareUpgrade(props.availableDfu[dfu.value].image);
 }
 
  // ----- Configuration -----
