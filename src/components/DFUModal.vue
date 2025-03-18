@@ -31,11 +31,11 @@
 
       <li>
         Click the <kbd>Connect</kbd> button below and select
-        <em>DFU in FS mode</em>.
+        <kbd><em>DFU in FS mode</em></kbd>.
         <ul class="mt-2 ul-reset text-blue-600">
           <li>
             Go back to first step if you do not see
-            <em>DFU in FS mode</em>.
+            <kbd><em>DFU in FS mode</em></kbd>.
           </li>
         </ul>
       </li>
@@ -269,9 +269,8 @@ async function connect() {
     return;
   }
   error.value = null;
-  try {
+  try {    
     await connectDevice();
-    isConnected.value = true;
   } catch (error) {
     catchError(error);
   }
@@ -366,6 +365,7 @@ async function writeFirmware() {
   let device;
   async function connectDevice() {
       try {
+          isConnected.value = false;
           device = await navigator.usb.requestDevice({
               filters: [{ vendorId: USB_VENDOR_ID }]
           });
@@ -375,10 +375,12 @@ async function writeFirmware() {
           }
           await device.claimInterface(DFU_INTERFACE_NUMBER);
           log("Device connected; DFU interface claimed.");
-          document.getElementById("startUpdate").disabled = false;
+          //document.getElementById("startUpdate").disabled = false;
+          isConnected.value = true;
       } catch (error) {
           error.value = "Connection error: " + error;      
           log("Connection error: " + error);
+          isConnected.value = false; 
       }
   }
 
