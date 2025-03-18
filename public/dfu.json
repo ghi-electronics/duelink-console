@@ -9,12 +9,12 @@
     ]
   },
   "MicroBlock": {
-    "name": "MicroBlock",
+    "name": "MicroBlocks",
     "versions": [      
 	  { "id": 1, "name": "v002", "url": "firmware/duelink_microblocks_v002.bin" }	  
     ],
     "boards": [
-	  { "name": "CincoBit", "id": "D" }     
+	  { "name": "microblocks.fun", "id": "D" }     
     ]
   }
 
