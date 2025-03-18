@@ -1,0 +1,22 @@
+{
+  "DUELink": {
+    "name": "DUELink",
+    "versions": [      		  
+	  { "id": 1, "name": "v0.26", "url": "firmware/duelink_fw_v026.bin" }
+    ],
+    "boards": [
+	  { "name": "Standard", "id": "D" }     
+    ]
+  },
+  "MicroBlock": {
+    "name": "MicroBlock",
+    "versions": [      
+	  { "id": 1, "name": "v002", "url": "firmware/duelink_microblocks_v002.bin" }	  
+    ],
+    "boards": [
+	  { "name": "CincoBit", "id": "D" }     
+    ]
+  }
+
+
+}
