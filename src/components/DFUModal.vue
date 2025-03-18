@@ -227,26 +227,25 @@ const availableVersions = computed(
 
 // Watch
 
-watch(
-  () => version.value,
-  async (key) => {
-    const url = availableVersions.value[key].url;
-    console.log("DFU selected", url);
-    const hashedKey = await sha256(url);
-    const saveAs = `download_${hashedKey}`;
-    let blob = null;
-    const response = await fetch(url);
-    if (response.ok) {
-      blob = await response.blob();
-      const data = await blob.arrayBuffer();
-      await saveFirmwareImage(saveAs, blob);
-      props.availableFirmware[dfu.value].image = data;
-      console.log("Firmware ready");
-    } else {
-      error.value = `Unable to download the firmware (${response.status}).`;
-      props.availableFirmware[dfu.value].image = null;
-      console.log("Firmware error");
-    }
+watch([dfu, version],
+async () => {
+  const url = availableVersions.value[version.value].url;
+      console.log("DFU selected", url);
+      const hashedKey = await sha256(url);
+      const saveAs = `download_${hashedKey}`;
+      let blob = null;
+      const response = await fetch(url);
+      if (response.ok) {
+        blob = await response.blob();
+        const data = await blob.arrayBuffer();
+        await saveFirmwareImage(saveAs, blob);
+        props.availableFirmware[dfu.value].image = data;
+        console.log("Firmware ready");
+      } else {
+        error.value = `Unable to download the firmware (${response.status}).`;
+        props.availableFirmware[dfu.value].image = null;
+        console.log("Firmware error");
+      }
   }
 );
 
