@@ -3,6 +3,7 @@
     "name": "DUELink",
     "versions": [      		  
 	  { "id": 1, "name": "v0.26", "url": "firmware/duelink_fw_v026.bin" }
+      { "id": 2, "name": "v0.27", "url": "firmware/duelink_fw_v027.bin" }
     ],
     "boards": [
 	  { "name": "Standard", "id": "D" }     
@@ -11,7 +12,7 @@
   "MicroBlock": {
     "name": "MicroBlocks",
     "versions": [      
-	  { "id": 1, "name": "v002", "url": "firmware/duelink_microblocks_v002.bin" }	  
+	  { "id": 1, "name": "v323", "url": "firmware/duelink_microblocks_v323.bin" }	  
     ],
     "boards": [
 	  { "name": "microblocks.fun", "id": "D" }     
