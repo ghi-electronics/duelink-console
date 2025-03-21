@@ -2,7 +2,7 @@
   "DUELink": {
     "name": "DUELink",
     "versions": [      		  
-	  { "id": 1, "name": "v0.26", "url": "firmware/duelink_fw_v026.bin" }
+	  { "id": 1, "name": "v0.26", "url": "firmware/duelink_fw_v026.bin" },
       { "id": 2, "name": "v0.27", "url": "firmware/duelink_fw_v027.bin" }
     ],
     "boards": [
