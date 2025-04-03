@@ -351,7 +351,7 @@ function download(filename) {
 
 async function loadFirmware() {
     try {
-        const response = await fetch('/firmware.json');
+        const response = await fetch('/legacy.json');
         const jsonData = await response.json();
         
         Object.keys(jsonData).forEach((key) => {
