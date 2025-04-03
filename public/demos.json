@@ -4,16 +4,16 @@
     "code": ["# Print to output", "Print(\"Hello World\")"]
   },
   {
-    "label": "Blink LED",
+    "label": "Blink Status LED",
     "code": [
-      "# Blinks LED High for 200ms, Low for 200ms, repeat 50 times",
-      "LED(200,200,50)"
+      "# Blinks Status LED High for 200ms, Low for 200ms, repeat 50 times",
+      "StatLed(200,200,50)"
     ]
   },
   {
-    "label": "Fade LED",
+    "label": "Fade Status LED",
     "code": [
-      "# Fade the STAT LED (pin 0) in and out",
+      "# Fade the Status LED (pin 0) in and out",
       "while 1",
       "  For _i=0 to 100 Step 10",
       "    PWrite(0, _i)",
