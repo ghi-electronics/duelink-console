@@ -14,7 +14,8 @@
     "name": "MicroBlocks",
     "versions": [      
 	  { "id": 1, "name": "v323 (Alpha)", "url": "firmware/duelink_microblocks_v323.bin" },	  
-      { "id": 2, "name": "v324 (Alpha)", "url": "firmware/duelink_microblocks_v324.bin" }
+      { "id": 2, "name": "v324 (Alpha)", "url": "firmware/duelink_microblocks_v324.bin" },
+      { "id": 3, "name": "v324 (Alpha)", "url": "firmware/duelink_microblocks_v326.bin" }
     ],
     "boards": [
 	  { "name": "microblocks.fun", "id": "D" }     
