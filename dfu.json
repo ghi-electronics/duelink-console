@@ -14,11 +14,10 @@
   "MicroBlock": {
     "name": "MicroBlocks",
     "versions": [      
-	  { "id": 1, "name": "v323 (Alpha)", "url": "firmware/duelink_microblocks_v323.bin" },	  
-      { "id": 2, "name": "v324 (Alpha)", "url": "firmware/duelink_microblocks_v324.bin" },
-      { "id": 3, "name": "v326 (Alpha)", "url": "firmware/duelink_microblocks_v326.bin" },
-      { "id": 4, "name": "v327 (Alpha)", "url": "firmware/duelink_microblocks_v327.bin" },
-      { "id": 5, "name": "v329 (Alpha)", "url": "firmware/duelink_microblocks_v329.bin" }
+      { "id": 1, "name": "v326 (Alpha)", "url": "firmware/duelink_microblocks_v326.bin" },
+      { "id": 2, "name": "v327 (Alpha)", "url": "firmware/duelink_microblocks_v327.bin" },
+      { "id": 3, "name": "v329 (Alpha)", "url": "firmware/duelink_microblocks_v329.bin" },
+      { "id": 4, "name": "v330 (Alpha)", "url": "firmware/duelink_microblocks_v330.bin" }
     ],
     "boards": [
 	  { "name": "microblocks.fun", "id": "D" }     
