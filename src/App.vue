@@ -85,7 +85,7 @@
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
                 <LogPanel v-model:log="webSerial.log.value" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
-                <AboutPanel :available-firmware="availableFirmware" :version="webSerial.version.value" />
+                <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
         </div>
         <div id="spacer"></div>

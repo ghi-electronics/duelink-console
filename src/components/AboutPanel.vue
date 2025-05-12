@@ -54,7 +54,7 @@ import Panel from './Panel.vue';
 // Props
 
 const props = defineProps({
-    availableFirmware: Object,
+    availableDfu: Object,
     version: String,
 });
 
@@ -79,7 +79,7 @@ const deviceVersion = computed(() => {
     return null;
 });
 
-const firmware = computed(() => Object.values(props.availableFirmware).find((firmware) => (firmware?.boards || []).find((board) => board.id === deviceChar.value)));
+const firmware = computed(() => Object.values(props.availableDfu).find((firmware) => (firmware?.boards || []).find((board) => board.id === deviceChar.value)));
 
 const device = computed(() => {
     if (firmware.value) {
@@ -100,10 +100,10 @@ const deviceFirmwareVersion = computed(() => {
 });
 
 const latestFirmwareVersion = computed(() => {
-    if (Object.values(props.availableFirmware).length) {
-        const key = Object.keys(props.availableFirmware)[0];
-        const maxId = Math.max(...props.availableFirmware[key].versions.map((version) => version.id));
-        const version = props.availableFirmware[key].versions.find((version) => version.id === maxId);
+    if (Object.values(props.availableDfu).length) {
+        const key = Object.keys(props.availableDfu)[0];
+        const maxId = Math.max(...props.availableDfu[key].versions.map((version) => version.id));
+        const version = props.availableDfu[key].versions.find((version) => version.id === maxId);
         return `${version.name}`;
     }
     // if (firmware.value) {

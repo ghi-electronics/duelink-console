@@ -9,7 +9,7 @@
       { "id": 5, "name": "v0.30 (Alpha)", "url": "firmware/duelink_fw_v030.bin" }
     ],
     "boards": [
-	  { "name": "Standard", "id": "D" }     
+	  { "name": "DUELink", "id": "D" }     
     ]
   },
   "MicroBlock": {
