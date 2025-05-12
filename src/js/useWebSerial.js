@@ -144,6 +144,15 @@ export default function useWebSerial($refs) {
                     delete callbacks[data.callbackId];
                 }
                 break;
+            case 'ConnectFailed':
+                const index = data.message.indexOf(':');
+                
+                if (index === -1)
+                    alert(data.message)
+                else 
+                    alert(data.message.substring(0, index))
+                
+                break;
         }
     }
 
