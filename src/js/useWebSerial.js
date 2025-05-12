@@ -146,11 +146,12 @@ export default function useWebSerial($refs) {
                 break;
             case 'ConnectFailed':
                 const index = data.message.indexOf(':');
+                let msg = data.message               
                 
-                if (index === -1)
-                    alert(data.message)
-                else 
-                    alert(data.message.substring(0, index))
+                if (index != -1)
+                    msg = data.message.substring(0, index)
+
+                alert(msg)
                 
                 break;
         }
