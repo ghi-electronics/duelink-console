@@ -65,15 +65,16 @@ const appVersion = APP_VERSION;
 // Computed
 
 const deviceChar = computed(() => {
-    if (props.version) {
-        return props.version.substring(props.version.length - 1, props.version.length);
-    }
-    return null;
+    // if (props.version) {
+        // return props.version.substring(props.version.length - 1, props.version.length);
+    // }
+    return /*null*/ 'D';
 });
 
 const deviceVersion = computed(() => {
     if (props.version) {
-        return props.version.substring(0, props.version.length - 1);
+        //return props.version.substring(0, props.version.length - 1);
+        return props.version;
     }
     return null;
 });
