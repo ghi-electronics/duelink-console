@@ -60,6 +60,7 @@ async function connect() {
             flowControl: 'none',
         });
     } catch (error) {
+        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
         logError(error?.message || 'Unable to open port.');
         return;
     }
@@ -195,8 +196,12 @@ async function getVersion() {
     const result = await write('version()');
     for (const line of result) {
         log('line', line, (line.match(/\./g) || []).length);
-        if (line.startsWith('v') && (line.match(/\./g) || []).length === 2) {
-            return line;
+        let p = line.indexOf ('GHI Electronics DUELink v')
+        if ( p != -1) {
+            let lines = line.split(':')
+       
+       
+            return lines[0].substring(24);
         }
     }
     return undefined;
