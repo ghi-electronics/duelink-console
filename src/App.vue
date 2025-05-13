@@ -241,11 +241,13 @@ const alreadyHasCodeModal = reactive({
 
 const firmwareModal = reactive({
     open: false,
+    toggleCounter: 0,
     start() {
         if (webSerial.isConnected) {
             webSerial.disconnect();
         }
-        this.open = true;
+        //this.open = true;
+        this.toggleCounter++;
 
 
     },
@@ -253,13 +255,17 @@ const firmwareModal = reactive({
 
 const dfuModal = reactive({
     open: false,
+    toggleCounter: 0,
     start() {
         if (webSerial.isConnected) {
             webSerial.disconnect();
         }
-        this.open = true;
+        //this.open = true;
+        this.toggleCounter++;
 
-    },
+        //console.log("Increased dfuModal.toggleCounter: " + this.toggleCounter)
+
+    }
 });
 
 const downloadModal = reactive({
@@ -313,6 +319,25 @@ loadFirmware()
 loadDfu()
 
 // Mounted
+function ClickAnyWhereCallback(event) {  
+    if (dfuModal.toggleCounter === 1) {
+        dfuModal.open = true
+        dfuModal.toggleCounter = 0
+        // console.log("Reset dfuModal.toggleCounter: " + dfuModal.toggleCounter )
+    }
+    else {
+        dfuModal.open = false
+    }
+
+    if (firmwareModal.toggleCounter === 1) {
+        firmwareModal.open = true
+        firmwareModal.toggleCounter = 0
+        // console.log("Reset dfuModal.toggleCounter: " + dfuModal.toggleCounter )
+    }
+    else {
+        firmwareModal.open = false
+    }
+}
 
 onMounted(() => {
     tippyInstances = tippy('[data-tippy-content]', tippyConfig);
@@ -322,6 +347,8 @@ onMounted(() => {
             return false;
         }
     }
+
+    document.addEventListener('click', ClickAnyWhereCallback);
 });
 
 // Methods
