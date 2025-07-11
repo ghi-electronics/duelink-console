@@ -2,11 +2,10 @@
   "DUELink": {
     "name": "DUELink",
     "versions": [      		        
-      { "id": 1, "name": "v0.29 (Alpha)", "url": "firmware/duelink_fw_v029.bin" },
-      { "id": 2, "name": "v0.30 (Alpha)", "url": "firmware/duelink_fw_v030.bin" },
-      { "id": 3, "name": "v0.31 (Alpha)", "url": "firmware/duelink_fw_v031.bin" },
-      { "id": 4, "name": "v0.32 (Alpha)", "url": "firmware/duelink_fw_v032.bin" },
-      { "id": 5, "name": "v0.33 (Alpha)", "url": "firmware/duelink_fw_v033.bin" }
+      { "id": 1, "name": "v0.31 (Alpha)", "url": "firmware/duelink_fw_v031.bin" },
+      { "id": 2, "name": "v0.32 (Alpha)", "url": "firmware/duelink_fw_v032.bin" },
+      { "id": 3, "name": "v0.33 (Alpha)", "url": "firmware/duelink_fw_v033.bin" },
+      { "id": 4, "name": "v0.34 (Alpha)", "url": "firmware/duelink_fw_v034.bin" }
     ],
     "boards": [
 	  { "name": "DUELink", "id": "D" }     
