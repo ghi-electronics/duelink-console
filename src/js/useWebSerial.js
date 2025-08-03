@@ -133,7 +133,6 @@ export default function useWebSerial($refs) {
                 logEvent(data.message);
                 break;
             case 'memoryRegionsResult':
-                console.log('memoryRegionsResult');
                 regions.value = [];
                 // Ignore the headings.
                 data.result.shift();
@@ -151,7 +150,6 @@ export default function useWebSerial($refs) {
                         total: info[2],
                     });
                 });
-                console.log(regions.value);
                 break;
             case 'output':
                 log.value = data.value;
