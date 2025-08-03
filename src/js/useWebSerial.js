@@ -12,6 +12,7 @@ export default function useWebSerial($refs) {
     const isStopped = ref(true);
     const isTalking = ref(false);
     const log = ref('');
+    const regions = ref([]);
     const version = ref(null);
 
     // Setup
@@ -55,24 +56,43 @@ export default function useWebSerial($refs) {
         worker.postMessage({ task: 'disconnect' });
     }
 
-    function record(lines) {
-        worker.postMessage({ task: 'record', lines });
-    }
-
-    function play() {
-        worker.postMessage({ task: 'play' });
-    }
-
-    function stop() {
-        worker.postMessage({ task: 'stop' });
+    function execute(line) {
+        worker.postMessage({ task: 'execute', line });
     }
 
     function list(callback = null) {
         worker.postMessage({ task: 'list', callbackId: storeCallback(callback) });
     }
 
-    function execute(line) {
-        worker.postMessage({ task: 'execute', line });
+    function memoryRegions() {
+        worker.postMessage({ task: 'memoryRegions' });
+    }
+
+    /**
+     * Request the worker to erase all regions.
+     */
+    function newAll() {
+        worker.postMessage({ task: 'newAll' });
+    }
+
+    function play() {
+        worker.postMessage({ task: 'play' });
+    }
+
+    function record(lines) {
+        worker.postMessage({ task: 'record', lines });
+    }
+
+    /**
+     * Request the worker to select a region.
+     * @param {Number} index
+     */
+    function region(index) {
+        worker.postMessage({ task: 'region', index });
+    }
+
+    function stop() {
+        worker.postMessage({ task: 'stop' });
     }
 
     // Methods - Utilities
@@ -91,6 +111,7 @@ export default function useWebSerial($refs) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
+                memoryRegions();
                 break;
             case 'disconnected':
                 isConnected.value = false;
@@ -98,6 +119,9 @@ export default function useWebSerial($refs) {
                 break;
             case 'isTalking':
                 isTalking.value = data.value;
+                if (data.lastCommand.startsWith('region')) {
+                    memoryRegions();
+                }
                 break;
             case 'logError':
                 logError(data.message);
@@ -107,6 +131,25 @@ export default function useWebSerial($refs) {
                 break;
             case 'logEvent':
                 logEvent(data.message);
+                break;
+            case 'memoryRegionsResult':
+                regions.value = [];
+                // Ignore the headings.
+                data.result.shift();
+                // Make more usable.
+                data.result.forEach((info) => {
+                    info = info.match(/(\*?\d+)/gm);
+                    const current = info[0].startsWith('*');
+                    if (current) {
+                        info[0] = info[0].substring(1, info[0].length);
+                    }
+                    regions.value.push({
+                        current,
+                        index: info[0],
+                        used: info[1],
+                        total: info[2],
+                    });
+                });
                 break;
             case 'output':
                 log.value = data.value;
@@ -130,6 +173,9 @@ export default function useWebSerial($refs) {
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
                 break;
+            case 'regionSelected':
+                regions.value.forEach((region) => region.current = region.index === data.index);
+                break;
             case 'stopped':
                 isPlaying.value = false;
                 isStopped.value = true;
@@ -148,7 +194,7 @@ export default function useWebSerial($refs) {
                 const index = data.message.indexOf(':');
                 let msg = data.message               
                 
-                if (index != -1)
+                if (index !== -1)
                     msg = data.message.substring(0, index)
 
                 alert(msg)
@@ -176,14 +222,17 @@ export default function useWebSerial($refs) {
         isStopped,
         isTalking,
         log,
+        regions,
         version,
         // Methods
         connect,
         disconnect,
         execute,
         list,
+        newAll,
         play,
         record,
+        region,
         stop,
     };
 }

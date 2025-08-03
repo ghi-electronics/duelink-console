@@ -84,6 +84,7 @@
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
                 <LogPanel v-model:log="webSerial.log.value" />
+                <RegionsPanel :regions="webSerial.regions.value" @erase="webSerial.newAll()" @region="webSerial.region($event)" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
@@ -166,6 +167,7 @@ import Modal from './components/Modal.vue';
 import FirmwareModal from './components/FirmwareModal.vue';
 import DFUModal from './components/DFUModal.vue';
 import LogPanel from './components/LogPanel.vue';
+import RegionsPanel from "./components/RegionsPanel.vue";
 import HistoryPanel from './components/HistoryPanel.vue';
 import AboutPanel from './components/AboutPanel.vue';
 

@@ -2,6 +2,7 @@ importScripts('../consumer-queue.min.js');
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
+let ignoreOutput = false;
 let isConnected = false;
 let isEchoing = true;
 let isLogging = true;
@@ -35,11 +36,20 @@ addEventListener('message', (e) => {
         case 'list':
             list(e.data.callbackId);
             break;
+        case 'memoryRegions':
+            memoryRegions();
+            break;
+        case 'newAll':
+            newAll();
+            break;
         case 'play':
             play();
             break;
         case 'record':
             record(e.data.lines);
+            break;
+        case 'region':
+            region(e.data.index);
             break;
         case 'stop':
             stop();
@@ -113,7 +123,13 @@ async function disconnect() {
 
 async function execute(line) {
     await write('>');
-    await write(line);
+    line = line.toLowerCase();
+    if (line.startsWith('mem')) {
+        const result = await write(line);
+        postMessage({ event: 'memoryRegionsResult', result });
+    } else {
+        await write(line);
+    }
     logEvent(`Executed: &nbsp;<code>${line}</code>`);
 }
 
@@ -121,6 +137,23 @@ async function list(callbackId) {
     const result = await write('list');
     postMessage({ event: 'writeResult', callbackId, result });
     logEvent('Listed program code.');
+}
+
+async function memoryRegions() {
+    ignoreOutput = true;
+    await write('>');
+    const result = await write('mem()');
+    postMessage({ event: 'memoryRegionsResult', result });
+    ignoreOutput = false;
+}
+
+/**
+ * Erase all regions.
+ */
+async function newAll() {
+    await write('>');
+    await write('new all');
+    await memoryRegions();
 }
 
 async function play() {
@@ -144,7 +177,7 @@ async function record(lines) {
         if (line.trim().length === 0) {
             line = ' ';
         }
-        console.log('line', `"${line}"`);
+        log('line', `"${line}"`);
         await stream(line + '\n');
         postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
     }
@@ -156,6 +189,16 @@ async function record(lines) {
 
     postMessage({ event: 'recorded' });
     logEvent('Recorded ' + lines.length + ' line(s) of code.');
+}
+
+/**
+ * Select a region.
+ * @param {Number} index
+ */
+async function region(index) {
+    await write('>');
+    await write(`region(${index})`);
+    postMessage({ event: 'regionSelected', index });
 }
 
 async function stop() {
@@ -248,8 +291,10 @@ async function readLoop() {
                         postOutput = false;
                     }
                 }
-                if (postOutput) {
+                if (postOutput && !ignoreOutput) {
                     postMessage({ event: 'output', value: output });
+                } else if (ignoreOutput) {
+                    output = '';
                 }
             }
 
@@ -402,6 +447,8 @@ async function synchronize() {
         }
         tryCount--;
     }
+
+
 }
 
 async function turnOffEcho() {
@@ -433,6 +480,6 @@ async function write(command, terminator = null, lineEnd = '\n') {
         log('write result', result);
         return result;
     } finally {
-        postMessage({ event: 'isTalking', value: false });
+        postMessage({ event: 'isTalking', value: false, lastCommand: command });
     }
 }
