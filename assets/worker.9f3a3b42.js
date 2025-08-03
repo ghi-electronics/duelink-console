@@ -177,7 +177,7 @@ async function record(lines) {
         if (line.trim().length === 0) {
             line = ' ';
         }
-        console.log('line', `"${line}"`);
+        log('line', `"${line}"`);
         await stream(line + '\n');
         postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
     }
