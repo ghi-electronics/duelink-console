@@ -28,7 +28,7 @@
         </div>
     </Panel>
     <div
-        v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null && deviceFirmwareVersion !== latestFirmwareVersion"
+        v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null && firmwareMatches"
         class="px-4 py-2 font-medium bg-yellow-200 dark:text-zinc-900"
     >
         <i class="fas fa-fw fa-triangle-exclamation mr-1"></i> Please update to the latest firmware.
@@ -94,7 +94,6 @@ const device = computed(() => {
 const deviceFirmwareVersion = computed(() => {
     if (firmware.value && deviceVersion.value) {
         return `${deviceVersion.value}`;
-        // return `${firmware.value.name} ${deviceVersion.value}`;
     }
     return null;
 });
@@ -106,11 +105,12 @@ const latestFirmwareVersion = computed(() => {
         const version = props.availableDfu[key].versions.find((version) => version.id === maxId);
         return `${version.name}`;
     }
-    // if (firmware.value) {
-    //     const maxId = Math.max(...firmware.value.versions.map((version) => version.id));
-    //     const version = firmware.value.versions.find((version) => version.id === maxId);
-    //     return `${firmware.value.name} ${version.name}`;
-    // }
     return null;
+});
+
+const firmwareMatches = computed(() => {
+    const deviceNumber = Number(deviceFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
+    const latestNumber = Number(latestFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
+    return !isNaN(deviceNumber) && !isNaN(latestNumber) && deviceNumber === latestNumber;
 });
 </script>
