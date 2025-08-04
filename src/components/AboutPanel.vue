@@ -28,7 +28,7 @@
         </div>
     </Panel>
     <div
-        v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null && firmwareMatches"
+        v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null && !firmwareMatches"
         class="px-4 py-2 font-medium bg-yellow-200 dark:text-zinc-900"
     >
         <i class="fas fa-fw fa-triangle-exclamation mr-1"></i> Please update to the latest firmware.
@@ -111,6 +111,7 @@ const latestFirmwareVersion = computed(() => {
 const firmwareMatches = computed(() => {
     const deviceNumber = Number(deviceFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
     const latestNumber = Number(latestFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
+    console.log(deviceNumber, latestNumber);
     return !isNaN(deviceNumber) && !isNaN(latestNumber) && deviceNumber === latestNumber;
 });
 </script>
