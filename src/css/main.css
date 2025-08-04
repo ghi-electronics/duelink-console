@@ -87,7 +87,11 @@ select {
 .btn.secondary {
     @apply ring-1 ring-inset;
     @apply bg-white text-slate-900 enabled:hover:bg-slate-100 ring-slate-300;
-    @apply dark:bg-transparent dark:text-zinc-100 dark:enabled:hover:bg-zinc-900 dark:ring-zinc-700;
+    @apply dark:bg-transparent dark:text-zinc-400 dark:enabled:hover:text-zinc-300 dark:enabled:hover:bg-zinc-900 dark:ring-zinc-500;
+}
+
+.btn.secondary:disabled {
+    @apply opacity-50;
 }
 
 .btn.connected {
@@ -116,7 +120,7 @@ select {
     @apply bg-slate-200 dark:bg-zinc-900;
 }
 
-#editor {
+#editor, #list-all-editor {
     @apply bg-slate-100 dark:bg-zinc-900;
 }
 

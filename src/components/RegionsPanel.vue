@@ -1,16 +1,11 @@
 <template>
     <Panel title="Regions">
-        <template #buttons>
-            <Button :disabled="!regions.length" data-tippy-content="Clear" @click.native.stop="$emit('erase')">
-                <i class="fas fa-fw fa-eraser"></i>
-            </Button>
-        </template>
-        <div v-if="regions.length" class="p-2 whitespace-pre-wrap">
-            <div class="p-2 text-sm divide-y divide-slate-300 dark:divide-zinc-700">
+        <div class="p-2 whitespace-pre-wrap">
+            <div v-if="regions.length" class="p-2 text-sm divide-y divide-slate-300 dark:divide-zinc-700">
                 <div class="px-2 py-1 grid grid-cols-12 font-medium">
                     <div class="col-span-1"></div>
-                    <div class="col-span-3">Region</div>
-                    <div class="col-span-5 text-right">Used</div>
+                    <div class="col-span-4">Region</div>
+                    <div class="col-span-4 text-right">Used</div>
                     <div class="col-span-3 text-right">Total</div>
                 </div>
                 <div
@@ -22,16 +17,45 @@
                     <div class="col-span-1">
                         <i v-if="region?.current" class="fas fa-fw fa-angle-right"></i>
                     </div>
-                    <div class="col-span-3">
-                        {{ region?.index || 0 }}
+                    <div class="col-span-4">
+                        {{ region?.index + ' - ' + (region?.index === 0 ? 'Driver' : 'User') }}
                     </div>
-                    <div class="col-span-5 text-right">
-                        {{ region?.used || 0 }}
+                    <div class="col-span-4 text-right">
+                        {{ region?.used }}
                     </div>
                     <div class="col-span-3 text-right">
-                        {{ region?.total || 0 }}
+                        {{ region?.total }}
                     </div>
                 </div>
+            </div>
+            <div v-if="regions.length" class="mt-2 px-12 flex space-x-4">
+                <Button
+                    :disabled="regions.length >= 2"
+                    class="w-full"
+                    data-tippy-content="Clear"
+                    type="secondary"
+                    @click.native.stop="$emit('region', 1)"
+                >
+                    Add Region
+                </Button>
+                <Button
+                    :disabled="regions.every((region) => region.used === 0)"
+                    class="w-full"
+                    data-tippy-content="Clear"
+                    type="secondary"
+                    @click.native.stop="$emit('list-all')"
+                >
+                    List All
+                </Button>
+                <Button
+                    :disabled="!regions.length || (regions.length === 1 && regions[0].index === 0 && regions[0].used === 0)"
+                    class="w-full"
+                    data-tippy-content="Clear"
+                    type="secondary"
+                    @click.native.stop="$emit('new-all')"
+                >
+                    Erase All
+                </Button>
             </div>
         </div>
     </Panel>

@@ -3,7 +3,13 @@ import { ref, watch } from 'vue';
 
 const worker = new Worker(new URL('worker.js', import.meta.url));
 
-export default function useWebSerial($refs) {
+/**
+ * Web Serial composable.
+ * @param {Object} $refs
+ * @param {import('mitt').Emitter} emitter
+ * @returns {Object}}
+ */
+export default function useWebSerial($refs, emitter) {
     // Data
     const history = ref([]);
     const isBusy = ref(false);
@@ -14,6 +20,8 @@ export default function useWebSerial($refs) {
     const log = ref('');
     const regions = ref([]);
     const version = ref(null);
+
+    let memoryRegionsCallback = null;
 
     // Setup
 
@@ -64,7 +72,17 @@ export default function useWebSerial($refs) {
         worker.postMessage({ task: 'list', callbackId: storeCallback(callback) });
     }
 
-    function memoryRegions() {
+    /**
+     * Request the worker to list all region code.
+     */
+    function listAll() {
+        worker.postMessage({ task: 'listAll' });
+    }
+
+    function memoryRegions(regionSelected = false) {
+        if (regionSelected) {
+            memoryRegionsCallback = () => emitter.emit('regionSelected');
+        }
         worker.postMessage({ task: 'memoryRegions' });
     }
 
@@ -111,17 +129,24 @@ export default function useWebSerial($refs) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
-                memoryRegions();
+                memoryRegions(true);
                 break;
             case 'disconnected':
                 isConnected.value = false;
                 logEvent('Port disconnected.');
                 break;
+            case 'erased':
+                regions.value = [];
+                emitter.emit('erased');
+                break;
             case 'isTalking':
                 isTalking.value = data.value;
-                if (data.lastCommand.startsWith('region')) {
-                    memoryRegions();
+                if (data?.lastCommand?.startsWith?.('region')) {
+                    //memoryRegions();
                 }
+                break;
+            case 'listAllResult':
+                emitter.emit('listAllResult', data);
                 break;
             case 'logError':
                 logError(data.message);
@@ -138,18 +163,24 @@ export default function useWebSerial($refs) {
                 data.result.shift();
                 // Make more usable.
                 data.result.forEach((info) => {
-                    info = info.match(/(\*?\d+)/gm);
-                    const current = info[0].startsWith('*');
-                    if (current) {
-                        info[0] = info[0].substring(1, info[0].length);
+                    if (info) {
+                        info = info.match(/(\*?\d+)/gm);
+                        const current = info[0].startsWith('*');
+                        if (current) {
+                            info[0] = info[0].substring(1, info[0].length);
+                        }
+                        regions.value.push({
+                            current,
+                            index: Number(info[0]),
+                            used: Number(info[1]),
+                            total: Number(info[2]),
+                        });
                     }
-                    regions.value.push({
-                        current,
-                        index: info[0],
-                        used: info[1],
-                        total: info[2],
-                    });
                 });
+                if (memoryRegionsCallback) {
+                    memoryRegionsCallback();
+                    memoryRegionsCallback = null;
+                }
                 break;
             case 'output':
                 log.value = data.value;
@@ -172,9 +203,11 @@ export default function useWebSerial($refs) {
             case 'recorded':
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
+                memoryRegions();
                 break;
             case 'regionSelected':
                 regions.value.forEach((region) => region.current = region.index === data.index);
+                memoryRegions(true);
                 break;
             case 'stopped':
                 isPlaying.value = false;
@@ -229,6 +262,7 @@ export default function useWebSerial($refs) {
         disconnect,
         execute,
         list,
+        listAll,
         newAll,
         play,
         record,
