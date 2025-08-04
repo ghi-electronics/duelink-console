@@ -5,7 +5,7 @@
                 <i class="fas fa-fw fa-eraser"></i>
             </Button>
         </template>
-        <div class="p-2 whitespace-pre-wrap">
+        <div class="p-4 whitespace-pre-wrap text-sm font-mono text-slate-700 dark:text-zinc-300">
             {{ finalLog }}
         </div>
     </Panel>

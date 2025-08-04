@@ -6,7 +6,9 @@
     "build": "vite build --emptyOutDir",
     "serve": "vite preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "mitt": "^3.0.1"
+  },
   "devDependencies": {
     "@headlessui/vue": "^1.7.13",
     "@popperjs/core": "^2.11.7",

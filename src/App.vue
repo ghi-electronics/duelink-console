@@ -39,7 +39,7 @@
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
-                <v-ace-editor
+                <VAceEditor
                     v-model:value="recordModeCode"
                     :lang="language"
                     :ref="(el) => $refs.editor = el"
@@ -83,8 +83,13 @@
                 </div>
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
+                <RegionsPanel
+                    :regions="webSerial.regions.value"
+                    @list-all="webSerial.listAll()"
+                    @new-all="newAllModal.open = true"
+                    @region="webSerial.region($event)"
+                />
                 <LogPanel v-model:log="webSerial.log.value" />
-                <RegionsPanel :regions="webSerial.regions.value" @erase="webSerial.newAll()" @region="webSerial.region($event)" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
@@ -149,6 +154,21 @@
         :open="dfuModal.open"
         @close="dfuModal.open = false"
     />
+    
+    <ListAllModal
+        :code="listAllModal.code"
+        :language="language"
+        :open="listAllModal.open"
+        :text-size="textSize"
+        :theme="theme"
+        @close="listAllModal.open = false"
+    />
+    
+    <NewAllModal
+        :open="newAllModal.open"
+        @close="newAllModal.open = false"
+        @confirm="webSerial.newAll(); newAllModal.open = false"
+    />
 </template>
 
 <script setup>
@@ -156,6 +176,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import tippy from 'tippy.js';
 import { VAceEditor } from 'vue3-ace-editor';
 import useWebSerial from './js/useWebSerial.js';
+import mitt from "mitt";
 
 // Components
 
@@ -170,14 +191,14 @@ import LogPanel from './components/LogPanel.vue';
 import RegionsPanel from "./components/RegionsPanel.vue";
 import HistoryPanel from './components/HistoryPanel.vue';
 import AboutPanel from './components/AboutPanel.vue';
+import ListAllModal from "./components/ListAllModal.vue";
+import NewAllModal from "./components/NewAllModal.vue";
 
 // Refs
 
 const $refs = { editor: null, filename: null, input: null, progress: null };
 
 // Data
-
-const webSerial = useWebSerial($refs);
 
 const availableFirmware = reactive({});
 const availableDfu = reactive({});
@@ -190,6 +211,28 @@ const filename = ref('');
 const language = ref('python');
 const theme = ref('light');
 const textSize = ref(16);
+
+// Emitter
+
+const emitter = mitt();
+
+emitter.on('erased', () => {
+    recordModeCode.value = '';
+});
+
+emitter.on('listAllResult', (data) => {
+    if (data.result.length === 1 && data.result[0] === '>') {
+        data.result = [];
+    }
+    listAllModal.code = data.result.join("\n");
+    listAllModal.open = true;
+});
+
+emitter.on('regionSelected', () => sendList(null));
+
+// Setup
+
+const webSerial = useWebSerial($refs, emitter);
 
 const tippyConfig = {
     animation: 'fade',
@@ -240,7 +283,6 @@ const alreadyHasCodeModal = reactive({
     },
 });
 
-
 const firmwareModal = reactive({
     open: false,
     toggleCounter: 0,
@@ -250,8 +292,6 @@ const firmwareModal = reactive({
         }
         //this.open = true;
         this.toggleCounter++;
-
-
     },
 });
 
@@ -284,6 +324,15 @@ const downloadModal = reactive({
         filename.value = '';
         this.open = false;
     },
+});
+
+const listAllModal = reactive({
+    open: false,
+    code: null,
+});
+
+const newAllModal = reactive({
+    open: false,
 });
 
 let editor = null;
