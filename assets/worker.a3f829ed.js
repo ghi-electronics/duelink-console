@@ -36,6 +36,9 @@ addEventListener('message', (e) => {
         case 'list':
             list(e.data.callbackId);
             break;
+        case 'listAll':
+            listAll();
+            break;
         case 'memoryRegions':
             memoryRegions();
             break;
@@ -139,6 +142,14 @@ async function list(callbackId) {
     logEvent('Listed program code.');
 }
 
+/**
+ * List all region code.
+ */
+async function listAll() {
+    const result = await write('list all');
+    postMessage({ event: 'listAllResult', result });
+}
+
 async function memoryRegions() {
     ignoreOutput = true;
     await write('>');
@@ -153,6 +164,7 @@ async function memoryRegions() {
 async function newAll() {
     await write('>');
     await write('new all');
+    postMessage({ event: 'erased' });
     await memoryRegions();
 }
 
