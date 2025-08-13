@@ -80,6 +80,7 @@ export default function useWebSerial($refs, emitter) {
     }
 
     function memoryRegions(regionSelected = false) {
+        window.console.log('memoryRegions 1');
         if (regionSelected) {
             memoryRegionsCallback = () => emitter.emit('regionSelected');
         }
@@ -129,7 +130,7 @@ export default function useWebSerial($refs, emitter) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
-                memoryRegions(true);
+                //memoryRegions(true);
                 break;
             case 'disconnected':
                 isConnected.value = false;
@@ -203,11 +204,11 @@ export default function useWebSerial($refs, emitter) {
             case 'recorded':
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
-                memoryRegions();
+                //memoryRegions();
                 break;
             case 'regionSelected':
                 regions.value.forEach((region) => region.current = region.index === data.index);
-                memoryRegions(true);
+                //memoryRegions(true);
                 break;
             case 'stopped':
                 isPlaying.value = false;
