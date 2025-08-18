@@ -2,10 +2,10 @@
   "DUELink": {
     "name": "DUELink",
     "versions": [      		        
-      { "id": 1, "name": "v0.36 (Alpha)", "url": "firmware/duelink_fw_v036.bin" },
-      { "id": 2, "name": "v0.37 (Alpha)", "url": "firmware/duelink_fw_v037.bin" },
-      { "id": 3, "name": "v0.38 (Alpha)", "url": "firmware/duelink_fw_v038.bin" },
-      { "id": 4, "name": "v0.39 (Alpha)", "url": "firmware/duelink_fw_v039.bin" }
+      { "id": 1, "name": "v0.37 (Alpha)", "url": "firmware/duelink_fw_v037.bin" },
+      { "id": 2, "name": "v0.38 (Alpha)", "url": "firmware/duelink_fw_v038.bin" },
+      { "id": 3, "name": "v0.39 (Alpha)", "url": "firmware/duelink_fw_v039.bin" },
+      { "id": 4, "name": "v0.40 (Alpha)", "url": "firmware/duelink_fw_v040.bin" }
     ],
     "boards": [
 	  { "name": "DUELink", "id": "D" }     
@@ -13,11 +13,11 @@
   },
   "MicroBlock": {
     "name": "MicroBlocks",
-    "versions": [            
-      { "id": 1, "name": "v329 (Alpha)", "url": "firmware/duelink_microblocks_v329.bin" },
-      { "id": 2, "name": "v330 (Alpha)", "url": "firmware/duelink_microblocks_v330.bin" },
-      { "id": 3, "name": "v331 (Alpha)", "url": "firmware/duelink_microblocks_v331.bin" },
-      { "id": 4, "name": "v333 (Alpha)", "url": "firmware/duelink_microblocks_v333.bin" }
+    "versions": [                  
+      { "id": 1, "name": "v330 (Alpha)", "url": "firmware/duelink_microblocks_v330.bin" },
+      { "id": 2, "name": "v331 (Alpha)", "url": "firmware/duelink_microblocks_v331.bin" },
+      { "id": 3, "name": "v333 (Alpha)", "url": "firmware/duelink_microblocks_v333.bin" },
+      { "id": 4, "name": "v343 (Alpha)", "url": "firmware/duelink_microblocks_v343.bin" }
     ],
     "boards": [
 	  { "name": "microblocks.fun", "id": "D" }     
