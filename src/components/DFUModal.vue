@@ -147,6 +147,15 @@
           <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
         </div>
       </div>
+      
+      <div v-else-if="state === 'erase_complete'" class="firmware-progress-box">
+        <div class="w-full">
+          <div class="mb-2 text-sky-600 dark:text-lime-400">
+            Erased all... 100%
+          </div>
+          <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
+        </div>
+      </div>
     </div>
 
     <template #buttons>
@@ -176,6 +185,11 @@
             <Button @click.native="done"> Done </Button>
             <Button type="secondary" @click.native="restart"> Restart </Button>
           </template>
+          
+          <template v-else-if="state === 'erase_complete'">            
+            <Button type="secondary" @click.native="restart"> Restart </Button>
+          </template>
+          
         </template>
         <template v-else>
           <Button @click.native="connect"> Connect </Button>
@@ -526,11 +540,11 @@ async function writeFirmware() {
           
           // await this.Go();
           
-          state.value = "complete";
+          state.value = "erase_complete";
       }
       catch (err) {
           log("Erase all failed: " + err.message);
-          state.value = "complete";
+          state.value = "erase_complete";
       }
   }
 
