@@ -523,8 +523,20 @@ async function writeFirmware() {
 
           // -------- Step 3: Finalize DFU download --------
           log(`Sending final zero-length packet (block ${blockNumber}) to complete DFU transfer...`);
-          try {
-              await dfuDownloadBlock(blockNumber, new ArrayBuffer(0));
+          try {              
+              cmdBlock[0] = 0x21; // "Download Memory" command
+              cmdBlock[1] = BASE_ADDRESS & 0xff;
+              cmdBlock[2] = (BASE_ADDRESS >> 8) & 0xff;
+              cmdBlock[3] = (BASE_ADDRESS >> 16) & 0xff;
+              cmdBlock[4] = (BASE_ADDRESS >> 24) & 0xff;
+              log(`Sending address command block (block 0): write pointer set to 0x${BASE_ADDRESS.toString(16)}`);
+              await dfuDownloadBlock(0, cmdBlock);
+              await waitForDfuIdle();
+          
+              
+              await dfuDownloadBlock(0, new ArrayBuffer(0));
+              
+              await waitForDfuIdle();
           } catch (e) {
               // STM32 DFU bootloader can return an error (e.g. status error 10)
               // when the final packet triggers the manifest phase (reset).
