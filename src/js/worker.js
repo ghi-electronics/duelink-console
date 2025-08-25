@@ -443,7 +443,13 @@ async function synchronize() {
             log('mode set to', result);
         }
     }
+    
+    result = await this.write('\n');        
+    console.log('new line result', result);
 
+    result = await this.write('sel(1)');        
+    console.log('sel(1) result ', result);
+        
     if (isEchoing) {
         await turnOffEcho();
     }
