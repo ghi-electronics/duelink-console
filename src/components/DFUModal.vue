@@ -162,6 +162,11 @@
             <Button type="secondary" @click.native="disconnect">
               Disconnect
             </Button>
+            
+            <Button type="secondary" @click.native="performEraseAll">
+              Erase All
+            </Button>
+            
           </template>
           <template v-if="state === 'erasing' || state === 'writing'">
             <Button disabled> Load </Button>
@@ -468,6 +473,66 @@ async function writeFirmware() {
       }
       log("Erase complete.");
   }
+  
+  // ----- DFU Go command (Single‑Session, DFU 1.1) -----
+  async function Go() {
+        log(`Sending final zero-length packet  to complete DFU transfer...`);
+        let cmdBlock = new Uint8Array(5);
+        try {              
+          cmdBlock[0] = 0x21; // "Download Memory" command
+          cmdBlock[1] = BASE_ADDRESS & 0xff;
+          cmdBlock[2] = (BASE_ADDRESS >> 8) & 0xff;
+          cmdBlock[3] = (BASE_ADDRESS >> 16) & 0xff;
+          cmdBlock[4] = (BASE_ADDRESS >> 24) & 0xff;
+          log(`Sending address command block (block 0): write pointer set to 0x${BASE_ADDRESS.toString(16)}`);
+          await dfuDownloadBlock(0, cmdBlock);
+          await waitForDfuIdle();
+
+          
+          await dfuDownloadBlock(0, new ArrayBuffer(0));
+          
+          await waitForDfuIdle();
+          
+          return 1;
+        } catch (e) {
+          // STM32 DFU bootloader can return an error (e.g. status error 10)
+          // when the final packet triggers the manifest phase (reset).
+          log(`Finalization error (expected during manifest/reset): ${e.message}`);
+        }
+        
+        return 0;
+  }
+  
+  
+  // ----- DFU Erase all Process (Single‑Session, DFU 1.1) -----
+  async function performEraseAll() {
+      try {
+          let status = await dfuGetStatus();
+          
+          if (status.status !== 0) {
+              log("Clearing DFU error status...");
+              await device.controlTransferOut({
+                  requestType: 'class',
+                  recipient: 'interface',
+                  request: DFU_CLRSTATUS,
+                  value: 0,
+                  index: DFU_INTERFACE_NUMBER
+              });
+              await sleep(100);
+          }
+          
+          const totalSize = 128*1024; // max size is 128k
+          await eraseTargetArea(totalSize);
+          
+          // await this.Go();
+          
+          state.value = "complete";
+      }
+      catch (err) {
+          log("Erase all failed: " + err.message);
+          state.value = "complete";
+      }
+  }
 
   // ----- DFU Firmware Upgrade Process (Single‑Session, DFU 1.1) -----
   async function performDfuFirmwareUpgrade(firmwareBuffer) {
@@ -523,25 +588,7 @@ async function writeFirmware() {
 
           // -------- Step 3: Finalize DFU download --------
           log(`Sending final zero-length packet (block ${blockNumber}) to complete DFU transfer...`);
-          try {              
-              cmdBlock[0] = 0x21; // "Download Memory" command
-              cmdBlock[1] = BASE_ADDRESS & 0xff;
-              cmdBlock[2] = (BASE_ADDRESS >> 8) & 0xff;
-              cmdBlock[3] = (BASE_ADDRESS >> 16) & 0xff;
-              cmdBlock[4] = (BASE_ADDRESS >> 24) & 0xff;
-              log(`Sending address command block (block 0): write pointer set to 0x${BASE_ADDRESS.toString(16)}`);
-              await dfuDownloadBlock(0, cmdBlock);
-              await waitForDfuIdle();
-          
-              
-              await dfuDownloadBlock(0, new ArrayBuffer(0));
-              
-              await waitForDfuIdle();
-          } catch (e) {
-              // STM32 DFU bootloader can return an error (e.g. status error 10)
-              // when the final packet triggers the manifest phase (reset).
-              log(`Finalization error (expected during manifest/reset): ${e.message}`);
-          }
+          await Go();
           log("Firmware update complete. The device should now program the firmware and reset.");
           state.value = "complete";
       } catch (err) {
