@@ -57,6 +57,9 @@ addEventListener('message', (e) => {
         case 'stop':
             stop();
             break;
+        case 'erase_all':
+            erase_all();
+            break;
     }
 });
 
@@ -201,6 +204,20 @@ async function record(lines) {
     await readUntil();
 
     postMessage({ event: 'recorded' });
+    logEvent('Recorded ' + lines.length + ' line(s) of code.');
+}
+
+async function erase_all() {
+    postMessage({ event: 'Erasing', percent: 0 });
+
+    await write('reset(1)');
+    
+    await write('reset(1)');
+
+
+    postMessage({ event: 'Erased', percent: 100 });
+
+
     logEvent('Recorded ' + lines.length + ' line(s) of code.');
 }
 

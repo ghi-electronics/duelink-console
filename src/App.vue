@@ -36,6 +36,7 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
+            @erase_all="erase_all"
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -115,6 +116,10 @@
             </div>
         </template>
     </Modal>
+    
+    
+    
+    
     
     <Modal :open="downloadModal.open">
         <template #title>
@@ -506,6 +511,13 @@ async function sendList(target) {
             }
         });
     }
+}
+
+async function erase_all() {
+    console.log('erase_all');
+    
+    webSerial.erase_all();
+
 }
 
 function updateTippy(target, show = false) {
