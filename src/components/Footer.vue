@@ -30,7 +30,7 @@
                 &copy; GHI Electronics {{ new Date().getFullYear() }}
             </div>
             <div class="text-4xl flex space-x-4">
-                <a href="https://www.facebook.com/ghielectronics/" target="_blank">
+                <a href="https://www.facebook.com/ghielec/" target="_blank">
                     <i class="fab fa-facebook-square"></i>
                 </a>
                 <a href="https://www.twitter.com/GHIElectronics" target="_blank">
