@@ -117,7 +117,23 @@
         </template>
     </Modal>
     
-    
+    <Modal :open="alreadyHasFWModal.open">
+        <template #title>
+            Heads up!
+        </template>
+        <div>Your device will be erased all</div>
+        <div>Do you want to continue?</div>
+        <template #buttons>
+            <div class="flex space-x-2">
+                <Button class="w-full" @click.native="alreadyHasFWModal.yes()">
+                    Yes
+                </Button>
+                <Button class="w-full" type="secondary" @click.native="alreadyHasFWModal.no()">
+                    No
+                </Button>
+            </div>
+        </template>
+    </Modal>
     
     
     
@@ -274,6 +290,30 @@ const alreadyHasCodeModal = reactive({
             // This call will create output.
             webSerial.list();
         }
+        this.open = false;
+        this.fixTippy();
+    },
+    fixTippy() {
+        if (this?.target?._tippy) {
+            this.target._tippy.destroy();
+            setTimeout(() => {
+                tippyConfig.theme = theme.value;
+                tippy(this.target, tippyConfig)
+            }, 200);
+        }
+    },
+});
+
+const alreadyHasFWModal = reactive({
+    open: false,
+    target: null,
+    async yes() {
+        webSerial.erase_all()
+        this.open = false;
+        this.fixTippy();
+    },
+    async no() {
+
         this.open = false;
         this.fixTippy();
     },
@@ -516,7 +556,9 @@ async function sendList(target) {
 async function erase_all() {
     console.log('erase_all');
     
-    webSerial.erase_all();
+    //alreadyHasFWModal.target = target;    
+    alreadyHasFWModal.open = true;
+    //webSerial.erase_all();
 
 }
 
