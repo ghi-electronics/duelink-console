@@ -8,7 +8,7 @@
         On your board, find <kbd>A</kbd> or <kbd>LDR</kbd> button. If not found,
         insert a paper clip in the 2 small holes. Images and instructions are
         found on the
-        <a href="https://www.duelink.com/docs/loader"> Loader</a> page.
+        <a target="_blank" rel="noopener noreferrer" href="https://www.duelink.com/docs/loader"> Loader</a> page.
         <span class="font-semibold"
           >Keep holding the button down or keep the paper clip in</span
         >
@@ -22,7 +22,7 @@
           </li>
         </ul>
         <ul class="mt-2 ul-reset text-blue-600">
-          <li>This will put your board in loader mode.</li>
+          <li>This will put your board in <kbd>DFU mode</kbd> </li>
         </ul>
       </li>
       <li>
@@ -41,10 +41,6 @@
       </li>
 
       <li>Select the desired firmware and click <kbd>Load</kbd>.</li>
-      <li>
-        Once <span class="font-semibold">Loading is complete</span>,
-        <kbd>RESET</kbd> or <kbd>Power Cycle</kbd> the board.
-      </li>
     </ol>
 
     <div v-if="error" class="mb-4 rounded-md bg-red-50 p-4">
@@ -147,6 +143,15 @@
           <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
         </div>
       </div>
+      
+      <div v-else-if="state === 'erase_complete'" class="firmware-progress-box">
+        <div class="w-full">
+          <div class="mb-2 text-sky-600 dark:text-lime-400">
+            Erased all... 100%
+          </div>
+          <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
+        </div>
+      </div>
     </div>
 
     <template #buttons>
@@ -162,15 +167,26 @@
             <Button type="secondary" @click.native="disconnect">
               Disconnect
             </Button>
+            
+            <Button type="secondary" @click.native="performEraseAll">
+              Erase All
+            </Button>
+            
           </template>
           <template v-if="state === 'erasing' || state === 'writing'">
             <Button disabled> Load </Button>
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
           <template v-else-if="state === 'complete'">
-            <Button @click.native="done"> Done </Button>
-            <Button type="secondary" @click.native="restart"> Restart </Button>
+            <Button @click.native="doback"> Back </Button>        
+            <Button @click.native="done"> Close </Button>            
           </template>
+          
+          <template v-else-if="state === 'erase_complete'">  
+            <Button @click.native="doback"> Back </Button>                  
+            <Button @click.native="done"> Close </Button>
+          </template>
+          
         </template>
         <template v-else>
           <Button @click.native="connect"> Connect </Button>
@@ -289,7 +305,7 @@ async function disconnect() {
   }
   error.value = null;
   try {
-    await ghiLoader.close();
+    //await ghiLoader.close();
     isConnected.value = false;
     port = undefined;
     state.value = "idle";
@@ -299,8 +315,13 @@ async function disconnect() {
 }
 
 async function done() {
+  restart();
   await disconnect();
   $emit("close");
+}
+
+async function doback() {
+  state.value = "idle";
 }
 
 async function sha256(message) {
@@ -468,6 +489,66 @@ async function writeFirmware() {
       }
       log("Erase complete.");
   }
+  
+  // ----- DFU Go command (Single‑Session, DFU 1.1) -----
+  async function Go() {
+        log(`Sending final zero-length packet  to complete DFU transfer...`);
+        let cmdBlock = new Uint8Array(5);
+        try {              
+          cmdBlock[0] = 0x21; // "Download Memory" command
+          cmdBlock[1] = BASE_ADDRESS & 0xff;
+          cmdBlock[2] = (BASE_ADDRESS >> 8) & 0xff;
+          cmdBlock[3] = (BASE_ADDRESS >> 16) & 0xff;
+          cmdBlock[4] = (BASE_ADDRESS >> 24) & 0xff;
+          log(`Sending address command block (block 0): write pointer set to 0x${BASE_ADDRESS.toString(16)}`);
+          await dfuDownloadBlock(0, cmdBlock);
+          await waitForDfuIdle();
+
+          
+          await dfuDownloadBlock(0, new ArrayBuffer(0));
+          
+          await waitForDfuIdle();
+          
+          return 1;
+        } catch (e) {
+          // STM32 DFU bootloader can return an error (e.g. status error 10)
+          // when the final packet triggers the manifest phase (reset).
+          log(`Finalization error (expected during manifest/reset): ${e.message}`);
+        }
+        
+        return 0;
+  }
+  
+  
+  // ----- DFU Erase all Process (Single‑Session, DFU 1.1) -----
+  async function performEraseAll() {
+      try {
+          let status = await dfuGetStatus();
+          
+          if (status.status !== 0) {
+              log("Clearing DFU error status...");
+              await device.controlTransferOut({
+                  requestType: 'class',
+                  recipient: 'interface',
+                  request: DFU_CLRSTATUS,
+                  value: 0,
+                  index: DFU_INTERFACE_NUMBER
+              });
+              await sleep(100);
+          }
+          
+          const totalSize = 128*1024; // max size is 128k
+          await eraseTargetArea(totalSize);
+          
+          // await this.Go();
+          
+          state.value = "erase_complete";
+      }
+      catch (err) {
+          log("Erase all failed: " + err.message);
+          state.value = "erase_complete";
+      }
+  }
 
   // ----- DFU Firmware Upgrade Process (Single‑Session, DFU 1.1) -----
   async function performDfuFirmwareUpgrade(firmwareBuffer) {
@@ -523,13 +604,7 @@ async function writeFirmware() {
 
           // -------- Step 3: Finalize DFU download --------
           log(`Sending final zero-length packet (block ${blockNumber}) to complete DFU transfer...`);
-          try {
-              await dfuDownloadBlock(blockNumber, new ArrayBuffer(0));
-          } catch (e) {
-              // STM32 DFU bootloader can return an error (e.g. status error 10)
-              // when the final packet triggers the manifest phase (reset).
-              log(`Finalization error (expected during manifest/reset): ${e.message}`);
-          }
+          await Go();
           log("Firmware update complete. The device should now program the firmware and reset.");
           state.value = "complete";
       } catch (err) {

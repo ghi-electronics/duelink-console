@@ -57,6 +57,14 @@
             <input id="file" type="file" class="hidden" @change="onLoad" />
         </label>
         <Button
+            :disabled="isBusy || !isConnected || isTalking"
+            class="tool"
+            data-tippy-content="Erase all"
+            @click.native="$emit('erase_all', $event.target)"
+        >
+            <i class="fas fa-fw fa-eraser" style="color: red;"></i>
+        </Button>
+        <Button
             :disabled="!canTextSizePlus"
             class="tool"
             data-tippy-content="Increase text size"
@@ -91,6 +99,7 @@ const $emit = defineEmits([
     'record',
     'list',
     'load',
+    'erase_all',
 ]);
 
 // Props
@@ -107,6 +116,7 @@ const props = defineProps({
     isBusy: Boolean,
     isConnected: Boolean,
     isTalking: Boolean,
+    canEraseAll: Boolean,
 });
 
 // Methods

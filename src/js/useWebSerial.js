@@ -113,6 +113,10 @@ export default function useWebSerial($refs, emitter) {
     function stop() {
         worker.postMessage({ task: 'stop' });
     }
+    
+    function erase_all() {
+        worker.postMessage({ task: 'erase_all' });
+    }
 
     // Methods - Utilities
 
@@ -269,5 +273,6 @@ export default function useWebSerial($refs, emitter) {
         record,
         region,
         stop,
+        erase_all,
     };
 }
