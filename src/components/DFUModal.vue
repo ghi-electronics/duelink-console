@@ -21,23 +21,14 @@
             in while resetting or power cycling the board.
           </li>
         </ul>
-        <ul class="mt-2 ul-reset text-blue-600">
-          <li>This will put your board in <kbd>DFU mode</kbd> </li>
-        </ul>
       </li>
       <li>
-        <kbd>Release</kbd> the button now or <kbd>remove</kbd> the paper clip.
+        <kbd>Release</kbd> the button now, or <kbd>remove</kbd> the paper clip.
       </li>
 
       <li>
         Click the <kbd>Connect</kbd> button below and select
-        <kbd><em>DFU in FS mode</em></kbd>.
-        <ul class="mt-2 ul-reset text-blue-600">
-          <li>
-            Go back to first step if you do not see
-            <kbd><em>DFU in FS mode</em></kbd>.
-          </li>
-        </ul>
+        <kbd><em>DFU in FS mode</em></kbd>.        
       </li>
 
       <li>Select the desired firmware and click <kbd>Load</kbd>.</li>
