@@ -182,12 +182,11 @@
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
           <template v-else-if="state === 'complete'">
-            <Button @click.native="done"> Done </Button>
-            <Button type="secondary" @click.native="restart"> Restart </Button>
+            <Button @click.native="done"> Done </Button>            
           </template>
           
           <template v-else-if="state === 'erase_complete'">            
-            <Button type="secondary" @click.native="restart"> Restart </Button>
+            <Button @click.native="done"> Done </Button>
           </template>
           
         </template>
@@ -308,7 +307,7 @@ async function disconnect() {
   }
   error.value = null;
   try {
-    await ghiLoader.close();
+    //await ghiLoader.close();
     isConnected.value = false;
     port = undefined;
     state.value = "idle";
@@ -318,6 +317,7 @@ async function disconnect() {
 }
 
 async function done() {
+  restart();
   await disconnect();
   $emit("close");
 }
