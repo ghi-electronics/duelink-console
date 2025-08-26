@@ -177,8 +177,7 @@
             <Button disabled> Load </Button>
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
-          <template v-else-if="state === 'complete'">
-            <Button @click.native="doback"> Back </Button>        
+          <template v-else-if="state === 'complete'">                   
             <Button @click.native="done"> Close </Button>            
           </template>
           
