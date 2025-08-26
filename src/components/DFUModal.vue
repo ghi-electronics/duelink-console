@@ -178,10 +178,12 @@
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
           <template v-else-if="state === 'complete'">
+            <Button @click.native="doback"> Back </Button>        
             <Button @click.native="done"> Close </Button>            
           </template>
           
-          <template v-else-if="state === 'erase_complete'">            
+          <template v-else-if="state === 'erase_complete'">  
+            <Button @click.native="doback"> Back </Button>                  
             <Button @click.native="done"> Close </Button>
           </template>
           
@@ -316,6 +318,10 @@ async function done() {
   restart();
   await disconnect();
   $emit("close");
+}
+
+async function doback() {
+  state.value = "idle";
 }
 
 async function sha256(message) {
