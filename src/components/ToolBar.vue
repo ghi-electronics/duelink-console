@@ -62,7 +62,7 @@
             data-tippy-content="Erase all"
             @click.native="$emit('erase_all', $event.target)"
         >
-            <i class="fas fa-fw fa-eraser"></i>
+            <i class="fas fa-fw fa-eraser" style="color: red;"></i>
         </Button>
         <Button
             :disabled="!canTextSizePlus"

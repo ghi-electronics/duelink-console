@@ -8,7 +8,7 @@
         On your board, find <kbd>A</kbd> or <kbd>LDR</kbd> button. If not found,
         insert a paper clip in the 2 small holes. Images and instructions are
         found on the
-        <a href="https://www.duelink.com/docs/loader"> Loader</a> page.
+        <a target="_blank" rel="noopener noreferrer" href="https://www.duelink.com/docs/loader"> Loader</a> page.
         <span class="font-semibold"
           >Keep holding the button down or keep the paper clip in</span
         >
@@ -22,7 +22,7 @@
           </li>
         </ul>
         <ul class="mt-2 ul-reset text-blue-600">
-          <li>This will put your board in loader mode.</li>
+          <li>This will put your board in <kbd>DFU mode</kbd> </li>
         </ul>
       </li>
       <li>
@@ -41,10 +41,6 @@
       </li>
 
       <li>Select the desired firmware and click <kbd>Load</kbd>.</li>
-      <li>
-        Once <span class="font-semibold">Loading is complete</span>,
-        <kbd>RESET</kbd> or <kbd>Power Cycle</kbd> the board.
-      </li>
     </ol>
 
     <div v-if="error" class="mb-4 rounded-md bg-red-50 p-4">
@@ -182,11 +178,11 @@
             <Button disabled type="secondary"> Disconnect </Button>
           </template>
           <template v-else-if="state === 'complete'">
-            <Button @click.native="done"> Done </Button>            
+            <Button @click.native="done"> Close </Button>            
           </template>
           
           <template v-else-if="state === 'erase_complete'">            
-            <Button @click.native="done"> Done </Button>
+            <Button @click.native="done"> Close </Button>
           </template>
           
         </template>
