@@ -58,11 +58,11 @@
         </label>
         <Button
             :disabled="isBusy || !isConnected || isTalking"
-            class="tool"
+            class="tool record"
             data-tippy-content="Erase all"
             @click.native="$emit('erase_all', $event.target)"
         >
-            <i class="fas fa-fw fa-eraser" style="color: red;"></i>
+            <i class="fas fa-fw fa-eraser"></i>
         </Button>
         <Button
             :disabled="!canTextSizePlus"
