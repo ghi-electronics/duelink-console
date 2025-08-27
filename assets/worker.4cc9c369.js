@@ -456,7 +456,7 @@ async function stream(data) {
 
 async function synchronize() {
     // Escape the current program.
-    let tryCount = 3;
+    let tryCount = 4;
     while (tryCount > 0) {
         writer.write(encoder.encode('\x1B'));
         log('wrote escape');
