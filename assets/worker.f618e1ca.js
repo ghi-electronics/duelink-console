@@ -109,7 +109,7 @@ async function connect() {
     }
     else {
         //logEvent('There was an error while connencting.');
-        postMessage({ event: 'ConnectFailed', message: "Synchronize failed. Try to connect again!", name: "Device is busy" });
+        postMessage({ event: 'ConnectFailed', message: "Synchronize failed. Reset the board, or Press F5 then try to click connect again.", name: "Device is busy" });
     }
 }
 
