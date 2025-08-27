@@ -477,7 +477,7 @@ async function synchronize() {
         }
         else {
             if (result.length === 0) {
-                await sleep(1000);
+                await sleep(500);
             }
         }
         tryCount--;
