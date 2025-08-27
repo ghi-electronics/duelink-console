@@ -66,6 +66,7 @@ addEventListener('message', (e) => {
 // ACTIONS
 
 async function connect() {
+    log(`Port status ${isConnected}`);
     [port] = await navigator.serial.getPorts();
     try {
         await port.open({
@@ -100,10 +101,16 @@ async function connect() {
     
     startReadLoop();
     await sleep(100);
-    await synchronize();
+    let ret = await synchronize();
 
-    isConnected = true;
-    postMessage({ event: 'connected' });
+    if (ret != 0) {
+        isConnected = true;
+        postMessage({ event: 'connected' });
+    }
+    else {
+        //logEvent('There was an error while connencting.');
+        postMessage({ event: 'ConnectFailed', message: "Synchronize failed. Try to connect again!", name: "Device is busy" });
+    }
 }
 
 async function disconnect() {
@@ -252,6 +259,10 @@ function flush() {
             line = await queue.tryPop();
             if (line) {
                 result.push(line);
+                log('flushed - push line:', line);
+            }
+            else {
+                log('flushed: No line');
             }
         } while (line);
 
@@ -445,21 +456,40 @@ async function stream(data) {
 
 async function synchronize() {
     // Escape the current program.
-    writer.write(encoder.encode('\x1B'));
-    log('wrote escape');
+    let tryCount = 3;
+    while (tryCount > 0) {
+        writer.write(encoder.encode('\x1B'));
+        log('wrote escape');
 
-    await sleep(100);
+        await sleep(100);
 
-    let result = await flush();
+        let result = await flush();
 
-    log('escape result', result);
-    if (result.length === 1) {
-        result = result.pop();
-        if (result === '>' || result === '$') {
-            mode = result;
-            log('mode set to', result);
+        log('escape result', result);
+        if (result.length === 1) {
+            result = result.pop();
+            if (result === '>' || result === '$') {
+                mode = result;
+                log('mode set to', result);
+            }
+            
+            break;
         }
+        else {
+            if (result.length === 0) {
+                await sleep(1000);
+            }
+        }
+        tryCount--;
     }
+    
+    log(`synchronize : ${tryCount}`);
+    
+    if (tryCount === 0) {        
+        await disconnect();
+        return 0;
+    }
+    
     
     result = await this.write('\n');        
     console.log('new line result', result);
@@ -472,7 +502,7 @@ async function synchronize() {
     }
 
     // Try to get the version.
-    let tryCount = 3;
+    tryCount = 3;
     while (tryCount > 0) {
         await sleep(100);
         const result = await getVersion();
@@ -483,6 +513,8 @@ async function synchronize() {
         }
         tryCount--;
     }
+    
+    return tryCount;
 
 
 }
