@@ -466,7 +466,9 @@ async function synchronize() {
         let result = await flush();
 
         log('escape result', result);
-        if (result.length === 1) {
+                
+        
+        if (result.length >= 1) { // when more than 1 device, more than '>' will be return
             result = result.pop();
             if (result === '>' || result === '$') {
                 mode = result;
@@ -476,6 +478,7 @@ async function synchronize() {
             break;
         }
         else {
+                        
             if (result.length === 0) {
                 await sleep(500);
             }
