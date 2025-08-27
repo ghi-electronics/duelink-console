@@ -458,8 +458,8 @@ async function synchronize() {
     // Escape the current program.
     let tryCount = 4;
     while (tryCount > 0) {
-        writer.write(encoder.encode('\x1B'));
-        log('wrote escape');
+        await writer.write(encoder.encode('\x1B'));
+        log(`wrote escape count: ${4-tryCount + 1}`);
 
         await sleep(100);
 
@@ -483,7 +483,7 @@ async function synchronize() {
         tryCount--;
     }
     
-    log(`synchronize : ${tryCount}`);
+    log(`synchronize : ${4-tryCount + 1}`);
     
     if (tryCount === 0) {        
         await disconnect();
@@ -494,6 +494,8 @@ async function synchronize() {
     result = await this.write('\n');        
     console.log('new line result', result);
 
+    await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
+    
     result = await this.write('sel(1)');        
     console.log('sel(1) result ', result);
         
