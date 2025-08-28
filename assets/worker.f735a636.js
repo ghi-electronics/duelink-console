@@ -494,7 +494,7 @@ async function synchronize() {
     }
     
     
-    result = await this.write('\n');        
+    result = await this.write('');        
     console.log('new line result', result);
 
     await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
