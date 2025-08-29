@@ -489,7 +489,7 @@ async function loadFirmware() {
 
 async function loadDfu() {
     try {
-        const response = await fetch('/dfu.json');
+        const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink-fw.json');
         const jsonData = await response.json();
         
         Object.keys(jsonData).forEach((key) => {
