@@ -496,13 +496,13 @@ async function synchronize() {
     }
     
     
-    result = await this.write('');        
-    console.log('new line result', result);
+    let result = await write('');
+    log('new line result', result);
 
     await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
     
-    result = await this.write('sel(1)');        
-    console.log('sel(1) result ', result);
+    result = await write('sel(1)');
+    log('sel(1) result ', result);
         
     if (isEchoing) {
         await turnOffEcho();
