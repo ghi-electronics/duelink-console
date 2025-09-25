@@ -40,7 +40,8 @@ addEventListener('message', (e) => {
             listAll();
             break;
         case 'memoryRegions':
-            //memoryRegions();
+            log('memoryRegions 1b');
+            memoryRegions();
             break;
         case 'newAll':
             newAll();
@@ -161,9 +162,8 @@ async function listAll() {
 }
 
 async function memoryRegions() {
-    window.console.log('memoryRegions 2');
+    log('memoryRegions 2');
     ignoreOutput = true;
-    await write('>');
     const result = await write('mem()');
     postMessage({ event: 'memoryRegionsResult', result });
     ignoreOutput = false;
@@ -173,10 +173,10 @@ async function memoryRegions() {
  * Erase all regions.
  */
 async function newAll() {
-    await write('>');
+    //await write('>');
     await write('new all');
     postMessage({ event: 'erased' });
-    //await memoryRegions();
+    await memoryRegions();
 }
 
 async function play() {
@@ -233,7 +233,6 @@ async function erase_all() {
  * @param {Number} index
  */
 async function region(index) {
-    await write('>');
     await write(`region(${index})`);
     postMessage({ event: 'regionSelected', index });
 }
@@ -408,6 +407,9 @@ function readUntil(terminator = null) {
         log('read until found', result);
         if (result.length > 1) {
             result.pop();
+        } else if (result?.[0] === terminator) {
+            log('removed terminator from result', terminator);
+            result.shift();
         }
         resolve(result);
     });

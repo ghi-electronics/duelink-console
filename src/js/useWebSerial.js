@@ -134,7 +134,7 @@ export default function useWebSerial($refs, emitter) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
-                //memoryRegions(true);
+                memoryRegions(true);
                 break;
             case 'disconnected':
                 isConnected.value = false;
@@ -147,7 +147,7 @@ export default function useWebSerial($refs, emitter) {
             case 'isTalking':
                 isTalking.value = data.value;
                 if (data?.lastCommand?.startsWith?.('region')) {
-                    //memoryRegions();
+                    memoryRegions();
                 }
                 break;
             case 'listAllResult':
@@ -211,8 +211,9 @@ export default function useWebSerial($refs, emitter) {
                 //memoryRegions();
                 break;
             case 'regionSelected':
+                // Toggle `current` for each region.
                 regions.value.forEach((region) => region.current = region.index === data.index);
-                //memoryRegions(true);
+                memoryRegions(true);
                 break;
             case 'stopped':
                 isPlaying.value = false;
