@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="regions.length" class="mt-2 px-12 flex space-x-4">
+            <div v-if="regions.length" class="mt-2 px-4 flex space-x-4">
                 <Button
                     :disabled="regions.length >= 2"
                     class="w-full"
