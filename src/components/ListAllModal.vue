@@ -1,12 +1,12 @@
 <template>
-    <Modal :open="open" max-width-class="sm:max-w-2xl">
+    <Modal :open="open" max-width-class="sm:max-w-4xl">
         <template #title> List All </template>
         <template #default>
             <div id="list-all-editor" class="mt-4">
                 <VAceEditor
                     :lang="language"
                     :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'"
-                    v-model:value="code"
+                    :value="code"
                     style="height: 300px"
                     @init="onEditorInit"
                 />

@@ -537,7 +537,7 @@ async function sendDirectMode() {
 }
 
 async function sendList(target) {
-    console.log('sendList');
+    console.log('[App.vue] sendList');
     if (recordModeCode.value) {
         alreadyHasCodeModal.target = target;
         alreadyHasCodeModal.list = true;

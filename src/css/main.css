@@ -49,7 +49,7 @@ select {
 }
 
 .btn {
-    @apply rounded-md px-2.5 py-1.5 text-sm font-semibold shadow-sm;
+    @apply rounded-md px-2 py-1.5 text-sm font-semibold shadow-sm;
     @apply disabled:opacity-40 transition duration-75 ease-in-out;
 }
 
