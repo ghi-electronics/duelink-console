@@ -79,9 +79,7 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'listAll' });
     }
 
-    function memoryRegions1(regionSelected = false) {
-        window.console.log('***********  TQD memoryRegions param.......' + regionSelected);
-        window.console.log('memoryRegions 1');
+    function memoryRegionsSelect(regionSelected = false) {        
         if (regionSelected) {
             memoryRegionsCallback = () => emitter.emit('regionSelected');
         }
@@ -135,7 +133,7 @@ export default function useWebSerial($refs, emitter) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
-                memoryRegions1(true);
+                memoryRegionsSelect(true);
                 break;
             case 'disconnected':
                 isConnected.value = false;
@@ -148,11 +146,11 @@ export default function useWebSerial($refs, emitter) {
                 break;
             case 'isTalking':
                 isTalking.value = data.value;
-                window.console.log('***********  TQD isTalking.......' + isTalking.value );
-                if (data?.lastCommand?.startsWith?.('region')) {
-                    window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
-                    //memoryRegions1(false);
-                }
+                // window.console.log('***********  TQD isTalking.......' + isTalking.value );
+                // if (data?.lastCommand?.startsWith?.('region')) {
+                    // window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
+                    // // memoryRegionsSelect(false);
+                // }
                 break;
             case 'listAllResult':
                 emitter.emit('listAllResult', data);
@@ -217,7 +215,7 @@ export default function useWebSerial($refs, emitter) {
             case 'regionSelected':
                 // Toggle `current` for each region.
                 regions.value.forEach((region) => region.current = region.index === data.index);
-                memoryRegions1(true);
+                memoryRegionsSelect(true);
                 break;
             case 'stopped':
                 isPlaying.value = false;
