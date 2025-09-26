@@ -68,7 +68,7 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'execute', line });
     }
 
-    function list(callback = null) {
+    function list1(callback = null) {
         worker.postMessage({ task: 'list', callbackId: storeCallback(callback) });
     }
 
@@ -79,7 +79,8 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'listAll' });
     }
 
-    function memoryRegions(regionSelected = false) {
+    function memoryRegions1(regionSelected = false) {
+        window.console.log('***********  TQD memoryRegions param.......' + regionSelected);
         window.console.log('memoryRegions 1');
         if (regionSelected) {
             memoryRegionsCallback = () => emitter.emit('regionSelected');
@@ -134,7 +135,7 @@ export default function useWebSerial($refs, emitter) {
                 isBusy.value = false;
                 isConnected.value = true;
                 logEvent('Port connected.');
-                memoryRegions(true);
+                memoryRegions1(true);
                 break;
             case 'disconnected':
                 isConnected.value = false;
@@ -146,8 +147,10 @@ export default function useWebSerial($refs, emitter) {
                 break;
             case 'isTalking':
                 isTalking.value = data.value;
+                window.console.log('***********  TQD isTalking.......' + isTalking.value );
                 if (data?.lastCommand?.startsWith?.('region')) {
-                    memoryRegions();
+                    //window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
+                    //memoryRegions1(false);
                 }
                 break;
             case 'listAllResult':
@@ -213,7 +216,7 @@ export default function useWebSerial($refs, emitter) {
             case 'regionSelected':
                 // Toggle `current` for each region.
                 regions.value.forEach((region) => region.current = region.index === data.index);
-                memoryRegions(true);
+                memoryRegions1(true);
                 break;
             case 'stopped':
                 isPlaying.value = false;
@@ -267,7 +270,7 @@ export default function useWebSerial($refs, emitter) {
         connect,
         disconnect,
         execute,
-        list,
+        list1,
         listAll,
         newAll,
         play,

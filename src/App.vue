@@ -271,7 +271,7 @@ const alreadyHasCodeModal = reactive({
     async yes() {
         if (this.list) {
             this.list = false;
-            webSerial.list((lines) => {
+            webSerial.list1((lines) => {
                 if (lines.length) {
                     recordModeCode.value = lines.join('\n');
                 }
@@ -543,7 +543,7 @@ async function sendList(target) {
         alreadyHasCodeModal.list = true;
         alreadyHasCodeModal.open = true;
     } else {
-        webSerial.list((result) => {
+        webSerial.list1((result) => {
             const code = result.join('\n');
             if (recordModeCode.value !== code) {
                 recordModeCode.value = code;

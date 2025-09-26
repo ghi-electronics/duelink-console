@@ -40,8 +40,8 @@ addEventListener('message', (e) => {
             listAll();
             break;
         case 'memoryRegions':
-            log('memoryRegions 1b');
-            memoryRegions();
+            //log('memoryRegions 1b');
+            memoryRegions2();
             break;
         case 'newAll':
             newAll();
@@ -161,8 +161,9 @@ async function listAll() {
     postMessage({ event: 'listAllResult', result });
 }
 
-async function memoryRegions() {
-    log('memoryRegions 2');
+async function memoryRegions2() {
+    console.log('***********  TQD memoryRegions NO param.......');
+    //log('memoryRegions 2');
     ignoreOutput = true;
     const result = await write('mem()');
     postMessage({ event: 'memoryRegionsResult', result });
@@ -176,7 +177,7 @@ async function newAll() {
     //await write('>');
     await write('new all');
     postMessage({ event: 'erased' });
-    await memoryRegions();
+    await memoryRegions2();
 }
 
 async function play() {
