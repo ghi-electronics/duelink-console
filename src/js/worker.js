@@ -194,10 +194,13 @@ async function record(lines) {
     postMessage({ event: 'recording', percent: 0 });
 
     await write('pgmbrst()', '&');
+    
+    postMessage({ event: 'isTalking', value: true });
 
     lines = lines.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
     let lineNumber = 0;
     for (let line of lines) {
+        await sleep(1);
         if (line.trim().length === 0) {
             line = ' ';
         }
@@ -210,6 +213,8 @@ async function record(lines) {
 
     await stream('\0');
     await readUntil();
+    
+    postMessage({ event: 'isTalking', value: false });
 
     postMessage({ event: 'recorded' });
     logEvent('Recorded ' + lines.length + ' line(s) of code.');
@@ -219,6 +224,8 @@ async function erase_all() {
     postMessage({ event: 'Erasing', percent: 0 });
 
     await write('reset(1)');
+    
+    await sleep(10);
     
     await write('reset(1)');
 
