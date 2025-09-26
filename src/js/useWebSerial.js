@@ -210,7 +210,8 @@ export default function useWebSerial($refs, emitter) {
             case 'recorded':
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
-                //memoryRegions();
+                
+                memoryRegionsSelect(false);
                 break;
             case 'regionSelected':
                 // Toggle `current` for each region.
