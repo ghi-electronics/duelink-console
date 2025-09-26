@@ -288,7 +288,8 @@ const alreadyHasCodeModal = reactive({
         if (this.list) {
             this.list = false;
             // This call will create output.
-            webSerial.list();
+            // TQD: don't do anything since select no
+            // webSerial.list();
         }
         this.open = false;
         this.fixTippy();
