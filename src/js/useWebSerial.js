@@ -68,7 +68,7 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'execute', line });
     }
 
-    function list1(callback = null) {
+    function list(callback = null) {
         worker.postMessage({ task: 'list', callbackId: storeCallback(callback) });
     }
 
@@ -271,7 +271,7 @@ export default function useWebSerial($refs, emitter) {
         connect,
         disconnect,
         execute,
-        list1,
+        list,
         listAll,
         newAll,
         play,
