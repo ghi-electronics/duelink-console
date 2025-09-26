@@ -274,6 +274,8 @@ const alreadyHasCodeModal = reactive({
             webSerial.list((lines) => {
                 if (lines.length) {
                     recordModeCode.value = lines.join('\n');
+                } else{
+                    recordModeCode.value = ''
                 }
             });
         }
