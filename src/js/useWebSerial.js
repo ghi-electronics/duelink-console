@@ -140,6 +140,7 @@ export default function useWebSerial($refs, emitter) {
             case 'disconnected':
                 isConnected.value = false;
                 logEvent('Port disconnected.');
+                regions.value = [];
                 break;
             case 'erased':
                 regions.value = [];
@@ -149,7 +150,7 @@ export default function useWebSerial($refs, emitter) {
                 isTalking.value = data.value;
                 window.console.log('***********  TQD isTalking.......' + isTalking.value );
                 if (data?.lastCommand?.startsWith?.('region')) {
-                    //window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
+                    window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
                     //memoryRegions1(false);
                 }
                 break;
