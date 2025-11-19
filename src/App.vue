@@ -414,7 +414,6 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
     tippyConfig.theme = 'dark';
 }
 
-loadFirmware()
 loadDfu()
 
 // Mounted
@@ -473,21 +472,6 @@ function download(filename) {
     document.body.appendChild(el);
     el.click();
     document.body.removeChild(el);
-}
-
-async function loadFirmware() {
-    try {
-        const response = await fetch('/legacy.json');
-        const jsonData = await response.json();
-        
-        Object.keys(jsonData).forEach((key) => {
-            availableFirmware[key] = jsonData[key];
-            availableFirmware[key].isGlb = false;
-            availableFirmware[key].image = null;
-        });
-    } catch (error) {
-        console.log(error);
-    }
 }
 
 async function loadDfu() {
