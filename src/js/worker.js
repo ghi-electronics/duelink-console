@@ -441,7 +441,9 @@ async function stopReadLoop() {
 }
 
 async function stream(data) {
-    const BLOCK_SIZE = 64;
+    // although USB fast but UART 115200 can send  ~10 bytes in 1ms.
+    // If we program chain (from second device, it is always UART interface, need limited 10KB/second)
+    const BLOCK_SIZE = 10; 
 
     let bytes = encoder.encode(data);
     let count = bytes.length;
