@@ -12,7 +12,8 @@
             @firmware="firmwareModal.start()"
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
-            @updateTippy="updateTippy"
+            @updateTippy="updateTippy"            
+            @eraseall_dms_menubar="eraseall_dms_show_connect"
         />
         <ToolBar
             :can-download="canDownload"
@@ -36,7 +37,6 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
-            @erase_all="erase_all"
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -95,6 +95,22 @@
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
         </div>
+        <div v-if="eraseall_dms_showConfirm" class="overlay">
+            <div class="dialog">
+                <p>This will erase the firmware and any applications. Are you sure you want to proceed?<br><br></p>
+
+                <button class="yes" @click="do_eraseall_dms_yes">Yes</button>
+                <button class="no" @click="do_eraseall_dms_no">No</button>
+            </div>
+        </div>
+
+        <div v-if="eraseall_dms_finished" class="overlay">
+            <div class="dialog">
+                <p>Erase All operation completed.<br><br></p>                
+                <button class="ok" @click="eraseall_dms_finished = false">OK</button>
+            </div>
+        </div>
+
         <div id="spacer"></div>
         <Footer />
     </div>
@@ -116,27 +132,7 @@
             </div>
         </template>
     </Modal>
-    
-    <Modal :open="alreadyHasFWModal.open">
-        <template #title>
-            Heads up!
-        </template>
-        <div>Your device will be erased all</div>
-        <div>Do you want to continue?</div>
-        <template #buttons>
-            <div class="flex space-x-2">
-                <Button class="w-full" @click.native="alreadyHasFWModal.yes()">
-                    Yes
-                </Button>
-                <Button class="w-full" type="secondary" @click.native="alreadyHasFWModal.no()">
-                    No
-                </Button>
-            </div>
-        </template>
-    </Modal>
-    
-    
-    
+              
     <Modal :open="downloadModal.open">
         <template #title>
             Download
@@ -233,6 +229,10 @@ const language = ref('python');
 const theme = ref('light');
 const textSize = ref(16);
 
+const eraseall_dms_showConfirm = ref(false);
+const eraseall_dms_finished = ref(false);
+
+
 // Emitter
 
 const emitter = mitt();
@@ -307,29 +307,6 @@ const alreadyHasCodeModal = reactive({
     },
 });
 
-const alreadyHasFWModal = reactive({
-    open: false,
-    target: null,
-    async yes() {
-        webSerial.erase_all()
-        this.open = false;
-        this.fixTippy();
-    },
-    async no() {
-
-        this.open = false;
-        this.fixTippy();
-    },
-    fixTippy() {
-        if (this?.target?._tippy) {
-            this.target._tippy.destroy();
-            setTimeout(() => {
-                tippyConfig.theme = theme.value;
-                tippy(this.target, tippyConfig)
-            }, 200);
-        }
-    },
-});
 
 const firmwareModal = reactive({
     open: false,
@@ -540,12 +517,53 @@ async function sendList(target) {
     }
 }
 
-async function erase_all() {
-    console.log('erase_all');
+async function eraseall_dms_show_connect() {
+   
+    webSerial.eraseall_status_dms.value = 0;
     
-    //alreadyHasFWModal.target = target;    
-    alreadyHasFWModal.open = true;
-    //webSerial.erase_all();
+    if (webSerial.isConnected.value == false) {
+        webSerial.eraseall_vid_dms.value = 0;
+
+        await webSerial.eraseall_dms_connect();
+        
+        while (webSerial.eraseall_status_dms.value == 0) {
+            await sleep(100);
+        }
+
+        await sleep(100);
+    }
+
+    if ( webSerial.eraseall_vid_dms.value != 0){
+        
+        eraseall_dms_showConfirm.value = true;
+    }
+}
+
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function do_eraseall_dms_no() {
+    eraseall_dms_showConfirm.value = false;
+
+    if (webSerial.eraseall_status_dms.value > 0) {
+        await webSerial.disconnect();
+    }
+}
+
+async function do_eraseall_dms_yes() {
+    eraseall_dms_showConfirm.value = false;
+    
+    await webSerial.eraseall_dms_execute();
+    
+    while (webSerial.eraseall_status_dms.value < 2) {
+        await sleep(100);
+    }
+
+    await sleep(100);
+    eraseall_dms_finished.value = true;
+
 
 }
 
@@ -586,3 +604,48 @@ function textSizeMinus() {
     editor.setOptions({ fontSize: textSize.value + 'px' });
 }
 </script>
+
+<style scoped>
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.dialog {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+button {
+  margin: 10px;
+  padding: 8px 20px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+button.yes {
+  background: #d9534f;
+  color: white;
+}
+
+button.no {
+  background: #ccc;
+  color: black;
+}
+
+button.ok {
+  background: #d9534f;
+  color: white;
+}
+</style>
