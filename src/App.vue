@@ -520,15 +520,19 @@ async function sendList(target) {
 async function eraseall_dms_show_connect() {
    
     webSerial.eraseall_status_dms.value = 0;
-    webSerial.eraseall_vid_dms.value = 0;
+    
+    if (webSerial.isConnected.value == false) {
+        webSerial.eraseall_vid_dms.value = 0;
 
-    await webSerial.eraseall_dms_connect();
-     
-    while (webSerial.eraseall_status_dms.value == 0) {
+        await webSerial.eraseall_dms_connect();
+        
+        while (webSerial.eraseall_status_dms.value == 0) {
+            await sleep(100);
+        }
+
         await sleep(100);
     }
 
-    await sleep(100);
     if ( webSerial.eraseall_vid_dms.value != 0){
         
         eraseall_dms_showConfirm.value = true;

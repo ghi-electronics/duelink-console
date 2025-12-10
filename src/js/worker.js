@@ -58,7 +58,7 @@ addEventListener('message', (e) => {
         case 'stop':
             stop();
             break;
-                    
+
         case 'eraseall_dms_execute_msg':
             eraseall_dms_execute();
             break;
@@ -111,7 +111,9 @@ async function connect() {
 
     if (ret != 0) {
         isConnected = true;
+        const info = port.getInfo();
         postMessage({ event: 'connected' });
+        postMessage({ event: 'eraseall_vid_dms', value: info.usbVendorId});
     }
     else {
         //logEvent('There was an error while connencting.');

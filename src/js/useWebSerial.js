@@ -53,6 +53,7 @@ export default function useWebSerial($refs, emitter) {
         isBusy.value = true;
 
         try {
+            const available = await navigator.serial.getPorts(); // this refresh port only
             await navigator.serial.requestPort({ 
                 filters: [
                     { usbVendorId: 0x1B9F } // GHI Electronics VID                    
@@ -82,24 +83,28 @@ export default function useWebSerial($refs, emitter) {
             window.location = '/browser-not-supported.html';
         }
 
-        isBusy.value = true;
+        if (isConnected.value == false) {
+            
+            try {
+                const available = await navigator.serial.getPorts(); // this refresh port only
+                await navigator.serial.requestPort({ 
+                    
+                    filters: [
+                        { usbVendorId: 0x1B9F }, // GHI Electronics VID
+                        { usbVendorId: 0x0483 }  // Optional: add ST VID
+                    ]
+                });
+            } catch (error) {
+                logError(error?.message || 'Unable to request port.');                
+                eraseall_status_dms.value = 1;
+                return;
+            }
 
-        try {
-            await navigator.serial.requestPort({ 
-                
-                filters: [
-                    { usbVendorId: 0x1B9F }, // GHI Electronics VID
-                    { usbVendorId: 0x0483 }  // Optional: add ST VID
-                ]
-             });
-        } catch (error) {
-            logError(error?.message || 'Unable to request port.');
-            isBusy.value = false;
-            eraseall_status_dms.value = 1;
-            return;
+            worker.postMessage({ task: 'eraseall_dms_connect_msg' });
         }
-
-        worker.postMessage({ task: 'eraseall_dms_connect_msg' });
+        else {
+            eraseall_status_dms.value = 1;
+        }
     }
 
     async function disconnect() {
