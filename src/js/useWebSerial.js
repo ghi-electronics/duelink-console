@@ -56,7 +56,7 @@ export default function useWebSerial($refs, emitter) {
             const available = await navigator.serial.getPorts(); // this refresh port only
             await navigator.serial.requestPort({ 
                 filters: [
-                    { usbVendorId: 0x1B9F } // GHI Electronics VID                    
+                    { usbVendorId: 0x1B9F, usbProductId:0xF300 } // GHI Electronics VID           
                 ]
              });
         } catch (error) {
@@ -90,8 +90,8 @@ export default function useWebSerial($refs, emitter) {
                 await navigator.serial.requestPort({ 
                     
                     filters: [
-                        { usbVendorId: 0x1B9F }, // GHI Electronics VID
-                        { usbVendorId: 0x0483 }  
+                        { usbVendorId: 0x1B9F, usbProductId:0xF300 }, // GHI Electronics VID
+                        { usbVendorId: 0x0483, usbProductId:0x5740 }  
                     ]
                 });
             } catch (error) {
