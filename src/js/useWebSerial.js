@@ -91,7 +91,7 @@ export default function useWebSerial($refs, emitter) {
                     
                     filters: [
                         { usbVendorId: 0x1B9F }, // GHI Electronics VID
-                        { usbVendorId: 0x0483 }  // Optional: add ST VID
+                        { usbVendorId: 0x0483 }  
                     ]
                 });
             } catch (error) {
