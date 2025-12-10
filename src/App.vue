@@ -13,6 +13,7 @@
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
+            @eraseall_dms_menubar="eraseall_dms_app_showcomfirm"
         />
         <ToolBar
             :can-download="canDownload"
@@ -36,7 +37,7 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
-            @erase_all="erase_all"
+            @erase_all="erase_all"            
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -95,6 +96,14 @@
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
         </div>
+        <div v-if="eraseall_dms_showConfirm" class="overlay">
+            <div class="dialog">
+            <p>Are you sure you want to erase all?</p>
+
+            <button class="yes" @click="do_eraseall_dms_app">Yes</button>
+            <button class="no" @click="eraseall_dms_showConfirm = false">No</button>
+            </div>
+        </div>
         <div id="spacer"></div>
         <Footer />
     </div>
@@ -134,9 +143,8 @@
             </div>
         </template>
     </Modal>
-    
-    
-    
+   
+        
     <Modal :open="downloadModal.open">
         <template #title>
             Download
@@ -232,6 +240,8 @@ const filename = ref('');
 const language = ref('python');
 const theme = ref('light');
 const textSize = ref(16);
+
+const eraseall_dms_showConfirm = ref(false);
 
 // Emitter
 
@@ -330,6 +340,7 @@ const alreadyHasFWModal = reactive({
         }
     },
 });
+
 
 const firmwareModal = reactive({
     open: false,
@@ -549,6 +560,25 @@ async function erase_all() {
 
 }
 
+async function eraseall_dms_app_showcomfirm() {
+    console.log('erase_all_dms');
+    
+    //if (confirm("Are you sure you want to erase all?")) {
+        // TODO: your erase code here
+        //console.log("Erasing...");
+      //}
+    //alreadyHasFWModal.target = target;    
+    //eraseall_dms.open = true;
+    //webSerial.erase_all();
+    this.eraseall_dms_showConfirm = true;
+    console.log("show confirm");
+
+}
+
+async function do_eraseall_dms_app() {
+    console.log("do erase all");
+}
+
 function updateTippy(target, show = false) {
     if (!target) {
         return;
@@ -586,3 +616,43 @@ function textSizeMinus() {
     editor.setOptions({ fontSize: textSize.value + 'px' });
 }
 </script>
+
+<style scoped>
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.dialog {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+button {
+  margin: 10px;
+  padding: 8px 20px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+button.yes {
+  background: #d9534f;
+  color: white;
+}
+
+button.no {
+  background: #ccc;
+  color: black;
+}
+</style>
