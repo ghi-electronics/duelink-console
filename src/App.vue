@@ -100,7 +100,7 @@
             <div class="dialog">
             <p>Are you sure you want to erase all?</p>
 
-            <button class="yes" @click="do_eraseall_dms_app">Yes</button>
+            <button class="yes" @click="do_eraseall_dms_app_func">Yes</button>
             <button class="no" @click="eraseall_dms_showConfirm = false">No</button>
             </div>
         </div>
@@ -570,12 +570,13 @@ async function eraseall_dms_app_showcomfirm() {
     //alreadyHasFWModal.target = target;    
     //eraseall_dms.open = true;
     //webSerial.erase_all();
-    this.eraseall_dms_showConfirm = true;
+    eraseall_dms_showConfirm.value = true;
     console.log("show confirm");
 
 }
 
-async function do_eraseall_dms_app() {
+async function do_eraseall_dms_app_func() {
+    eraseall_dms_showConfirm.value = false;
     console.log("do erase all");
 }
 
