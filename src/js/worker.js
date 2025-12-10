@@ -58,10 +58,7 @@ addEventListener('message', (e) => {
         case 'stop':
             stop();
             break;
-        case 'erase_all':
-            erase_all();
-            break;
-        
+                    
         case 'eraseall_dms_execute_msg':
             eraseall_dms_execute();
             break;
@@ -290,22 +287,6 @@ async function record(lines) {
     postMessage({ event: 'isTalking', value: false });
 
     postMessage({ event: 'recorded' });
-    logEvent('Recorded ' + lines.length + ' line(s) of code.');
-}
-
-async function erase_all() {
-    postMessage({ event: 'Erasing', percent: 0 });
-
-    await write('reset(1)');
-    
-    await sleep(10);
-    
-    await write('reset(1)');
-
-
-    postMessage({ event: 'Erased', percent: 100 });
-
-
     logEvent('Recorded ' + lines.length + ' line(s) of code.');
 }
 

@@ -37,7 +37,6 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
-            @erase_all="erase_all"            
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -133,26 +132,7 @@
             </div>
         </template>
     </Modal>
-    
-    <Modal :open="alreadyHasFWModal.open">
-        <template #title>
-            Heads up!
-        </template>
-        <div>Your device will be erased all</div>
-        <div>Do you want to continue?</div>
-        <template #buttons>
-            <div class="flex space-x-2">
-                <Button class="w-full" @click.native="alreadyHasFWModal.yes()">
-                    Yes
-                </Button>
-                <Button class="w-full" type="secondary" @click.native="alreadyHasFWModal.no()">
-                    No
-                </Button>
-            </div>
-        </template>
-    </Modal>
-   
-        
+              
     <Modal :open="downloadModal.open">
         <template #title>
             Download
@@ -313,30 +293,6 @@ const alreadyHasCodeModal = reactive({
             // TQD: don't do anything since select no
             // webSerial.list();
         }
-        this.open = false;
-        this.fixTippy();
-    },
-    fixTippy() {
-        if (this?.target?._tippy) {
-            this.target._tippy.destroy();
-            setTimeout(() => {
-                tippyConfig.theme = theme.value;
-                tippy(this.target, tippyConfig)
-            }, 200);
-        }
-    },
-});
-
-const alreadyHasFWModal = reactive({
-    open: false,
-    target: null,
-    async yes() {
-        webSerial.erase_all()
-        this.open = false;
-        this.fixTippy();
-    },
-    async no() {
-
         this.open = false;
         this.fixTippy();
     },
@@ -559,15 +515,6 @@ async function sendList(target) {
             }
         });
     }
-}
-
-async function erase_all() {
-    console.log('erase_all');
-    
-    //alreadyHasFWModal.target = target;    
-    alreadyHasFWModal.open = true;
-    //webSerial.erase_all();
-
 }
 
 async function eraseall_dms_show_connect() {

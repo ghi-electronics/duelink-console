@@ -155,10 +155,6 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'stop' });
     }
     
-    function erase_all() {
-        worker.postMessage({ task: 'erase_all' });
-    }
-
     // Methods - Utilities
 
     function logError(message) {
@@ -329,7 +325,6 @@ export default function useWebSerial($refs, emitter) {
         record,
         region,
         stop,
-        erase_all,
         eraseall_dms_execute,        
         eraseall_dms_connect,
     };
