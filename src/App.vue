@@ -12,8 +12,8 @@
             @firmware="firmwareModal.start()"
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
-            @updateTippy="updateTippy"
-            @eraseall_dms_menubar="eraseall_dms_app_showcomfirm"
+            @updateTippy="updateTippy"            
+            @eraseall_dms_menubar="eraseall_dms_show_connect"
         />
         <ToolBar
             :can-download="canDownload"
@@ -98,12 +98,20 @@
         </div>
         <div v-if="eraseall_dms_showConfirm" class="overlay">
             <div class="dialog">
-            <p>Are you sure you want to erase all?</p>
+                <p>This will erase the firmware and any applications. Are you sure you want to proceed?<br><br></p>
 
-            <button class="yes" @click="do_eraseall_dms_app_func">Yes</button>
-            <button class="no" @click="eraseall_dms_showConfirm = false">No</button>
+                <button class="yes" @click="do_eraseall_dms_yes">Yes</button>
+                <button class="no" @click="do_eraseall_dms_no">No</button>
             </div>
         </div>
+
+        <div v-if="eraseall_dms_finished" class="overlay">
+            <div class="dialog">
+                <p>Erase All operation completed.<br><br></p>                
+                <button class="ok" @click="eraseall_dms_finished = false">OK</button>
+            </div>
+        </div>
+
         <div id="spacer"></div>
         <Footer />
     </div>
@@ -242,6 +250,8 @@ const theme = ref('light');
 const textSize = ref(16);
 
 const eraseall_dms_showConfirm = ref(false);
+const eraseall_dms_finished = ref(false);
+
 
 // Emitter
 
@@ -560,24 +570,50 @@ async function erase_all() {
 
 }
 
-async function eraseall_dms_app_showcomfirm() {
-    console.log('erase_all_dms');
-    
-    //if (confirm("Are you sure you want to erase all?")) {
-        // TODO: your erase code here
-        //console.log("Erasing...");
-      //}
-    //alreadyHasFWModal.target = target;    
-    //eraseall_dms.open = true;
-    //webSerial.erase_all();
-    eraseall_dms_showConfirm.value = true;
-    console.log("show confirm");
+async function eraseall_dms_show_connect() {
+   
+    webSerial.eraseall_status_dms.value = 0;
+    webSerial.eraseall_vid_dms.value = 0;
 
+    await webSerial.eraseall_dms_connect();
+     
+    while (webSerial.eraseall_status_dms.value == 0) {
+        await sleep(100);
+    }
+
+    await sleep(100);
+    if ( webSerial.eraseall_vid_dms.value != 0){
+        
+        eraseall_dms_showConfirm.value = true;
+    }
 }
 
-async function do_eraseall_dms_app_func() {
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function do_eraseall_dms_no() {
     eraseall_dms_showConfirm.value = false;
-    console.log("do erase all");
+
+    if (webSerial.eraseall_status_dms.value > 0) {
+        await webSerial.disconnect();
+    }
+}
+
+async function do_eraseall_dms_yes() {
+    eraseall_dms_showConfirm.value = false;
+    
+    await webSerial.eraseall_dms_execute();
+    
+    while (webSerial.eraseall_status_dms.value < 2) {
+        await sleep(100);
+    }
+
+    await sleep(100);
+    eraseall_dms_finished.value = true;
+
+
 }
 
 function updateTippy(target, show = false) {
@@ -655,5 +691,10 @@ button.yes {
 button.no {
   background: #ccc;
   color: black;
+}
+
+button.ok {
+  background: #d9534f;
+  color: white;
 }
 </style>

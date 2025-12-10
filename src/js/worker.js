@@ -61,6 +61,14 @@ addEventListener('message', (e) => {
         case 'erase_all':
             erase_all();
             break;
+        
+        case 'eraseall_dms_execute_msg':
+            eraseall_dms_execute();
+            break;
+
+        case 'eraseall_dms_connect_msg':
+            eraseall_dms_connect();
+            break;    
     }
 });
 
@@ -112,6 +120,71 @@ async function connect() {
         //logEvent('There was an error while connencting.');
         postMessage({ event: 'ConnectFailed', message: "Synchronize failed. Reset the board, or Press F5 then try to click connect again.", name: "Device is busy" });
     }
+}
+
+async function eraseall_dms_execute() {
+    const info = port.getInfo();
+    
+    if (info.usbVendorId == 0x0483) {
+        await writer.write(new Uint8Array([0xFA, 0x0F, 0xC7]));
+        await sleep(100);        
+        postMessage({ event: 'eraseall_status_dms', value: 2 });       
+    }
+    else if (info.usbVendorId == 0x1B9F) {
+        await writer.write(encoder.encode("\n"));                 
+        await sleep(100);
+        await writer.write(encoder.encode("reset(1)\n"));         
+        await sleep(100);
+        await writer.write(encoder.encode("reset(1)\n"));         
+        await sleep(600);
+        postMessage({ event: 'eraseall_status_dms', value: 2 });  
+        
+    }
+
+    //await disconnect();
+}
+
+async function eraseall_dms_connect() {
+    log(`Port status ${isConnected}`);
+    [port] = await navigator.serial.getPorts();
+    try {
+        await port.open({
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: 'none',
+        });
+    } catch (error) {
+        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
+        logError(error?.message || 'Unable to open port.');
+        return;
+    }
+
+    port.addEventListener('disconnect', () => {
+        log('Port disconnected');
+        disconnect();
+    });
+
+    if (port?.writable == null) {
+        logError('Port is not a writable.');
+        return;
+    }
+    if (port?.readable == null) {
+        logError('Port is not a readable.');
+        return;
+    }
+
+    const info = port.getInfo();
+
+    if (info.usbVendorId == 0x0483 || info.usbVendorId == 0x1B9F) {
+        writer = port.writable.getWriter();
+        postMessage({ event: 'eraseall_vid_dms', value: info.usbVendorId});
+        
+    }       
+
+    postMessage({ event: 'eraseall_status_dms', value: 1});
+        
 }
 
 async function disconnect() {

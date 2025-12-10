@@ -21,6 +21,9 @@ export default function useWebSerial($refs, emitter) {
     const regions = ref([]);
     const version = ref(null);
 
+    const eraseall_status_dms = ref(0);
+    const eraseall_vid_dms = ref(0);
+
     let memoryRegionsCallback = null;
 
     // Setup
@@ -50,7 +53,11 @@ export default function useWebSerial($refs, emitter) {
         isBusy.value = true;
 
         try {
-            await navigator.serial.requestPort({ usbVendorId: 0x1B9F });
+            await navigator.serial.requestPort({ 
+                filters: [
+                    { usbVendorId: 0x1B9F } // GHI Electronics VID                    
+                ]
+             });
         } catch (error) {
             logError(error?.message || 'Unable to request port.');
             isBusy.value = false;
@@ -58,6 +65,41 @@ export default function useWebSerial($refs, emitter) {
         }
 
         worker.postMessage({ task: 'connect' });
+    }
+
+    async function eraseall_dms_execute() {
+        if (window.document.documentMode || !navigator.serial) {
+            window.location = '/browser-not-supported.html';
+        }
+
+        isBusy.value = true;
+
+        worker.postMessage({ task: 'eraseall_dms_execute_msg' });
+    }
+
+    async function eraseall_dms_connect() {
+        if (window.document.documentMode || !navigator.serial) {
+            window.location = '/browser-not-supported.html';
+        }
+
+        isBusy.value = true;
+
+        try {
+            await navigator.serial.requestPort({ 
+                
+                filters: [
+                    { usbVendorId: 0x1B9F }, // GHI Electronics VID
+                    { usbVendorId: 0x0483 }  // Optional: add ST VID
+                ]
+             });
+        } catch (error) {
+            logError(error?.message || 'Unable to request port.');
+            isBusy.value = false;
+            eraseall_status_dms.value = 1;
+            return;
+        }
+
+        worker.postMessage({ task: 'eraseall_dms_connect_msg' });
     }
 
     async function disconnect() {
@@ -242,6 +284,14 @@ export default function useWebSerial($refs, emitter) {
                 alert(msg)
                 
                 break;
+
+            case 'eraseall_status_dms':
+                eraseall_status_dms.value = data.value;
+                break; 
+                
+            case 'eraseall_vid_dms':
+                eraseall_vid_dms.value = data.value;
+                break;
         }
     }
 
@@ -266,6 +316,8 @@ export default function useWebSerial($refs, emitter) {
         log,
         regions,
         version,
+        eraseall_status_dms,
+        eraseall_vid_dms,
         // Methods
         connect,
         disconnect,
@@ -278,5 +330,7 @@ export default function useWebSerial($refs, emitter) {
         region,
         stop,
         erase_all,
+        eraseall_dms_execute,        
+        eraseall_dms_connect,
     };
 }
