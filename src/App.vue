@@ -684,6 +684,7 @@ function textSizeMinus() {
 .dialog {
   width: auto;        
   max-width: 25vw;    
+  min-width: 200px;
   display: inline-block;
   text-align: center;
   border-radius: 8px;
