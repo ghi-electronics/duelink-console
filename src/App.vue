@@ -13,7 +13,7 @@
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"            
-            @eraseall_dms_menubar="eraseall_dms_show_connect"
+            @eraseall_dms_menubar="eraseall_dms_show_confirm_pre"
         />
         <ToolBar
             :can-download="canDownload"
@@ -95,19 +95,29 @@
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
             </div>
         </div>
-        <div v-if="eraseall_dms_showConfirm" class="overlay">
-            <div class="dialog">
-                <p>This will erase the firmware and any applications. Are you sure you want to proceed?<br><br></p>
 
-                <button class="yes" @click="do_eraseall_dms_yes">Yes</button>
-                <button class="no" @click="do_eraseall_dms_no">No</button>
+        <div v-if="eraseall_dms_msgbox_confirm_pre" class="overlay">
+            <div class="dialog">
+                <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.<br>It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br></p>
+
+                <button class="yes" @click="do_eraseall_dms_pre_yes">Yes</button>
+                <button class="no" @click="do_eraseall_dms_pre_no">No</button>
             </div>
         </div>
 
-        <div v-if="eraseall_dms_finished" class="overlay">
+        <div v-if="eraseall_dms_msgbox_confirm_final" class="overlay">
+            <div class="dialog">
+                <p>This will erase the firmware and any applications. Are you sure you want to proceed?<br><br></p>
+
+                <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
+                <button class="no" @click="do_eraseall_dms_final_no">No</button>
+            </div>
+        </div>
+
+        <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
                 <p>Erase All operation completed.<br><br></p>                
-                <button class="ok" @click="eraseall_dms_finished = false">OK</button>
+                <button class="ok" @click="eraseall_dms_msgbox_finished = false">OK</button>
             </div>
         </div>
 
@@ -229,8 +239,9 @@ const language = ref('python');
 const theme = ref('light');
 const textSize = ref(16);
 
-const eraseall_dms_showConfirm = ref(false);
-const eraseall_dms_finished = ref(false);
+const eraseall_dms_msgbox_confirm_final = ref(false);
+const eraseall_dms_msgbox_confirm_pre = ref(false);
+const eraseall_dms_msgbox_finished = ref(false);
 
 
 // Emitter
@@ -517,6 +528,10 @@ async function sendList(target) {
     }
 }
 
+async function eraseall_dms_show_confirm_pre() {
+    eraseall_dms_msgbox_confirm_pre.value = true
+}
+
 async function eraseall_dms_show_connect() {
    
     webSerial.eraseall_status_dms.value = 0;
@@ -535,7 +550,7 @@ async function eraseall_dms_show_connect() {
 
     if ( webSerial.eraseall_vid_dms.value != 0){
         
-        eraseall_dms_showConfirm.value = true;
+        eraseall_dms_msgbox_confirm_final.value = true;
     }
 }
 
@@ -544,16 +559,28 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function do_eraseall_dms_no() {
-    eraseall_dms_showConfirm.value = false;
+async function do_eraseall_dms_pre_no() {
+    eraseall_dms_msgbox_confirm_pre.value = false;
+}
+
+async function do_eraseall_dms_pre_yes() {
+    eraseall_dms_msgbox_confirm_pre.value = false;
+
+    eraseall_dms_show_connect();
+    
+}
+
+
+async function do_eraseall_dms_final_no() {
+    eraseall_dms_msgbox_confirm_final.value = false;
 
     if (webSerial.eraseall_status_dms.value > 0) {
         await webSerial.disconnect();
     }
 }
 
-async function do_eraseall_dms_yes() {
-    eraseall_dms_showConfirm.value = false;
+async function do_eraseall_dms_final_yes() {
+    eraseall_dms_msgbox_confirm_final.value = false;
     
     await webSerial.eraseall_dms_execute();
     
@@ -562,7 +589,7 @@ async function do_eraseall_dms_yes() {
     }
 
     await sleep(100);
-    eraseall_dms_finished.value = true;
+    eraseall_dms_msgbox_finished.value = true;
 
 
 }
@@ -621,7 +648,7 @@ function textSizeMinus() {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  width: 280px;
+  width: 25vw;  /* 25% of the screen width */
   text-align: center;
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
