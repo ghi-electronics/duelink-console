@@ -98,26 +98,44 @@
 
         <div v-if="eraseall_dms_msgbox_confirm_pre" class="overlay">
             <div class="dialog">
-                <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.<br>It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br></p>
+                <div class="dialog-title">Warning</div>
+                <div class="dialog-body">
+                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.<br>It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br></p>
+                </div>
 
-                <button class="yes" @click="do_eraseall_dms_pre_yes">Yes</button>
-                <button class="no" @click="do_eraseall_dms_pre_no">No</button>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_eraseall_dms_pre_yes">Continue</button>
+                    <button class="no" @click="do_eraseall_dms_pre_no">Abort</button>
+                </div>
             </div>
         </div>
 
         <div v-if="eraseall_dms_msgbox_confirm_final" class="overlay">
             <div class="dialog">
-                <p>This will erase the firmware and any applications. Are you sure you want to proceed?<br><br></p>
+                <div class="dialog-title">Warning</div>
+                <div class="dialog-body">
+                    <p>{{dms_confirm_final_text}}<br><br></p>
+                </div>
 
-                <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
-                <button class="no" @click="do_eraseall_dms_final_no">No</button>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
+                    <button class="no" @click="do_eraseall_dms_final_no">No</button>
+                </div>                   
             </div>
         </div>
 
         <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
-                <p>Erase All operation completed.<br><br></p>                
-                <button class="ok" @click="eraseall_dms_msgbox_finished = false">OK</button>
+                <div class="dialog-title-success">Success</div>
+                <div class="dialog-body">
+                     <p>Erase All operation completed.<br><br></p>        
+                </div>
+
+                <div class="dialog-buttons">
+                    <button class="no" @click="eraseall_dms_msgbox_finished = false">OK</button>
+                </div>       
             </div>
         </div>
 
@@ -242,6 +260,9 @@ const textSize = ref(16);
 const eraseall_dms_msgbox_confirm_final = ref(false);
 const eraseall_dms_msgbox_confirm_pre = ref(false);
 const eraseall_dms_msgbox_finished = ref(false);
+
+const ERASE_ALL_DMS_CONFIRM_FINAL_TEXT = "Firmware detected.\nAre you sure you want to erase all and enter DFU mode?";
+const dms_confirm_final_text = ref(ERASE_ALL_DMS_CONFIRM_FINAL_TEXT);
 
 
 // Emitter
@@ -550,6 +571,13 @@ async function eraseall_dms_show_connect() {
 
     if ( webSerial.eraseall_vid_dms.value != 0){
         
+        if (webSerial.eraseall_vid_dms.value == 0x1B9F) {
+            dms_confirm_final_text.value = "DUELink "  + ERASE_ALL_DMS_CONFIRM_FINAL_TEXT;
+        }
+        else {
+            dms_confirm_final_text.value = "MicroBlocks "  + ERASE_ALL_DMS_CONFIRM_FINAL_TEXT;
+        }
+
         eraseall_dms_msgbox_confirm_final.value = true;
     }
 }
@@ -645,22 +673,65 @@ function textSizeMinus() {
 }
 
 .dialog {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 25vw;  /* 25% of the screen width */
+  width: auto;        
+  max-width: 25vw;    
+  display: inline-block;
   text-align: center;
+  border-radius: 8px;
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  overflow: hidden;      
+  font-family: Arial, sans-serif;
+  background-color: white;  /* Add white background here */
 }
 
-button {
-  margin: 10px;
-  padding: 8px 20px;
-  border-radius: 4px;
+.dialog-title {
+  background-color: #d9534f;  /* green background */
+  color: white;                /* white text */
+  padding: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.dialog-title-success {
+  background-color: #4CAF50;  /* green background */
+  color: white;                /* white text */
+  padding: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Remove bottom margin on dialog-body and buttons */
+.dialog-body {
+  background-color: white;
+  color: black;
+  padding: 15px;
+  margin-bottom: 0;  /* prevent extra space */
+}
+.dialog-buttons {
+  margin-top: 0;       /* remove top margin */
+  padding: 10px 0 15px 0; /* keep vertical padding */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background-color: white;
+}
+
+/* Base button styles */
+.dialog-buttons button {
+  padding: 5px 12px;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
 }
 
+/* Hover effect for all buttons */
+.dialog-buttons button:hover {
+  filter: brightness(0.9);
+}
+
+/* Your specific button colors */
 button.yes {
   background: #d9534f;
   color: white;
