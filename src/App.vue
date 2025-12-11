@@ -98,7 +98,10 @@
 
         <div v-if="eraseall_dms_msgbox_confirm_pre" class="overlay">
             <div class="dialog">
-                <div class="dialog-title">Warning</div>
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning
+                </div>
                 <div class="dialog-body">
                     <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.<br>It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br></p>
                 </div>
@@ -113,7 +116,10 @@
 
         <div v-if="eraseall_dms_msgbox_confirm_final" class="overlay">
             <div class="dialog">
-                <div class="dialog-title">Warning</div>
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning
+                </div>
                 <div class="dialog-body">
                     <p>{{dms_confirm_final_text}}<br><br></p>
                 </div>
@@ -128,7 +134,10 @@
 
         <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
-                <div class="dialog-title-success">Success</div>
+                <div class="dialog-title-success">
+                    <i class="fas fa-check-circle" style="color: green; margin-right: 8px;"></i>
+                    Success
+                </div>
                 <div class="dialog-body">
                      <p>Erase All operation completed.<br><br></p>        
                 </div>
