@@ -16,11 +16,11 @@
       "# Fade the Status LED (pin 0) in and out",
       "while 1",
       "  For _i=0 to 100 Step 10",
-      "    PWrite(0, _i/100)",
+      "    AWrite(0, _i/100)",
       "    Wait(100)",
       "  Next",
       "  For _i=100 to 0 Step -10",
-      "    PWrite(0, _i/100)",
+      "    AWrite(0, _i/100)",
       "    Wait(100)",
       "  Next",
       "wend"
