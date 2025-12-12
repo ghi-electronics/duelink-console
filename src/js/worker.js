@@ -202,8 +202,10 @@ async function disconnect() {
         await port.close();
         logEvent('Port disconnected.');
     } catch (error) {
-        logEvent('There was an error while disconnecting.');
-        logError(error?.message || 'Unknown error.');
+        if (isConnected) {
+            logEvent('There was an error while disconnecting.');
+            logError(error?.message || 'Unknown error.');
+        }
     } finally {
         isConnected = false;
         postMessage({ event: 'disconnected' });

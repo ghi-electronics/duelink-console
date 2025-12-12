@@ -1,7 +1,7 @@
 <template>
   <Modal
   :open="open"
-  max-width-class="w-auto max-w-[50vw] min-w-[300px]"
+  max-width-class="w-auto max-w-[50vw] min-w-[300px] sm:max-w-[60vw] lg:max-w-[40vw]"
 >
     <template #title> Firmware Update </template>
 
