@@ -26,6 +26,11 @@ export default function useWebSerial($refs, emitter) {
 
     let memoryRegionsCallback = null;
 
+    // Const
+    const GHI_VID = 0x1B9F;
+    const DL_PID = 0xF300;
+    const MB_PID = 0xF301;
+
     // Setup
 
     let uid = 0;
@@ -56,7 +61,7 @@ export default function useWebSerial($refs, emitter) {
             const available = await navigator.serial.getPorts(); // this refresh port only
             await navigator.serial.requestPort({ 
                 filters: [
-                    { usbVendorId: 0x1B9F, usbProductId:0xF300 } // GHI Electronics VID           
+                    { usbVendorId: GHI_VID, usbProductId:DL_PID } // GHI Electronics VID           
                 ]
              });
         } catch (error) {
@@ -90,8 +95,8 @@ export default function useWebSerial($refs, emitter) {
                 await navigator.serial.requestPort({ 
                     
                     filters: [
-                        { usbVendorId: 0x1B9F, usbProductId:0xF300 }, // GHI Electronics VID
-                        { usbVendorId: 0x0483, usbProductId:0x5740 }  
+                        { usbVendorId: GHI_VID, usbProductId:DL_PID }, // GHI Electronics VID
+                        { usbVendorId: GHI_VID, usbProductId:MB_PID }  
                     ]
                 });
             } catch (error) {

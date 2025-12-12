@@ -248,6 +248,10 @@ import AboutPanel from './components/AboutPanel.vue';
 import ListAllModal from "./components/ListAllModal.vue";
 import NewAllModal from "./components/NewAllModal.vue";
 
+// Const
+const GHI_VID = 0x1B9F;
+const DL_PID = 0xF300;
+const MB_PID = 0xF301;
 // Refs
 
 const $refs = { editor: null, filename: null, input: null, progress: null };
@@ -579,8 +583,8 @@ async function eraseall_dms_show_connect() {
     }
 
     if ( webSerial.eraseall_vid_dms.value != 0){
-        
-        if (webSerial.eraseall_vid_dms.value == 0x1B9F) {
+        let pid = webSerial.eraseall_vid_dms.value & 0xFFFF
+        if (pid == DL_PID) {
             dms_confirm_final_text.value = "DUELink "  + ERASE_ALL_DMS_CONFIRM_FINAL_TEXT;
         }
         else {
@@ -622,10 +626,10 @@ async function do_eraseall_dms_final_yes() {
     await webSerial.eraseall_dms_execute();
     
     while (webSerial.eraseall_status_dms.value < 2) {
-        await sleep(100);
+        await sleep(250);
     }
 
-    await sleep(100);
+    await sleep(250);
     eraseall_dms_msgbox_finished.value = true;
 
 

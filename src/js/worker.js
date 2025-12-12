@@ -18,6 +18,10 @@ let writer = null;
 const queue = new ConsumerQueue();
 const ignoreChars = ['>', '$', '&'];
 
+const GHI_VID = 0x1B9F;
+const DL_PID = 0xF300;
+const MB_PID = 0xF301;
+
 addEventListener('message', (e) => {
     log(`---- on "message", do task: ${e.data.task} ----`);
     switch (e.data.task) {
@@ -124,18 +128,18 @@ async function connect() {
 async function eraseall_dms_execute() {
     const info = port.getInfo();
     
-    if (info.usbVendorId == 0x0483) {
+    if (info.usbVendorId == GHI_VID && info.usbProductId == MB_PID) {
         await writer.write(new Uint8Array([0xFA, 0x0F, 0xC7]));
-        await sleep(100);        
+        await sleep(200);        
         postMessage({ event: 'eraseall_status_dms', value: 2 });       
     }
-    else if (info.usbVendorId == 0x1B9F) {
+    else if (info.usbVendorId == GHI_VID && info.usbProductId == DL_PID) {
         await writer.write(encoder.encode("\n"));                 
-        await sleep(100);
+        await sleep(400);
         await writer.write(encoder.encode("reset(1)\n"));         
         await sleep(100);
         await writer.write(encoder.encode("reset(1)\n"));         
-        await sleep(600);
+        await sleep(700);
         postMessage({ event: 'eraseall_status_dms', value: 2 });  
         
     }
@@ -176,9 +180,9 @@ async function eraseall_dms_connect() {
 
     const info = port.getInfo();
 
-    if (info.usbVendorId == 0x0483 || info.usbVendorId == 0x1B9F) {
+    if (info.usbVendorId == GHI_VID) {
         writer = port.writable.getWriter();
-        postMessage({ event: 'eraseall_vid_dms', value: info.usbVendorId});
+        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId)});
         
     }       
 

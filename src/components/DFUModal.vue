@@ -1,38 +1,35 @@
 <template>
-  <Modal :open="open" max-width-class="sm:max-w-xl">
-    <template #title> Firmware Update Steps </template>
+  <Modal
+  :open="open"
+  max-width-class="w-auto max-w-[50vw] min-w-[300px]"
+>
+    <template #title> Firmware Update </template>
 
-    <ol class="mb-4 ol-reset space-y-2 leading-loose">
-      <li>Connect your board to the computer.</li>
-      <li>
-        On your board, find <kbd>A</kbd> or <kbd>LDR</kbd> button. If not found,
-        insert a paper clip in the 2 small holes. Images and instructions are
-        found on the
-        <a target="_blank" href="https://www.duelink.com/docs/loader"> Loader</a> page.
-        <span class="font-semibold"
-          >Keep holding the button down or keep the paper clip in</span
-        >
-        and <kbd>RESET</kbd> the board. If you do not have a reset button then
-        <kbd>power cycle</kbd> the module.
+    <ul class="mb-4 list-none space-y-2 leading-loose">
+      <li>Updates will bring new features and fixes to your module, see <a target="_blank" href="https://www.duelink.com/docs/loader"> Release Notes</a> page.<br>
+        You have 2 firmware options:<br>
+        
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>1.</strong> DUELink (official) firmware: Use this to write scripts using this very console, and to control modules using one of the <a target="_blank" href="https://www.duelink.com/docs/language/intro"> Coding Languages</a> page.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>2.</strong> MicroBlocks (microblocks.fun) firmware: This brings block-coding options right to your DUELink module. See <a target="_blank" href="https://www.duelink.com/docs/language/microblocks"> MicroBlocks</a> page for more details.<br>
 
+        
+        <strong>Enter the DFU (Device Firmware Update) mode:</strong><br>
+        To enter DFU mode, you can use the <kbd>Erase All</kbd> top-menu option, or you can enter DFU mode using the following:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>1.</strong> Connect your board to a computer.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>2.</strong> If your board has <kbd>LDR</kbd> or <kbd>A</kbd> buttons, <strong>press and hold the button and <kbd>RESET</kbd> your board while holding <kbd>LDR</kbd> or <kbd>A</kbd> down.</strong><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>3.</strong> If your board does not have a button, insert a wire or a paper clip in the 2 small holes. Images and details are found on the Loader page.<br>
         <ul class="mt-2 ul-reset text-red-600">
           <li>
             Important! Remember to keep on holding the button or keep the clip
-            in while resetting or power cycling the board.
+            in while resetting or power cycling the board.<br>
           </li>
-        </ul>
-      </li>
-      <li>
-        <kbd>Release</kbd> the button now, or <kbd>remove</kbd> the paper clip.
-      </li>
-
-      <li>
-        Click the <kbd>Connect</kbd> button below and select
-        <kbd><em>DFU in FS mode</em></kbd>.        
+        </ul>        
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>4.</strong> <kbd>Release</kbd> the button now or <kbd>remove</kbd> the paper clip.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>5.</strong> Click the <kbd>Connect</kbd> button below and select <kbd>DFU in FS mode</kbd>. If you don’t see it, check your `Device Manager`, you might need to install the USB drivers <a target="_blank" href="https://www.duelink.com/docs/downloads#usb-drivers"> MicroBlocks</a>.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<strong>6.</strong> Select the desired firmware and click <kbd>Load</kbd>.<br>
       </li>
 
-      <li>Select the desired firmware and click <kbd>Load</kbd>.</li>
-    </ol>
+    </ul>
 
     <div v-if="error" class="mb-4 rounded-md bg-red-50 p-4">
       <div class="flex">
@@ -362,7 +359,8 @@ async function writeFirmware() {
 }
 
  // ----- Configuration -----
-  const USB_VENDOR_ID = 0x0483;           // STMicroelectronics
+  const STM32_VID = 0x0483;           // STMicroelectronics
+  const STM32_PID = 0xDF11;           // STMicroelectronics
   const DFU_INTERFACE_NUMBER = 0;        
   const DFU_TRANSFER_SIZE = 1024;
   const DFU_PAGE_ERASE_SIZE = 2048;
@@ -381,8 +379,8 @@ async function writeFirmware() {
           device = await navigator.usb.requestDevice({
               filters: [
               { 
-                vendorId: 0x0483,      // STMicroelectronics
-                productId: 0xDF11      // STM32 DFU bootloader
+                vendorId: STM32_VID,      // STMicroelectronics
+                productId: STM32_PID      // STM32 DFU bootloader
               }
             ]
           });
@@ -608,3 +606,5 @@ async function writeFirmware() {
       }
   }
 </script>
+
+
