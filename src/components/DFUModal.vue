@@ -379,7 +379,12 @@ async function writeFirmware() {
       try {
           isConnected.value = false;
           device = await navigator.usb.requestDevice({
-              filters: [{ vendorId: USB_VENDOR_ID }]
+              filters: [
+              { 
+                vendorId: 0x0483,      // STMicroelectronics
+                productId: 0xDF11      // STM32 DFU bootloader
+              }
+            ]
           });
           await device.open();
           if (!device.configuration) {
