@@ -117,7 +117,7 @@ async function connect() {
         isConnected = true;
         const info = port.getInfo();
         postMessage({ event: 'connected' });
-        postMessage({ event: 'eraseall_vid_dms', value: info.usbVendorId});
+        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId)});
     }
     else {
         //logEvent('There was an error while connencting.');
