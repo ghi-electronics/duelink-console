@@ -1,33 +1,19 @@
 <template>
   <Modal
   :open="open"
-  max-width-class="w-auto max-w-[50vw] min-w-[300px] sm:max-w-[60vw] lg:max-w-[40vw]"
+  max-width-class="w-auto max-w-[50vw] min-w-[350px] sm:max-w-[60vw] lg:max-w-[80vw]"
 >
     <template #title> Firmware Update </template>
-
-    <ol class="mb-4 space-y-1 leading-loose">
-        Updates will bring new features and fixes to your module, see <a target="_blank" href="https://www.duelink.com/docs/loader"> Release Notes</a> page.<br>
-        You have 2 firmware options:<br>
-        <ol class="list-decimal pl-8 space-y-1 leading-loose">
-          <li>DUELink (official) firmware: Use this to write scripts using this very console, and to control modules using one of the <a target="_blank" href="https://www.duelink.com/docs/language/intro"> Coding Languages</a> page.<br></li>
-          <li>MicroBlocks (microblocks.fun) firmware: This brings block-coding options right to your DUELink module. See <a target="_blank" href="https://www.duelink.com/docs/language/microblocks"> MicroBlocks</a> page for more details.<br></li>
+        Updates will bring new features and fixes to your module, see <a target="_blank" href="https://www.duelink.com/docs/release-notes"> Release Notes</a>.<br>
+        To update, enter the DFU (Device Firmware Update) mode: You can either use the <kbd>Erase All</kbd> top-menu option, or do the following:<br>
+        <ol class="list-decimal">
+        <li>Connect your module to a computer.</li>
+        <li>If your module has <kbd>LDR</kbd> or <kbd>A</kbd> button, press and <strong>hold</strong> the button and reset <kbd>RST</kbd> your module <strong>while continuing to hold</strong> <kbd>LDR</kbd> or <kbd>A</kbd> down.</li>
+        <li>If your module does not have a button, insert a wire or a paper clip in the 2 small holes, then power cycle your module. Images and details are found on the <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.</li>       
+        <li>Release the button now or remove the paper clip.</li>
+        <li>Click the <kbd>Connect</kbd> button below and select <kbd>DFU in FS mode</kbd>. If you don't see it, check your <kbd>Device Manager</kbd>, you might need to install the <a target="_blank" href="https://www.duelink.com/docs/downloads#usb-drivers"> USB drivers</a>, or you forgot to hold LDR down while resetting!</li>
+        <li>Select the desired firmware (Official or MicroBlocks) and click <kbd>Load</kbd>.</li>
         </ol>
-        Enter the DFU (Device Firmware Update) mode. To enter DFU mode, you can use the <kbd>Erase All</kbd> top-menu option, or you can enter DFU mode using the following:<br>
-        <ol class="list-decimal pl-8 space-y-1 leading-loose">
-        <li>Connect your board to a computer.<br></li>
-        <li>If your board has <kbd>LDR</kbd> or <kbd>A</kbd> buttons, press and hold the button and RESET your board <strong>while continuing to hold <kbd>LDR</kbd> or <kbd>A</kbd> down.</strong><br></li>
-        <li>If your board does not have a button, insert a wire or a paper clip in the 2 small holes. Images and details are found on the Loader page.<br></li>
-        <ul class="mt-2 ul-reset text-red-600">
-          <li>
-            Important! Remember to keep on holding the button or keep the clip
-            in while resetting or power cycling the board.<br>
-          </li>
-        </ul>        
-        <li>Release the button now or remove the paper clip.<br></li>
-        <li>Click the <kbd>Connect</kbd> button below and select <kbd>DFU in FS mode</kbd>. If you don’t see it, check your <kbd>Device Manager</kbd>, you might need to install the <a target="_blank" href="https://www.duelink.com/docs/downloads#usb-drivers"> USB drivers</a>.<br></li>
-        <li>Select the desired firmware and click <kbd>Load</kbd>.<br></li>
-        </ol>
-    </ol>
 
     <div v-if="error" class="mb-4 rounded-md bg-red-50 p-4">
       <div class="flex">
@@ -60,6 +46,7 @@
     <div v-if="isConnected">
       <div v-if="state === 'idle'" class="grid grid-cols-6 gap-2">      
         <div class="col-span-4">
+          <hr>
           <label for="dfu">Firmware</label>
           <select v-model="dfu" id="dfu" class="mt-2">
             <option value="" disabled>Select</option>
@@ -138,6 +125,12 @@
           <div class="w-full h-2 bg-sky-500 dark:bg-lime-500"></div>
         </div>
       </div>
+      You have 2 firmware options:<br>
+        <ol class="list-decimal">
+          <li><kbd>DUELink (Official)</kbd> firmware: Use this to write scripts using this console, to load <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a>, and to control modules using one of the <a target="_blank" href="https://www.duelink.com/docs/language/intro"> Coding Languages</a> page.</li>
+          <li><kbd>MicroBlocks (microblocks.fun)</kbd> firmware: This brings block-coding option right to your DUELink module. See <a target="_blank" href="https://www.duelink.com/docs/language/microblocks"> MicroBlocks</a> page for more details.</li>
+        </ol>
+      
     </div>
 
     <template #buttons>
@@ -155,7 +148,7 @@
             </Button>
             
             <Button type="secondary" @click.native="performEraseAll">
-              Erase All
+              Clear Memory
             </Button>
             
           </template>

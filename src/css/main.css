@@ -181,3 +181,12 @@ kbd {
     @apply bg-slate-200 text-slate-600;
     @apply dark:bg-zinc-700 dark:text-zinc-300;
 }
+
+li {
+    line-height: 1.2; /* A unitless value (1.5 times the font size) is recommended for consistency */
+}
+
+ol li {
+  padding: 5px;
+  margin-left: 30px;
+}
