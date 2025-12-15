@@ -5,7 +5,7 @@
 >
     <template #title> Firmware Update </template>
         Updates will bring new features and fixes to your module, see <a target="_blank" href="https://www.duelink.com/docs/release-notes"> Release Notes</a>.<br>
-        To update, enter the DFU (Device Firmware Update) mode: You can either use the <kbd>Erase All</kbd> top-menu option, or do the following:<br>
+        To update, enter the DFU (Device Firmware Update) mode: You can either use the <kbd>Erase All</kbd> button, or do the following:<br>
         <ol class="list-decimal">
         <li>Connect your module to a computer.</li>
         <li>If your module has <kbd>LDR</kbd> or <kbd>A</kbd> button, press and <strong>hold</strong> the button and reset <kbd>RST</kbd> your module <strong>while continuing to hold</strong> <kbd>LDR</kbd> or <kbd>A</kbd> down.</li>
@@ -168,6 +168,7 @@
         </template>
         <template v-else>
           <Button @click.native="connect"> Connect </Button>
+          <Button type="secondary" @click.prevent="$emit('eraseall_dms_dfumodal')"> Erase All </Button>
           <Button type="secondary" @click.native="$emit('close')">
             Close
           </Button>

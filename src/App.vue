@@ -13,7 +13,6 @@
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"            
-            @eraseall_dms_menubar="eraseall_dms_show_confirm_pre"
         />
         <ToolBar
             :can-download="canDownload"
@@ -103,14 +102,13 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.<br>It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br></p>
+                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br>Note: The following connect window will be empty if the device is already in DFU mode!</p>
                 </div>
-
                 
                 <div class="dialog-buttons">
                     <button class="yes" @click="do_eraseall_dms_pre_yes">Continue</button>
                     <button class="no" @click="do_eraseall_dms_pre_no">Abort</button>
-                </div>
+                </div>               
             </div>
         </div>
 
@@ -207,6 +205,7 @@
         :available-dfu="availableDfu"
         :open="dfuModal.open"
         @close="dfuModal.open = false"
+        @eraseall_dms_dfumodal="eraseall_dms_show_confirm_pre"
     />
     
     <ListAllModal
