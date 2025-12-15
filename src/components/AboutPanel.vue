@@ -13,13 +13,19 @@
                     {{ device ? device : '...'  }}
                 </div>
             </div>
-            <div class="px-2 py-1 flex justify-between">
+            <div
+                v-if="deviceFirmwareVersion !== null"
+                class="px-2 py-1 flex justify-between"
+            >
                 <div class="font-medium">Device firmware</div>
                 <div>
                     {{ deviceFirmwareVersion ? deviceFirmwareVersion : '...'  }}
                 </div>
             </div>
-            <div class="px-2 py-1 flex justify-between">
+            <div
+                v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null"
+                class="px-2 py-1 flex justify-between"
+            >
                 <div class="font-medium">Latest firmware</div>
                 <div>
                     {{ latestFirmwareVersion ? latestFirmwareVersion : '...'  }}
