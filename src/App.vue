@@ -12,7 +12,8 @@
             @firmware="firmwareModal.start()"
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
-            @updateTippy="updateTippy"            
+            @updateTippy="updateTippy" 
+            @eraseall_dms_menubar="doTest"           
         />
         <ToolBar
             :can-download="canDownload"
@@ -251,6 +252,8 @@ import NewAllModal from "./components/NewAllModal.vue";
 const GHI_VID = 0x1B9F;
 const DL_PID = 0xF300;
 const MB_PID = 0xF301;
+const STM32_VID = 0x0483;           // STMicroelectronics
+const STM32_PID = 0xDF11;           // STMicroelectronics
 // Refs
 
 const $refs = { editor: null, filename: null, input: null, progress: null };
@@ -559,6 +562,74 @@ async function sendList(target) {
             }
         });
     }
+}
+
+async function getFilteredSerialPorts() {
+  const ports = await navigator.serial.getPorts();
+
+  return ports.filter(port => {
+    const info = port.getInfo();
+    return (
+     info.usbVendorId === GHI_VID &&
+    (
+      info.usbProductId === DL_PID ||
+      info.usbProductId === MB_PID
+    )
+    );
+  });
+}
+
+async function getFilteredUsbDevices() {
+  const devices = await navigator.usb.getDevices();
+
+  return devices.filter(device =>
+    device.vendorId === STM32_VID &&
+    device.productId === STM32_PID
+  );
+}
+
+async function autoDetect() {
+  const serialPorts = await getFilteredSerialPorts();
+  if (serialPorts.length > 0) {
+    return { type: 'serial', device: serialPorts[0] };
+  }
+
+  const usbDevices = await getFilteredUsbDevices();
+  if (usbDevices.length > 0) {
+    return { type: 'usb', device: usbDevices[0] };
+  }
+
+  return null;
+}
+
+async function doTest() {
+    let result = await autoDetect();
+
+  if (!result) {
+    try {
+      const port = await navigator.serial.requestPort({
+        filters: [{ usbVendorId: GHI_VID, usbProductId: DL_PID }]
+      });
+      result = { type: 'serial', device: port };
+    } catch {}
+
+    if (!result) {
+      const device = await navigator.usb.requestDevice({
+        filters: [{ vendorId: STM32_VID, productId: STM32_PID }]
+      });
+      result = { type: 'usb', device };
+    }
+  }
+
+  if (!result) throw new Error('No supported device selected');
+
+  if (result.type === 'serial') {
+    //await connectSerial(result.device);
+    console.log("Serial detected")
+  } else {
+    //await connectDFU(result.device);
+    console.log("DFU detected")
+  }
 }
 
 async function eraseall_dms_show_confirm_pre() {
