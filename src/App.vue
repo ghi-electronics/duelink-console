@@ -12,7 +12,8 @@
             @firmware="firmwareModal.start()"
             @dfu="dfuModal.start()"
             @update:theme="updateTippyTheme"
-            @updateTippy="updateTippy"            
+            @updateTippy="updateTippy"
+            @update_driver_menubar="do_update_driver_menubar"            
         />
         <ToolBar
             :can-download="canDownload"
@@ -112,6 +113,23 @@
             </div>
         </div>
 
+        <div v-if="update_driver_msgbox_confirm_pre" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning
+                </div>
+                <div class="dialog-body">
+                    <p>Driver scripts are only needed on modules loaded with DUELink official firmware. Click Connect and select the DUELink device. </p>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_update_driver_pre_yes">Continue</button>
+                    <button class="no" @click="do_update_driver_pre_no">Abort</button>
+                </div>               
+            </div>
+        </div>
+
         <div v-if="eraseall_dms_msgbox_confirm_final" class="overlay">
             <div class="dialog">
                 <div class="dialog-title">
@@ -127,6 +145,75 @@
                     <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
                     <button class="no" @click="do_eraseall_dms_final_no">No</button>
                 </div>                   
+            </div>
+        </div>
+
+        <div v-if="update_driver_msgbox_confirm_final" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning
+                </div>
+                <div class="dialog-body">
+                    <p>{{do_update_driver_confirm_final_text1}}<br></p>
+                    <p>{{do_update_driver_confirm_final_text2}}<br></p>
+                    <p>{{do_update_driver_confirm_final_text3}}<br><br></p>
+                    <p>{{do_update_driver_confirm_final_text}}<br><br></p>
+                </div>
+
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_update_driver_final_yes">Yes</button>
+                    <button class="no" @click="do_update_driver_final_no">No</button>
+                </div>                   
+            </div>
+        </div>
+
+        <div v-if="update_driver_msgbox_progress" class="overlay">
+            <div class="dialog" style="width: 25vw;">
+                <div class="dialog-title">
+                <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                {{ percent_tmp < 100 ? "Writting..." : "Updated successful" }}
+                </div>
+
+                <div class="dialog-body">
+                <!-- Progress bar -->
+                <br>
+                <div class="update-driver-progress-container">
+                    <div
+                    class="update-driver-progress-bar"
+                    :style="{ 
+                        width: percent_tmp + '%'
+                        
+                        }"
+                    ></div>
+                </div>
+
+                <!-- Percent text -->
+                <div class="progress-text">
+                    {{ percent_tmp }}%
+                </div>
+                </div>
+
+                <div class="dialog-buttons">
+                    <button 
+                        class="yes" 
+                        @click="update_driver_msgbox_progress = false" 
+                        :disabled="percent_tmp < 100"
+                    >
+                        {{ percent_tmp < 100 ? "Please wait..." : "Close" }}
+                    </button>
+
+                    <!-- Blink LED button, only visible when progress is 100% -->
+                    <!--<button 
+                        v-if="percent_tmp === 100"
+                        class="no"
+                        @click="blinkLED()"
+                    >
+                        Blink StatLed
+                    </button>
+                    -->
+                </div>
             </div>
         </div>
 
@@ -272,12 +359,26 @@ const language = ref('python');
 const theme = ref('light');
 const textSize = ref(16);
 
+const percent_tmp = ref(0);
+
 const eraseall_dms_msgbox_confirm_final = ref(false);
 const eraseall_dms_msgbox_confirm_pre = ref(false);
 const eraseall_dms_msgbox_finished = ref(false);
 
+const update_driver_msgbox_confirm_pre = ref(false);
+const update_driver_msgbox_confirm_final = ref(false);
+const update_driver_msgbox_progress = ref(false);
+
+
+
 const ERASE_ALL_DMS_CONFIRM_FINAL_TEXT = "Firmware detected.\nAre you sure you want to erase all and enter DFU mode?";
 const dms_confirm_final_text = ref(ERASE_ALL_DMS_CONFIRM_FINAL_TEXT);
+
+const DO_UPDATE_DRIVER_CONFIRM_FINAL_TEXT = "This feature will update the module's driver script. It will erase any existing drivers and applications. Are you sure you want to continue?";
+const do_update_driver_confirm_final_text = ref(DO_UPDATE_DRIVER_CONFIRM_FINAL_TEXT);
+const do_update_driver_confirm_final_text1 = ref("");
+const do_update_driver_confirm_final_text2 = ref("");
+const do_update_driver_confirm_final_text3 = ref("");
 
 
 // Emitter
@@ -539,19 +640,21 @@ async function sendDirectMode() {
 }
 
 async function sendList(target) {
-    console.log('[App.vue] sendList');
-    if (recordModeCode.value) {
-        alreadyHasCodeModal.target = target;
-        alreadyHasCodeModal.list = true;
-        alreadyHasCodeModal.open = true;
-    } else {
-        webSerial.list((result) => {
-            const code = result.join('\n');
-            if (recordModeCode.value !== code) {
-                recordModeCode.value = code;
-                lastRecordModeCode.value = code;
-            }
-        });
+    if (webSerial.update_driver_status.value == 0) {
+        console.log('[App.vue] sendList');
+        if (recordModeCode.value) {
+            alreadyHasCodeModal.target = target;
+            alreadyHasCodeModal.list = true;
+            alreadyHasCodeModal.open = true;
+        } else {
+            webSerial.list((result) => {
+                const code = result.join('\n');
+                if (recordModeCode.value !== code) {
+                    recordModeCode.value = code;
+                    lastRecordModeCode.value = code;
+                }
+            });
+        }
     }
 }
 
@@ -593,6 +696,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Erase all
 async function do_eraseall_dms_pre_no() {
     eraseall_dms_msgbox_confirm_pre.value = false;
     dfuModal.start();
@@ -604,7 +708,6 @@ async function do_eraseall_dms_pre_yes() {
     eraseall_dms_show_connect();
     
 }
-
 
 async function do_eraseall_dms_final_no() {
     eraseall_dms_msgbox_confirm_final.value = false;
@@ -632,6 +735,102 @@ async function do_eraseall_dms_final_yes() {
     eraseall_dms_msgbox_finished.value = true;
 
 
+}
+
+// Driver update
+async function do_update_driver_menubar(params) {
+    if (webSerial.isConnected.value) {
+        // Disconnect, we need to reconnect again because need get driver ver, pid....
+        webSerial.disconnect();
+
+        await sleep(100); 
+    }
+
+    update_driver_msgbox_confirm_pre.value = true;
+    
+}
+
+async function do_update_driver_pre_yes() {
+
+    update_driver_msgbox_confirm_pre.value = false;
+
+    if (!webSerial.isConnected.value) {
+        webSerial.device_name.value = "";
+        webSerial.driver_ver.value = "";
+        webSerial.update_driver_percent.value = 0;
+        percent_tmp.value = 0;
+        webSerial.update_driver_status.value = 0;
+       
+        await webSerial.driver_connect();
+
+        while (webSerial.update_driver_status.value == 0) {
+            await sleep(100);
+        }
+
+        await sleep(100);
+
+        if (webSerial.update_driver_status.value == 1) { // user select connected
+            
+           
+            while (!webSerial.isConnected.value || webSerial.device_name.value == "" || webSerial.driver_ver.value=="") {
+                  await sleep(100);
+            }
+
+            //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
+            do_update_driver_confirm_final_text1.value = "Device name: " + webSerial.device_name.value
+            do_update_driver_confirm_final_text2.value = "FW version: " + webSerial.version.value
+            do_update_driver_confirm_final_text3.value = "Driver script version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+            update_driver_msgbox_confirm_final.value = true;
+        }
+         
+    }
+    
+}
+
+async function do_update_driver_final_yes() {
+
+    update_driver_msgbox_confirm_final.value = false; 
+   
+    update_driver_msgbox_progress.value = true;
+
+    webSerial.driver_update(); // no await because just send message
+
+    while (webSerial.update_driver_percent.value !=100) {
+        await sleep(1);
+        percent_tmp.value = webSerial.update_driver_percent.value;
+    }
+
+    // reset every thing
+    
+    webSerial.update_driver_status.value = 0;
+
+    // return to normal state: Disconnect
+    webSerial.disconnect();
+    await sleep(1);
+
+}
+
+async function do_update_driver_pre_no() {   
+     if (webSerial.isConnected.value) {
+        // Disconnect, we need to reconnect again because need get driver ver, pid....
+        webSerial.disconnect();
+
+         await sleep(100); 
+    } 
+    update_driver_msgbox_confirm_pre.value = false;
+    
+}
+
+async function do_update_driver_final_no() {    
+     if (webSerial.isConnected.value) {
+        // Disconnect, we need to reconnect again because need get driver ver, pid....
+        webSerial.disconnect();
+
+        await sleep(100); 
+    }
+
+    update_driver_msgbox_confirm_final.value = false;
+    
 }
 
 function updateTippy(target, show = false) {
@@ -758,5 +957,20 @@ button.no {
 button.ok {
   background: #d9534f;
   color: white;
+}
+
+.update-driver-progress-container {
+  width: 100%;
+  height: 20px;
+  background-color: #555;   /* visible background */
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.update-driver-progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #4caf50; /* green bar */
+  transition: width 0.3s ease;
 }
 </style>

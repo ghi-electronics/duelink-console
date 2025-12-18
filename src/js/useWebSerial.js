@@ -24,6 +24,12 @@ export default function useWebSerial($refs, emitter) {
     const eraseall_status_dms = ref(0);
     const eraseall_vid_dms = ref(0);
 
+    const update_driver_status = ref(0);
+    const driver_ver = ref("");
+    const device_name = ref("");
+    const update_driver_percent = ref(0);
+    
+
     let memoryRegionsCallback = null;
 
     // Const
@@ -111,6 +117,46 @@ export default function useWebSerial($refs, emitter) {
             eraseall_status_dms.value = 1;
         }
     }
+
+    // driver update
+    async function driver_connect() {
+        if (window.document.documentMode || !navigator.serial) {
+            window.location = '/browser-not-supported.html';
+        }
+
+        if (isConnected.value == false) {
+            
+            try {
+                const available = await navigator.serial.getPorts(); // this refresh port only
+                await navigator.serial.requestPort({ 
+                    
+                    filters: [
+                        { usbVendorId: GHI_VID, usbProductId:DL_PID } // GHI Electronics VID                     
+                    ]
+                });
+            } catch (error) {
+                logError(error?.message || 'Unable to request port.');     
+                update_driver_status.value = -1;           
+                return;
+            }
+
+            worker.postMessage({ task: 'driver_connect_msg' });
+            update_driver_status.value = 1;
+        }
+        else {
+            update_driver_status.value = 1;
+        }
+    }
+
+    async function driver_update() {
+        if (isConnected.value == true)
+        {
+
+            worker.postMessage({ task: 'driver_connect_updadate_msg' });
+        }
+        
+    }
+
 
     async function disconnect() {
         worker.postMessage({ task: 'disconnect' });
@@ -298,6 +344,22 @@ export default function useWebSerial($refs, emitter) {
             case 'eraseall_vid_dms':
                 eraseall_vid_dms.value = data.value;
                 break;
+
+            case 'update_driver_status':
+                update_driver_status.value = data.value;
+                break;
+
+            case 'driver_ver_msg':
+                driver_ver.value = data.value;
+                break;
+
+            case 'device_name_msg':
+                device_name.value = data.value;
+                break;
+
+            case 'update_driver_percent_msg':
+                update_driver_percent.value = data.value;
+                break;
         }
     }
 
@@ -324,6 +386,10 @@ export default function useWebSerial($refs, emitter) {
         version,
         eraseall_status_dms,
         eraseall_vid_dms,
+        update_driver_status,
+        driver_ver,
+        device_name,
+        update_driver_percent,
         // Methods
         connect,
         disconnect,
@@ -337,5 +403,7 @@ export default function useWebSerial($refs, emitter) {
         stop,
         eraseall_dms_execute,        
         eraseall_dms_connect,
+        driver_connect,
+        driver_update,
     };
 }
