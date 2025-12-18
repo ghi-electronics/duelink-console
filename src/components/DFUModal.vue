@@ -8,11 +8,10 @@
       v-if="!isConnected "
     >
       Updates will bring new features and fixes to your module, see <a target="_blank" href="https://www.duelink.com/docs/release-notes"> Release Notes</a>.<br>
-      <br>
       <ol class="list-decimal">
         <li>Connect your module to a computer.</li>
-        <li>Enter the <kbd>DFU Mode</kbd> (Device Firmware Update): You can either use the <kbd>Erase All</kbd> button, or <kbd>Force DFU Mode</kbd> as explained on the <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.</li>
-        <li>Click the <kbd>Connect</kbd> button below and select <kbd>DFU in FS mode</kbd>. If you don't see it, check your <kbd>Device Manager</kbd>, you might need to install the <a target="_blank" href="https://www.duelink.com/docs/downloads#usb-drivers"> USB drivers</a>, or you did not force <kbd>DFU Mode</kbd> properly.</li>
+        <li>Enter the <kbd>DFU Mode</kbd>. You can either use the <kbd>Erase All</kbd> button, or <kbd>Force DFU Mode</kbd> as explained on the <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.</li>
+        <li>Click the <kbd>Connect</kbd> button and select <kbd>DFU in FS mode</kbd>. If no compatible device found, check your <kbd>Device Manager</kbd>, you might need to install the <a target="_blank" href="https://www.duelink.com/docs/downloads#usb-drivers"> USB drivers</a>.</li>
       </ol>
     </div>
     

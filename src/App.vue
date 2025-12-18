@@ -102,7 +102,7 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware.It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br>Note: The following connect window will be empty if the device is already in DFU mode!</p>
+                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware. It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br>Note: The following connect window will be empty if the device is already in DFU mode or it has an uncompatible firmware, see <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.</p>
                 </div>
                 
                 <div class="dialog-buttons">
@@ -612,6 +612,11 @@ async function do_eraseall_dms_final_no() {
     if (webSerial.eraseall_status_dms.value > 0) {
         await webSerial.disconnect();
     }
+
+    await sleep(250);
+     
+    dfuModal.start();
+
 }
 
 async function do_eraseall_dms_final_yes() {
