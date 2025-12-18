@@ -319,7 +319,7 @@ async function do_driver_update() {
         console.error("Failed to load text file:", response.status);
         return;
     }
-    driverText = await response.text(); // store content in variable
+    let driverText = await response.text(); // store content in variable
     //console.log("Driver text loaded:", driverText);
 
     const lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
