@@ -137,11 +137,14 @@
                     Success
                 </div>
                 <div class="dialog-body">
-                     <p>Erase All operation completed.<br><br></p>        
+                     <p>"Erase All" operation completed. You are in DFU Mode now!<br><br>Click the Connect button on the next window.</p>        
                 </div>
 
                 <div class="dialog-buttons">
-                    <button class="no" @click="eraseall_dms_msgbox_finished = false">OK</button>
+                    <button class="no" @click="
+                        eraseall_dms_msgbox_finished = false;
+                        dfuModal.start();
+                        ">OK</button>
                 </div>       
             </div>
         </div>
@@ -446,16 +449,7 @@ function ClickAnyWhereCallback(event) {
     }
     else {
         dfuModal.open = false
-    }
-
-    if (firmwareModal.toggleCounter === 1) {
-        firmwareModal.open = true
-        firmwareModal.toggleCounter = 0
-        // console.log("Reset dfuModal.toggleCounter: " + dfuModal.toggleCounter )
-    }
-    else {
-        firmwareModal.open = false
-    }
+    }   
 }
 
 onMounted(() => {
@@ -601,6 +595,7 @@ function sleep(ms) {
 
 async function do_eraseall_dms_pre_no() {
     eraseall_dms_msgbox_confirm_pre.value = false;
+    dfuModal.start();
 }
 
 async function do_eraseall_dms_pre_yes() {
