@@ -779,7 +779,10 @@ async function do_update_driver_pre_yes() {
             //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
             do_update_driver_confirm_final_text1.value = "Device name: " + webSerial.device_name.value
             do_update_driver_confirm_final_text2.value = "FW version: " + webSerial.version.value
-            do_update_driver_confirm_final_text3.value = "Driver script version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+            if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
+                do_update_driver_confirm_final_text3.value = "Driver script version: " + webSerial.driver_ver.value
+            else
+                do_update_driver_confirm_final_text3.value = "Driver script version: " + Number(webSerial.driver_ver.value).toFixed(1) 
             update_driver_msgbox_confirm_final.value = true;
         }
          
@@ -822,7 +825,7 @@ async function do_update_driver_pre_no() {
 }
 
 async function do_update_driver_final_no() {    
-     if (webSerial.isConnected.value) {
+    if (webSerial.isConnected.value) {
         // Disconnect, we need to reconnect again because need get driver ver, pid....
         webSerial.disconnect();
 

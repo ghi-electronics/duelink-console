@@ -201,7 +201,9 @@ async function eraseall_dms_connect() {
 // driver update
 let dl_json_data = null;
 async function loadDLJson() {
-  const response = await fetch('https://www.duelink.com/duelink.json');
+  //const response = await fetch('https://www.duelink.com/duelink.json');
+  const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink.json');
+  
   const json = await response.json();
 
   // Ensure products array exists
@@ -308,7 +310,8 @@ async function do_driver_update() {
     //console.log(device.name, device.partNumber);
 
     const device_part_number = update_device_partNum.toLowerCase();
-    const device_driver_path = "https://www.duelink.com/code/driver/" + device_part_number + ".txt";
+    //const device_driver_path = "https://www.duelink.com/code/driver/" + device_part_number + ".txt";
+    const device_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + device_part_number + ".txt";
 
     const response = await fetch(device_driver_path);
 
