@@ -21,7 +21,8 @@
         <div class="flex items-center space-x-4">
             <a href="https://duelink.com" target="_blank">Docs</a>
             <Menu :options="demoOptions" id="demo">Demos</Menu>
-            <a @click.prevent="$emit('dfu')">Firmware</a>                        
+            <a @click.prevent="$emit('dfu')">Firmware</a>  
+            <a @click.prevent="$emit('update_driver_menubar')">Driver</a>                      
             <a
                 class="text-sm"
                 :data-tippy-content="theme === 'dark' ? 'Light' : 'Dark'"
@@ -43,7 +44,7 @@ import Button from './Button.vue';
 
 // Emits
 
-const $emit = defineEmits(['demo', 'dfu', 'update:theme', 'updateTippy']);
+const $emit = defineEmits(['demo', 'dfu', 'update:theme', 'updateTippy','update_driver_menubar']);
 
 // Props
 

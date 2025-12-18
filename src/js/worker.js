@@ -69,7 +69,15 @@ addEventListener('message', (e) => {
 
         case 'eraseall_dms_connect_msg':
             eraseall_dms_connect();
-            break;    
+            break;  
+            
+        case 'driver_connect_msg':
+            do_driver_connect();
+            break; 
+
+        case 'driver_connect_updadate_msg':
+            do_driver_update();
+            break; 
     }
 });
 
@@ -188,6 +196,200 @@ async function eraseall_dms_connect() {
 
     postMessage({ event: 'eraseall_status_dms', value: 1});
         
+}
+
+// driver update
+let dl_json_data = null;
+async function loadDLJson() {
+  const response = await fetch('https://www.duelink.com/duelink.json');
+  const json = await response.json();
+
+  // Ensure products array exists
+  dl_json_data = Array.isArray(json.products) ? json.products : [];
+}
+
+function getDeviceByPID(pid) {
+   if (!dl_json_data) return "NA";
+
+  // Convert pid to uppercase for case‑insensitive match
+  const pidStr = String(pid).toUpperCase();
+
+  const item = dl_json_data.find(d => String(d.PID).toUpperCase() === pidStr);
+
+  if (!item) return "NA";
+
+  return {
+    name: item.name ?? "NA",
+    partNumber: item.partNumber ?? "NA"
+  };
+}
+
+let update_driver_ver = "";
+let update_device_name = "";
+let update_device_pid = "";
+let update_device_partNum = "";
+let update_can_update = false;
+async function do_driver_connect() {
+    update_can_update = false;
+    await connect()
+
+    await sleep(100);
+
+    if (!isConnected) {
+        return;
+    }
+
+    await writer.write(encoder.encode("\n"));                 
+    await sleep(400);
+    (await flush()).pop();
+    await writer.write(encoder.encode("Dver()\n"));         
+    await sleep(100);
+
+    let response = await flush();
+
+
+    if (response.length > 0) {   
+        response.pop();
+
+        let c = response.pop();
+
+        if (c.includes("unknown identifier")) {
+
+           update_driver_ver = "N/A";
+        }
+        else {
+           update_driver_ver = c;
+        }
+        
+    }
+
+    // get pid
+    await writer.write(encoder.encode("Info(0)\n")); 
+    await sleep(100);
+    response = await flush();
+    if (response.length > 0) {  
+        response.pop();
+
+        let c = response.pop();
+
+        const num = Number(c);
+
+        const hexStr = num.toString(16).toUpperCase().padStart(6, "0");
+
+        update_device_pid = "0x" + hexStr;
+
+    }
+
+    await loadDLJson();
+
+    const device = getDeviceByPID(update_device_pid);
+
+    if (device === "NA") {
+        console.log("NA");
+        return;
+    } else {
+       
+        update_device_name = device.name;
+        update_device_partNum = device.partNumber; 
+        
+        postMessage({ event: 'driver_ver_msg', value: update_driver_ver });
+        postMessage({ event: 'device_name_msg', value: update_device_name });
+        
+        update_can_update = true;
+    }
+       
+}
+
+async function do_driver_update() {
+    if (!isConnected || !update_can_update) {
+        return;
+    }
+
+    //console.log(device.name, device.partNumber);
+
+    const device_part_number = update_device_partNum.toLowerCase();
+    const device_driver_path = "https://www.duelink.com/code/driver/" + device_part_number + ".txt";
+
+    const response = await fetch(device_driver_path);
+
+    if (!response.ok) {
+        console.error("Failed to load text file:", response.status);
+        return;
+    }
+    driverText = await response.text(); // store content in variable
+    //console.log("Driver text loaded:", driverText);
+
+    const lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+
+    postMessage({ event: 'update_driver_percent_msg', value: 0 });
+
+    // erase program
+    await write('new all');
+
+    // start program
+    postMessage({ event: 'update_driver_percent_msg', value: 10 });
+
+
+    await write('pgmbrst()', '&');
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 20 });
+
+    
+    let lineNumber = 0;
+    for (let line of lines) {
+        await sleep(2);
+        if (line.trim().length === 0) {
+            line = ' ';
+        }
+        log('line', `"${line}"`);
+        await stream(line + '\n');
+
+        lineNumber++;
+
+        let per =  Math.floor((lineNumber / lines.length) * 70);
+
+        
+
+        if (per > 70)
+        {
+            per = 70;
+        }
+
+        per = per + 20;
+
+        postMessage({ event: 'update_driver_percent_msg', value: per });
+
+        //postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
+    }
+
+    //postMessage({ event: 'recording', percent: 100 });
+
+    postMessage({ event: 'update_driver_percent_msg', value: 95 });
+
+    await stream('\0');
+    await readUntil();
+
+
+    await writer.write(encoder.encode("run\n"));         
+    await sleep(100);
+
+    await writer.write(encoder.encode("Statled(100,100,10)\n"));         
+    await sleep(100);
+
+
+    postMessage({ event: 'update_driver_percent_msg', value: 100 });
+    
+    //postMessage({ event: 'isTalking', value: false });
+
+    //postMessage({ event: 'recorded' });
+    //logEvent('Recorded ' + lines.length + ' line(s) of code.');
+
+    // end program
+
+    //console.log("done");
+
+
+    
 }
 
 async function disconnect() {
