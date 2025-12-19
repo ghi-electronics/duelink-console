@@ -165,7 +165,7 @@
                 <div class="dialog-body">
                     <p>{{do_update_driver_confirm_final_text1}}<br></p>
                     <p>{{do_update_driver_confirm_final_text2}}<br></p>
-                    <p :style="{ color: firmwareMatches ? '#4CAF50' : '#d9534f' }">
+                    <p :style="{ color: firmwareMatches ? '#000000' : '#d9534f' }">
                     {{ do_update_driver_confirm_final_text3 }}<br>
                     </p>
                     <p v-if="firmwareMatches === false" class="firmware-warning">
