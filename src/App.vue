@@ -92,7 +92,11 @@
                 />
                 <LogPanel v-model:log="webSerial.log.value" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
-                <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value" />
+                <AboutPanel 
+                :available-dfu="availableDfu" 
+                :version="webSerial.version.value" 
+                @firmware-matches="onFirmwareMatches" 
+                @call-update-firmware-box="dfuModal.start()"/>
             </div>
         </div>
 
@@ -161,11 +165,28 @@
                 <div class="dialog-body">
                     <p>{{do_update_driver_confirm_final_text1}}<br></p>
                     <p>{{do_update_driver_confirm_final_text2}}<br></p>
-                    <p>{{do_update_driver_confirm_final_text3}}<br><br></p>
+                    <p :style="{ color: firmwareMatches ? '#4CAF50' : '#d9534f' }">
+                    {{ do_update_driver_confirm_final_text3 }}<br>
+                    </p>
+                    <p v-if="firmwareMatches === false" class="firmware-warning">
+                        (Recommend: 
+                        <button
+                            class="link-button underline"
+                            @click="
+                                update_driver_msgbox_confirm_final = false;
+                                dfuModal.start();
+                            "
+                        >
+                            Update
+                        </button>
+                        to the latest firmware.) 
+                    </p>
+                    <br>
                     <p>Do you want to erase all scripts and load <a 
                         target="_blank" 
                         :href="webSerial.update_driver_path.value"
-                    >this driver</a><br><br></p>
+                    >this driver</a>?<br><br></p>       
+     
                 </div>
 
                 
@@ -394,6 +415,11 @@ const do_update_driver_confirm_final_text1 = ref("");
 const do_update_driver_confirm_final_text2 = ref("");
 const do_update_driver_confirm_final_text3 = ref("");
 
+const firmwareMatches = ref(false);
+
+function onFirmwareMatches(value) {
+  firmwareMatches.value = value;
+}
 
 // Emitter
 
@@ -797,7 +823,9 @@ async function do_update_driver_pre_yes() {
                 do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
             else
                 do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
-            do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value
+            do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
+
+
             update_driver_msgbox_confirm_final.value = true;
         }
          

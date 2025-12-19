@@ -31,7 +31,17 @@
         v-if="deviceFirmwareVersion !== null && latestFirmwareVersion !== null && !firmwareMatches"
         class="px-4 py-2 font-medium bg-yellow-200 dark:text-zinc-900"
     >
-        <i class="fas fa-fw fa-triangle-exclamation mr-1"></i> Please update to the latest firmware.
+        <i class="fas fa-fw fa-triangle-exclamation mr-1"></i>         
+        <span class="firmware-warning">
+            Please 
+            <button
+                class="link-button underline"
+                @click="show_update_fw_box()"
+            >
+                update
+            </button>
+            to the latest firmware.
+        </span>
     </div>
     <div class="flex justify-end px-4">
         <a
@@ -45,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 // Components
 
@@ -109,9 +119,23 @@ const latestFirmwareVersion = computed(() => {
 });
 
 const firmwareMatches = computed(() => {
+    if (!deviceFirmwareVersion.value || !latestFirmwareVersion.value) {
+        return false;
+    }
+
     const deviceNumber = Number(deviceFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
     const latestNumber = Number(latestFirmwareVersion.value.replace(/([^.\d]+)/gm, ''));
     console.log(deviceNumber, latestNumber);
     return !isNaN(deviceNumber) && !isNaN(latestNumber) && deviceNumber === latestNumber;
 });
+
+const emit = defineEmits(['firmware-matches','call-update-firmware-box']);
+
+function show_update_fw_box() {
+    emit('call-update-firmware-box');
+}
+
+watch(firmwareMatches, (value) => {
+  emit('firmware-matches', value);
+}, { immediate: true });
 </script>
