@@ -390,32 +390,49 @@ async function do_driver_update() {
     await flush();
 
 
-    await writer.write(encoder.encode("new\n"));         
-    await sleep(100);
-    await flush();
+    //await writer.write(encoder.encode("new\n"));         
+    //await sleep(100);
+    //await flush();
+
+    
 
     //# This is region 1 User
     //# Replace this with your code
     //# StatLed(200,200,10)
 
-    await write('pgmbrst()', '&');
-    await sleep(250);
 
-    driverText = "# This is region 1 User\n# Replace this with your code\n\n# StatLed(200,200,10)";
-    lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+    //await write('pgmbrst()', '&');
 
-    lineNumber = 0;
-    for (let line of lines) {
-        await sleep(2);
-        if (line.trim().length === 0) {
-            line = ' ';
+    await writer.write(encoder.encode("$\n"));   
+    await sleep(100);  
+
+    await writer.write(encoder.encode("$\n"));   await sleep(100);  
+    await writer.write(encoder.encode("# This is region 1 User\n"));   await sleep(100);  
+    await writer.write(encoder.encode("# Replace this with your code\n"));   await sleep(100);      
+    await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(100);  
+
+    await writer.write(encoder.encode(">\n"));   await sleep(100);  
+
+    await flush();
+    
+    if (false) {
+        driverText = "# This is region 1 User\n# Replace this with your code\n\n# StatLed(200,200,10)";
+        lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+
+        lineNumber = 0;
+        for (let line of lines) {
+            await sleep(2);
+            if (line.trim().length === 0) {
+                line = ' ';
+            }
+            log('line', `"${line}"`);
+            await stream(line + '\n');
         }
-        log('line', `"${line}"`);
-        await stream(line + '\n');
+
+        await stream('\0');
+        await readUntil();
     }
 
-    await stream('\0');
-    await readUntil();
 
 
     postMessage({ event: 'update_driver_percent_msg', value: 100 });
