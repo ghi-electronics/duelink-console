@@ -427,10 +427,13 @@ async function do_driver_update() {
     }
     else {
         await writer.write(encoder.encode("$\n"));   await sleep(250);   
+        postMessage({ event: 'update_driver_percent_msg', value: 96 });
         await writer.write(encoder.encode("# This is region 1 User\n"));   await sleep(250);   
         await writer.write(encoder.encode("# Replace this with your code\n"));   await sleep(250);
+        postMessage({ event: 'update_driver_percent_msg', value: 97 });
         await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(250);   
 
+        postMessage({ event: 'update_driver_percent_msg', value: 99 });
         await writer.write(encoder.encode(">\n"));   await sleep(250);   
 
         await flush();
