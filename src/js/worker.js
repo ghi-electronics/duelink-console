@@ -231,6 +231,8 @@ let update_device_name = "";
 let update_device_pid = "";
 let update_device_partNum = "";
 let update_can_update = false;
+let update_driver_path = "";
+
 async function do_driver_connect() {
     update_can_update = false;
     await connect()
@@ -293,7 +295,9 @@ async function do_driver_connect() {
        
         update_device_name = device.name;
         update_device_partNum = device.partNumber; 
-        
+        update_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + update_device_partNum.toLowerCase() + ".txt";
+
+        postMessage({ event: 'update_driver_path_msg', value: update_driver_path });
         postMessage({ event: 'driver_ver_msg', value: update_driver_ver });
         postMessage({ event: 'device_name_msg', value: update_device_name });
         
@@ -309,9 +313,9 @@ async function do_driver_update() {
 
     //console.log(device.name, device.partNumber);
 
-    const device_part_number = update_device_partNum.toLowerCase();
+    //const device_part_number = update_device_partNum.toLowerCase();
     //const device_driver_path = "https://www.duelink.com/code/driver/" + device_part_number + ".txt";
-    const device_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + device_part_number + ".txt";
+    const device_driver_path = update_driver_path;//"https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + device_part_number + ".txt";
 
     const response = await fetch(device_driver_path);
 
@@ -320,6 +324,8 @@ async function do_driver_update() {
         return;
     }
     let driverText = await response.text(); // store content in variable
+
+    
     //console.log("Driver text loaded:", driverText);
 
     const lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
@@ -331,7 +337,6 @@ async function do_driver_update() {
 
     // start program
     postMessage({ event: 'update_driver_percent_msg', value: 10 });
-
 
     await write('pgmbrst()', '&');
     

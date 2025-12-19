@@ -28,6 +28,7 @@ export default function useWebSerial($refs, emitter) {
     const driver_ver = ref("");
     const device_name = ref("");
     const update_driver_percent = ref(0);
+    const update_driver_path = ref("");
     
 
     let memoryRegionsCallback = null;
@@ -360,6 +361,10 @@ export default function useWebSerial($refs, emitter) {
             case 'update_driver_percent_msg':
                 update_driver_percent.value = data.value;
                 break;
+
+            case 'update_driver_path_msg':
+                update_driver_path.value = data.value;
+                break;    
         }
     }
 
@@ -390,6 +395,7 @@ export default function useWebSerial($refs, emitter) {
         driver_ver,
         device_name,
         update_driver_percent,
+        update_driver_path,
         // Methods
         connect,
         disconnect,

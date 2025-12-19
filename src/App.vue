@@ -120,7 +120,11 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>Driver scripts are only needed on modules loaded with DUELink official firmware. Click Connect and select the DUELink device. </p>
+                    <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware. Click continue to select a device. </p>
+
+                    
+
+                    
                 </div>
                 
                 <div class="dialog-buttons">
@@ -158,7 +162,10 @@
                     <p>{{do_update_driver_confirm_final_text1}}<br></p>
                     <p>{{do_update_driver_confirm_final_text2}}<br></p>
                     <p>{{do_update_driver_confirm_final_text3}}<br><br></p>
-                    <p>{{do_update_driver_confirm_final_text}}<br><br></p>
+                    <p>Do you want to erase all scripts and load <a 
+                        target="_blank" 
+                        :href="webSerial.update_driver_path.value"
+                    >this driver</a><br><br></p>
                 </div>
 
                 
@@ -171,8 +178,17 @@
 
         <div v-if="update_driver_msgbox_progress" class="overlay">
             <div class="dialog" style="width: 25vw;">
-                <div class="dialog-title">
-                <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                <div 
+                class="dialog-title"
+                :class="{ 'dialog-title-success': percent_tmp === 100 }"
+                >
+                <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
+                 <!-- Show icon only while writing -->
+                <i
+                    v-if="percent_tmp < 100"
+                    class="fas fa-exclamation-triangle"
+                    style="margin-right: 8px;"
+                ></i>
                 {{ percent_tmp < 100 ? "Writting..." : "Updated successful" }}
                 </div>
 
@@ -197,7 +213,7 @@
 
                 <div class="dialog-buttons">
                     <button 
-                        class="yes" 
+                        class="no" 
                         @click="update_driver_msgbox_progress = false" 
                         :disabled="percent_tmp < 100"
                     >
@@ -231,7 +247,7 @@
                     <button class="no" @click="
                         eraseall_dms_msgbox_finished = false;
                         dfuModal.start();
-                        ">OK</button>
+                        ">Close</button>
                 </div>       
             </div>
         </div>
@@ -374,8 +390,6 @@ const update_driver_msgbox_progress = ref(false);
 const ERASE_ALL_DMS_CONFIRM_FINAL_TEXT = "Firmware detected.\nAre you sure you want to erase all and enter DFU mode?";
 const dms_confirm_final_text = ref(ERASE_ALL_DMS_CONFIRM_FINAL_TEXT);
 
-const DO_UPDATE_DRIVER_CONFIRM_FINAL_TEXT = "This feature will update the module's driver script. It will erase any existing drivers and applications. Are you sure you want to continue?";
-const do_update_driver_confirm_final_text = ref(DO_UPDATE_DRIVER_CONFIRM_FINAL_TEXT);
 const do_update_driver_confirm_final_text1 = ref("");
 const do_update_driver_confirm_final_text2 = ref("");
 const do_update_driver_confirm_final_text3 = ref("");
@@ -777,12 +791,13 @@ async function do_update_driver_pre_yes() {
             }
 
             //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
-            do_update_driver_confirm_final_text1.value = "Device name: " + webSerial.device_name.value
-            do_update_driver_confirm_final_text2.value = "FW version: " + webSerial.version.value
+            do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
+            
             if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
-                do_update_driver_confirm_final_text3.value = "Driver script version: " + webSerial.driver_ver.value
+                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
             else
-                do_update_driver_confirm_final_text3.value = "Driver script version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+            do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value
             update_driver_msgbox_confirm_final.value = true;
         }
          
