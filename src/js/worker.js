@@ -328,7 +328,7 @@ async function do_driver_update() {
     
     //console.log("Driver text loaded:", driverText);
 
-    const lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+    let lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
 
     postMessage({ event: 'update_driver_percent_msg', value: 0 });
 
@@ -339,6 +339,7 @@ async function do_driver_update() {
     postMessage({ event: 'update_driver_percent_msg', value: 10 });
 
     await write('pgmbrst()', '&');
+    await sleep(250);
     
     postMessage({ event: 'update_driver_percent_msg', value: 20 });
 
@@ -381,8 +382,40 @@ async function do_driver_update() {
     await writer.write(encoder.encode("run\n"));         
     await sleep(100);
 
-    await writer.write(encoder.encode("Statled(100,100,10)\n"));         
+    //await writer.write(encoder.encode("Statled(100,100,10)\n"));         
+    //await sleep(100);
+
+    await writer.write(encoder.encode("Region(1)\n"));   
+    await sleep(100);   
+    await flush();
+
+
+    await writer.write(encoder.encode("new\n"));         
     await sleep(100);
+    await flush();
+
+    //# This is region 1 User
+    //# Replace this with your code
+    //# StatLed(200,200,10)
+
+    await write('pgmbrst()', '&');
+    await sleep(250);
+
+    driverText = "# This is region 1 User\n# Replace this with your code\n\n# StatLed(200,200,10)";
+    lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
+
+    lineNumber = 0;
+    for (let line of lines) {
+        await sleep(2);
+        if (line.trim().length === 0) {
+            line = ' ';
+        }
+        log('line', `"${line}"`);
+        await stream(line + '\n');
+    }
+
+    await stream('\0');
+    await readUntil();
 
 
     postMessage({ event: 'update_driver_percent_msg', value: 100 });
@@ -395,9 +428,6 @@ async function do_driver_update() {
     // end program
 
     //console.log("done");
-
-
-    
 }
 
 async function disconnect() {
