@@ -389,6 +389,9 @@ async function do_driver_update() {
     await sleep(100);   
     await flush();
 
+    await writer.write(encoder.encode("run\n"));         
+    await sleep(1000);
+
 
     //await writer.write(encoder.encode("new\n"));         
     //await sleep(100);
@@ -403,18 +406,7 @@ async function do_driver_update() {
 
     //await write('pgmbrst()', '&');
 
-    await writer.write(encoder.encode("$\n"));   
-    await sleep(100);  
-
-    await writer.write(encoder.encode("$\n"));   await sleep(100);  
-    await writer.write(encoder.encode("# This is region 1 User\n"));   await sleep(100);  
-    await writer.write(encoder.encode("# Replace this with your code\n"));   await sleep(100);      
-    await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(100);  
-
-    await writer.write(encoder.encode(">\n"));   await sleep(100);  
-
-    await flush();
-    
+   
     if (false) {
         driverText = "# This is region 1 User\n# Replace this with your code\n\n# StatLed(200,200,10)";
         lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
@@ -431,6 +423,19 @@ async function do_driver_update() {
 
         await stream('\0');
         await readUntil();
+        
+    }
+    else {
+        await writer.write(encoder.encode("$\n"));   await sleep(250);   
+        await writer.write(encoder.encode("# This is region 1 User\n"));   await sleep(250);   
+        await writer.write(encoder.encode("# Replace this with your code\n"));   await sleep(250);
+        await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(250);   
+
+        await writer.write(encoder.encode(">\n"));   await sleep(250);   
+
+        await flush();
+    
+
     }
 
 
