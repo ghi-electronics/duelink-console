@@ -29,37 +29,15 @@
   {
     "label": "Read Buttons",
     "code": [
-      "# Read A and B buttons found on boards such as Cincobit and Pixobit",
-      "BtnEn(20, 1) #Button A",
-      "BtnEn(23, 1) #Button B",
+      "# Read LDR buttons found on a several boards",
+      "BtnEn(20, 1) # Button LDR (called A on some boards)",
       "while 1",
       "  _a=BtnDown(20)",
-      "  _b=BtnDown(23)",
       "  If _a=1",
-      "    PrintLn(\"Button A\")",
-      "  End",
-      "  If _b=1",
-      "    PrintLn(\"Button B\")",
+      "    PrintLn(\"Button LDR\")",
       "  End",
       "  Wait(200)",
       "wend"
-    ]
-  },
-  {
-    "label": "Image Arrays",
-    "code": [
-      "# This sample assumes you have the display configured and driver loaded",
-      "Dim a1[8*8] = {0, 0, 0, 1, 1, 0, 0, 0,",
-      "0, 0, 1, 1, 1, 1, 0, 0,",
-      "0, 1, 1, 1, 1, 1, 1, 0,",
-      "1, 1, 0, 1, 1, 0, 1, 1,",
-      "1, 1, 1, 1, 1, 1, 1, 1,",
-      "0, 0, 1, 0, 0, 1, 0, 0,",
-      "0, 1, 0, 1, 1, 0, 1, 0,",
-      "1, 0, 1, 0, 0, 1, 0, 1}",
-      "Clear(0)",
-      "Img(a1,13,22,8,8,0)",
-      "Show()"
     ]
   },
   {
@@ -88,25 +66,14 @@
     ]
   },
   {
-    "label": "Cap Touch Sense",
-    "code": [
-      "# This sample reads pin 0 as a capacitive touch",
-      "# Touch with your finger to detect",
-      "# Requires R/C, already found on xxxxBit boards' large pads ",
-      "while 1",
-      "  _t = Touch(1, 10, 1, 100)",
-      "  PrintLn(\"pin 0 \", _t)",
-      "  Wait(100)",
-      "wend"
-    ]
-  },
-  {
     "label": "For Loop",
     "code": ["# Print 0 to 10", "For _i=0 to 10", "  PrintLn(_i)", "Next"]
   },
   {
     "label": "If Statement",
     "code": [
+      "_x=3",
+      " ",
       "If _x=1",
       "  PrintLn(\"one\")",
       "Else",
@@ -122,7 +89,9 @@
       "# Enter Go() in the immediate window",
       "fn Go()",
       "  Print(\"I am going!\")",
-      "fend"
+      "fend",
+      " ",
+      "Go()"
     ]
   }
 ]
