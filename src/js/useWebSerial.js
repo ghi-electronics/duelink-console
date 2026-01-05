@@ -29,6 +29,7 @@ export default function useWebSerial($refs, emitter) {
     const device_name = ref("");
     const update_driver_percent = ref(0);
     const update_driver_path = ref("");
+    const update_devaddr=ref(1);
     
 
     let memoryRegionsCallback = null;
@@ -76,8 +77,8 @@ export default function useWebSerial($refs, emitter) {
             isBusy.value = false;
             return;
         }
-
-        worker.postMessage({ task: 'connect' });
+        update_devaddr.value = 1;
+        worker.postMessage({ task: 'connect', value: update_devaddr.value });
     }
 
     async function eraseall_dms_execute() {
@@ -140,8 +141,8 @@ export default function useWebSerial($refs, emitter) {
                 update_driver_status.value = -1;           
                 return;
             }
-
-            worker.postMessage({ task: 'driver_connect_msg' });
+            
+            worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
             update_driver_status.value = 1;
         }
         else {
@@ -159,8 +160,8 @@ export default function useWebSerial($refs, emitter) {
     }
 
 
-    async function disconnect() {
-        worker.postMessage({ task: 'disconnect' });
+    async function disconnect() {        
+        worker.postMessage({ task: 'disconnect' });        
     }
 
     function execute(line) {
@@ -396,6 +397,7 @@ export default function useWebSerial($refs, emitter) {
         device_name,
         update_driver_percent,
         update_driver_path,
+        update_devaddr,
         // Methods
         connect,
         disconnect,

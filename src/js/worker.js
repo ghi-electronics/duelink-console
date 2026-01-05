@@ -29,6 +29,7 @@ addEventListener('message', (e) => {
             output = '';
             break;
         case 'connect':
+            update_devaddr = e.data.value;
             connect();
             break;
         case 'disconnect':
@@ -72,7 +73,7 @@ addEventListener('message', (e) => {
             break;  
             
         case 'driver_connect_msg':
-            do_driver_connect();
+            do_driver_connect(e.data.value);
             break; 
 
         case 'driver_connect_updadate_msg':
@@ -87,13 +88,25 @@ async function connect() {
     log(`Port status ${isConnected}`);
     [port] = await navigator.serial.getPorts();
     try {
-        await port.open({
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: 'none',
-        });
+        if (port.connected ) {
+            if (port.readable != null && port.writable!= null) {
+                if (port.readable.locked || port.writable.locked) {
+                    await disconnect();
+                }
+            }            
+        
+
+            await port.open({
+                baudRate: 115200,
+                dataBits: 8,
+                parity: 'none',
+                stopBits: 1,
+                flowControl: 'none',
+            });
+        }
+        else {
+            return;
+        }
     } catch (error) {
         postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
         logError(error?.message || 'Unable to open port.');
@@ -159,13 +172,25 @@ async function eraseall_dms_connect() {
     log(`Port status ${isConnected}`);
     [port] = await navigator.serial.getPorts();
     try {
-        await port.open({
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: 'none',
-        });
+       if (port.connected ) {
+            if (port.readable != null && port.writable!= null) {
+                if (port.readable.locked || port.writable.locked) {
+                    await disconnect();
+                }
+            }            
+        
+
+            await port.open({
+                baudRate: 115200,
+                dataBits: 8,
+                parity: 'none',
+                stopBits: 1,
+                flowControl: 'none',
+            });
+        }
+        else {
+            return;
+        }
     } catch (error) {
         postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
         logError(error?.message || 'Unable to open port.');
@@ -232,9 +257,11 @@ let update_device_pid = "";
 let update_device_partNum = "";
 let update_can_update = false;
 let update_driver_path = "";
+let update_devaddr = 1;
 
-async function do_driver_connect() {
+async function do_driver_connect(devAdd) {
     update_can_update = false;
+    update_devaddr = devAdd;
     await connect()
 
     await sleep(100);
@@ -838,8 +865,8 @@ async function synchronize() {
 
     await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
     
-    result = await write('sel(1)');
-    log('sel(1) result ', result);
+    result = await write(`sel(${update_devaddr})`);
+    log(`sel(${update_devaddr})`, result);
         
     if (isEchoing) {
         await turnOffEcho();

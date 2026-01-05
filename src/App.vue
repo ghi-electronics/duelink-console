@@ -125,10 +125,21 @@
                 </div>
                 <div class="dialog-body">
                     <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware. Click continue to select a device. </p>
-
-                    
-
-                    
+   
+                    <label for="device-number" style="display: block; margin-top: 10px;">
+                        Device address:
+                   
+                        <input
+                            id="device-number"
+                            type="number"
+                            min="1"
+                            max="254"
+                            v-model.number="webSerial.update_devaddr.value"
+                            placeholder="Enter device number"
+                            style="width: 70px; height: 20px;margin-top: 1px;"
+                            @blur="onDeviceNumberBlur"
+                        />
+                     </label>
                 </div>
                 
                 <div class="dialog-buttons">
@@ -914,6 +925,12 @@ function textSizeMinus() {
         textSize.value = 12;
     }
     editor.setOptions({ fontSize: textSize.value + 'px' });
+}
+
+function onDeviceNumberBlur() {
+    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 0 || webSerial.update_devaddr.value > 254) {
+        webSerial.update_devaddr.value = 1;
+    }
 }
 </script>
 
