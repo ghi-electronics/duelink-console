@@ -4,7 +4,7 @@ const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 let ignoreOutput = false;
 let isConnected = false;
-let isEchoing = true;
+let isEchoing = false;
 let isLogging = true;
 let mode = '>';
 let output = '';
@@ -21,6 +21,8 @@ const ignoreChars = ['>', '$', '&'];
 const GHI_VID = 0x1B9F;
 const DL_PID = 0xF300;
 const MB_PID = 0xF301;
+
+let dev_responsed = false;
 
 addEventListener('message', (e) => {
     log(`---- on "message", do task: ${e.data.task} ----`);
@@ -258,6 +260,7 @@ let update_device_partNum = "";
 let update_can_update = false;
 let update_driver_path = "";
 let update_devaddr = 1;
+
 
 async function do_driver_connect(devAdd) {
     update_can_update = false;
@@ -743,7 +746,7 @@ async function readLoop() {
     }
 }
 
-function readUntil(terminator = null) {
+function readUntil_DoNotUse(terminator = null) {
     if (!terminator) {
         terminator = mode;
     }
@@ -774,6 +777,64 @@ function readUntil(terminator = null) {
             result.shift();
         }
         resolve(result);
+    });
+}
+
+function cleanupResult(result, terminator) {
+    const cleaned = [...result];
+
+    if (cleaned.length > 1) {
+        cleaned.pop();
+    } else if (cleaned?.[0] === terminator) {
+        log('removed terminator from result', terminator);
+        cleaned.shift();
+    }
+
+    return cleaned;
+}
+
+function readUntil(terminator = null, timeout = 3000) {
+    if (!terminator) {
+        terminator = mode;
+    }
+
+    return new Promise(async (resolve) => {
+        const result = [];
+        let timedOut = false;
+
+        // Start timeout
+        const timeoutId = setTimeout(() => {
+            timedOut = true;
+            dev_responsed = !timedOut;
+            log('readUntilTimeout', `timeout reached (${timeout} ms)`, result);
+            resolve(cleanupResult(result, terminator));
+        }, timeout);
+
+        try {
+            let line;
+            do {
+                line = await queue.pop().catch(() => {
+                    log('read until', 'queue waiter terminated', result);
+                    return null;
+                });
+
+                if (!line || timedOut) break;
+
+                result.push(line);
+
+                if (line.startsWith('!')) {
+                    log('Error:', line);
+                    break;
+                }
+
+            } while (line !== terminator);
+
+        } finally {
+            // Terminator reached or loop exited → cancel timeout
+            clearTimeout(timeoutId);
+        }
+        dev_responsed = !timedOut;
+        resolve(cleanupResult(result, terminator));
     });
 }
 
@@ -831,9 +892,7 @@ async function synchronize() {
 
         let result = await flush();
 
-        log('escape result', result);
-                
-        
+        log('escape result', result);                        
         if (result.length >= 1) { // when more than 1 device, more than '>' will be return
             result = result.pop();
             if (result === '>' || result === '$') {
@@ -865,9 +924,26 @@ async function synchronize() {
 
     await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
     
+    dev_responsed = true;
     result = await write(`sel(${update_devaddr})`);
-    log(`sel(${update_devaddr})`, result);
+    log(`sel(${update_devaddr})`, result);    
+
+    if (!dev_responsed) {
+        // when device address is not in range, back to sel(1) as default so there is always response.
+        if (update_devaddr!==1) {
+            await write(`sel(1)`);
+        }
         
+        await disconnect();
+        return 0;
+    }
+
+    //await sleep(100); // stop if loop is running
+    //await writer.write(encoder.encode('\x1B'));
+
+    await sleep(100); // max devices 255, each take 1ms, give 2ms to initialize
+    result  = await flush();
+
     if (isEchoing) {
         await turnOffEcho();
     }
@@ -898,7 +974,7 @@ async function turnOffEcho() {
     isEchoing = false;
 }
 
-async function write(command, terminator = null, lineEnd = '\n') {
+async function write(command, terminator = null, lineEnd = '\n',timeout = 3000) {
     try {
         log('----- write -----');
         postMessage({ event: 'isTalking', value: true });
@@ -915,7 +991,7 @@ async function write(command, terminator = null, lineEnd = '\n') {
         log('write is sleeping');
         await sleep(50);
         log('write is reading until', terminator ? terminator : mode);
-        const result = await readUntil(terminator ? terminator : mode);
+        const result = await readUntil(terminator ? terminator : mode,timeout);
         log('write result', result);
         return result;
     } finally {

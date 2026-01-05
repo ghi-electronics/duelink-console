@@ -2,6 +2,7 @@
     <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
         <Button
             id="plugBtn"
+            :disabled="isBusy"
             :class="['tool', isConnected ? 'connected' : '']"
             :data-tippy-content="isConnected ? 'Disconnect' : 'Connect'"
             @click.native="onPlug"
@@ -49,6 +50,7 @@
             <i class="fas fa-fw fa-download"></i>
         </Button>
         <label
+            :disabled="isBusy"
             class="btn primary tool text-center cursor-pointer"
             data-tippy-content="Load"
             for="file"

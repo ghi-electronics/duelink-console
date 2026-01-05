@@ -124,11 +124,10 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware. Click continue to select a device. </p>
+                    <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware.</p>
    
                     <label for="device-number" style="display: block; margin-top: 10px;">
-                        Device address:
-                   
+                        Module Address:                   
                         <input
                             id="device-number"
                             type="number"
@@ -136,7 +135,7 @@
                             max="254"
                             v-model.number="webSerial.update_devaddr.value"
                             placeholder="Enter device number"
-                            style="width: 70px; height: 20px;margin-top: 1px;"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
                             @blur="onDeviceNumberBlur"
                         />
                      </label>
@@ -811,6 +810,8 @@ async function do_update_driver_pre_yes() {
         webSerial.update_driver_percent.value = 0;
         percent_tmp.value = 0;
         webSerial.update_driver_status.value = 0;
+        let tmp = webSerial.isBusy.value;
+        webSerial.isBusy.value = true;
        
         await webSerial.driver_connect();
 
@@ -822,23 +823,37 @@ async function do_update_driver_pre_yes() {
 
         if (webSerial.update_driver_status.value == 1) { // user select connected
             
-           
+            let connected = false;
+            const expire = Date.now() + 3000;
             while (!webSerial.isConnected.value || webSerial.device_name.value == "" || webSerial.driver_ver.value=="") {
-                  await sleep(100);
+                await sleep(100);
+                if (Date.now() > expire) {
+                    break;
+                }
+
+                  
             }
 
-            //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
-            do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
-            
-            if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
-                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
-            else
-                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
-            do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
+            if (webSerial.isConnected.value && Date.now() < expire ){
+                connected = true;
+            }
+
+            if (connected) {
+                //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
+                do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
+                
+                if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
+                    do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
+                else
+                    do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+                do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
 
 
-            update_driver_msgbox_confirm_final.value = true;
+                update_driver_msgbox_confirm_final.value = true;
+            }
         }
+
+        webSerial.isBusy.value = tmp;
          
     }
     
