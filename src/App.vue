@@ -392,7 +392,7 @@ const lastRecordModeCode = ref('');
 const editorLine = ref(1);
 const editorColumn = ref(1);
 const filename = ref('');
-const language = ref('python');
+const language = ref('duelink');
 const theme = ref('light');
 const textSize = ref(16);
 
