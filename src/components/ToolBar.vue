@@ -74,6 +74,15 @@
         >
             <i class="fas fa-fw fa-magnifying-glass-minus"></i>
         </Button>
+
+        <Button
+            :disabled="isBusy"
+            class="tool"
+            data-tippy-content="Select module address"
+            @click.native="$emit('sel_cmd')"
+        >
+            Sel
+        </Button>
     </div>
 </template>
 
@@ -92,7 +101,8 @@ const $emit = defineEmits([
     'stop',
     'record',
     'list',
-    'load',    
+    'load',
+    'sel_cmd',
 ]);
 
 // Props

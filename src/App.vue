@@ -27,7 +27,7 @@
             :is-busy="webSerial.isBusy.value"
             :is-connected="webSerial.isConnected.value"
             :is-talking="webSerial.isTalking.value"
-            @connect="webSerial.connect()"
+            @connect="do_connect"
             @disconnect="webSerial.disconnect()"
             @download="downloadModal.start()"
             @play="webSerial.play()"
@@ -37,6 +37,7 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
+            @sel_cmd="sel_cmd_msgbox_show"
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -95,6 +96,7 @@
                 <AboutPanel 
                 :available-dfu="availableDfu" 
                 :version="webSerial.version.value" 
+                :devAdd="webSerial.update_devaddr.value"
                 @firmware-matches="onFirmwareMatches" 
                 @call-update-firmware-box="dfuModal.start()"/>
             </div>
@@ -148,6 +150,32 @@
             </div>
         </div>
 
+        <div v-if="sel_cmd_msgbox" class="overlay">
+            <div class="dialog">
+                
+                <div class="dialog-body">
+                    <label for="device-number" style="display: block; margin-top: 10px;">
+                        Module Address:                   
+                        <input
+                            id="device-number"
+                            type="number"
+                            min="1"
+                            max="254"
+                            v-model.number="sel_devaddr"
+                            placeholder="Enter device number"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
+                            @blur="onDeviceNumberBlur"
+                        />
+                     </label>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_sel_cmd_msgbox_yes">Set</button>      
+                    <button class="no" @click="do_sel_cmd_msgbox_no">Cancel</button>                   
+                </div>               
+            </div>
+        </div>
+
         <div v-if="eraseall_dms_msgbox_confirm_final" class="overlay">
             <div class="dialog">
                 <div class="dialog-title">
@@ -157,7 +185,6 @@
                 <div class="dialog-body">
                     <p>{{dms_confirm_final_text}}<br><br></p>
                 </div>
-
                 
                 <div class="dialog-buttons">
                     <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
@@ -278,6 +305,7 @@
                     <button class="no" @click="
                         eraseall_dms_msgbox_finished = false;
                         dfuModal.start();
+                        webSerial.isBusy = false;
                         ">Close</button>
                 </div>       
             </div>
@@ -407,6 +435,7 @@ const theme = ref('light');
 const textSize = ref(16);
 
 const percent_tmp = ref(0);
+const sel_devaddr = ref(1);
 
 const eraseall_dms_msgbox_confirm_final = ref(false);
 const eraseall_dms_msgbox_confirm_pre = ref(false);
@@ -415,6 +444,9 @@ const eraseall_dms_msgbox_finished = ref(false);
 const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
 const update_driver_msgbox_progress = ref(false);
+
+const sel_cmd_msgbox = ref(false);
+
 
 
 
@@ -708,6 +740,20 @@ async function sendList(target) {
     }
 }
 
+async function do_connect() {
+    webSerial.connect_status.value = 0;
+    webSerial.connection_mode.value = 0; // regular mode
+
+    await webSerial.connect();
+
+    while (webSerial.connect_status.value == 0) {
+        await sleep(100); 
+    }
+    
+    webSerial.isBusy.value = false;
+
+}
+
 async function eraseall_dms_show_confirm_pre() {
     eraseall_dms_msgbox_confirm_pre.value = true
 }
@@ -716,9 +762,11 @@ async function eraseall_dms_show_connect() {
    
     webSerial.eraseall_status_dms.value = 0;
     
+    
     if (webSerial.isConnected.value == false) {
         webSerial.eraseall_vid_dms.value = 0;
 
+        webSerial.connection_mode.value = 2; // erase all
         await webSerial.eraseall_dms_connect();
         
         while (webSerial.eraseall_status_dms.value == 0) {
@@ -787,6 +835,27 @@ async function do_eraseall_dms_final_yes() {
 
 }
 
+async function sel_cmd_msgbox_show() {
+    sel_cmd_msgbox.value = true;
+}
+
+async function do_sel_cmd_msgbox_yes() {
+    if (sel_devaddr.value != webSerial.update_devaddr.value) {
+        webSerial.update_devaddr.value = sel_devaddr.value;
+
+        if (webSerial.isConnected) {
+            await webSerial.disconnect();
+        }
+    }
+
+    sel_cmd_msgbox.value = false;
+}
+
+async function do_sel_cmd_msgbox_no() {
+    sel_devaddr.value = webSerial.update_devaddr.value;
+    sel_cmd_msgbox.value = false;
+}
+
 // Driver update
 async function do_update_driver_menubar(params) {
     if (webSerial.isConnected.value) {
@@ -813,6 +882,7 @@ async function do_update_driver_pre_yes() {
         let tmp = webSerial.isBusy.value;
         webSerial.isBusy.value = true;
        
+        webSerial.connection_mode.value = 1; // driver mode
         await webSerial.driver_connect();
 
         while (webSerial.update_driver_status.value == 0) {
@@ -830,8 +900,6 @@ async function do_update_driver_pre_yes() {
                 if (Date.now() > expire) {
                     break;
                 }
-
-                  
             }
 
             if (webSerial.isConnected.value && Date.now() < expire ){
@@ -943,8 +1011,12 @@ function textSizeMinus() {
 }
 
 function onDeviceNumberBlur() {
-    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 0 || webSerial.update_devaddr.value > 254) {
+    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 1 || webSerial.update_devaddr.value > 254) {
         webSerial.update_devaddr.value = 1;
+    }
+
+    if (!sel_devaddr.value || sel_devaddr.value < 1 || sel_devaddr.value > 254) {
+        sel_devaddr.value = 1;
     }
 }
 </script>
