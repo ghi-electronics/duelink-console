@@ -19,6 +19,14 @@
                     {{ deviceFirmwareVersion ? deviceFirmwareVersion : '...'  }}
                 </div>
             </div>
+            <!--
+            <div class="px-2 py-1 flex justify-between">
+                <div class="font-medium">Device address</div>
+                <div>
+                    {{ deviceAddress ? deviceAddress : '...'  }}
+                </div>
+            </div>
+            -->
             <div class="px-2 py-1 flex justify-between">
                 <div class="font-medium">Latest firmware</div>
                 <div>
@@ -66,6 +74,7 @@ import Panel from './Panel.vue';
 const props = defineProps({
     availableDfu: Object,
     version: String,
+    devAdd:Number,
 });
 
 // Setup
@@ -85,6 +94,14 @@ const deviceVersion = computed(() => {
     if (props.version) {
         //return props.version.substring(0, props.version.length - 1);
         return props.version;
+    }
+    return null;
+});
+
+const deviceAddress = computed(() => {
+    if (props.version) {
+        //return props.version.substring(0, props.version.length - 1);
+        return props.devAdd;
     }
     return null;
 });

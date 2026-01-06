@@ -27,7 +27,8 @@
             :is-busy="webSerial.isBusy.value"
             :is-connected="webSerial.isConnected.value"
             :is-talking="webSerial.isTalking.value"
-            @connect="webSerial.connect()"
+            :devAdd="sel_devaddr"
+            @connect="do_connect"
             @disconnect="webSerial.disconnect()"
             @download="downloadModal.start()"
             @play="webSerial.play()"
@@ -37,6 +38,8 @@
             @load="onLoad"
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
+            @sel_cmd="sel_cmd_msgbox_show"
+            
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -95,6 +98,7 @@
                 <AboutPanel 
                 :available-dfu="availableDfu" 
                 :version="webSerial.version.value" 
+                :devAdd="webSerial.update_devaddr.value"
                 @firmware-matches="onFirmwareMatches" 
                 @call-update-firmware-box="dfuModal.start()"/>
             </div>
@@ -124,11 +128,10 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware. Click continue to select a device. </p>
+                    <p>This feature will load/replace the <a target="_blank" href="https://www.duelink.com/docs/engine/drivers">drivers</a> on a module running DUELink official firmware.</p>
    
                     <label for="device-number" style="display: block; margin-top: 10px;">
-                        Device address:
-                   
+                        Module Address:                   
                         <input
                             id="device-number"
                             type="number"
@@ -136,7 +139,7 @@
                             max="254"
                             v-model.number="webSerial.update_devaddr.value"
                             placeholder="Enter device number"
-                            style="width: 70px; height: 20px;margin-top: 1px;"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
                             @blur="onDeviceNumberBlur"
                         />
                      </label>
@@ -145,6 +148,36 @@
                 <div class="dialog-buttons">
                     <button class="yes" @click="do_update_driver_pre_yes">Continue</button>
                     <button class="no" @click="do_update_driver_pre_no">Abort</button>
+                </div>               
+            </div>
+        </div>
+
+        <div v-if="sel_cmd_msgbox" class="overlay">
+            <div class="dialog">
+                
+                <div class="dialog-title-success">                   
+                    Select Module Address
+                </div>
+
+                <div class="dialog-body">
+                    <label for="device-number" style="display: block; margin-top: 10px;">
+                        Module Address:                   
+                        <input
+                            id="device-number"
+                            type="number"
+                            min="1"
+                            max="254"
+                            v-model.number="sel_devaddr"
+                            placeholder="Enter device number"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
+                            @blur="onDeviceNumberBlur"
+                        />
+                     </label>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_sel_cmd_msgbox_yes">Select</button>      
+                    <button class="no" @click="do_sel_cmd_msgbox_no">Cancel</button>                   
                 </div>               
             </div>
         </div>
@@ -158,7 +191,6 @@
                 <div class="dialog-body">
                     <p>{{dms_confirm_final_text}}<br><br></p>
                 </div>
-
                 
                 <div class="dialog-buttons">
                     <button class="yes" @click="do_eraseall_dms_final_yes">Yes</button>
@@ -265,6 +297,44 @@
             </div>
         </div>
 
+        <div v-if="connect_msgbox_progress" class="overlay">
+            <div class="dialog" style="width: 25vw;">
+                <div 
+                class="dialog-title"
+                :class="{ 'dialog-title-success': percent_tmp === 100 }"
+                >
+                <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
+                 <!-- Show icon only while writing -->
+                <i
+                    v-if="percent_tmp < 100"
+                    class="fas fa-exclamation-triangle"
+                    style="margin-right: 8px;"
+                ></i>
+                {{ percent_tmp < 100 ? "Please wait..." : "Connected" }}
+                </div>
+
+                <div class="dialog-body">
+                <!-- Progress bar -->
+                <br>
+                <div class="update-driver-progress-container">
+                    <div
+                    class="update-driver-progress-bar"
+                    :style="{ 
+                        width: percent_tmp + '%'
+                        
+                        }"
+                    ></div>
+                </div>
+
+                <!-- Percent text -->
+                <div class="progress-text">
+                    {{ percent_tmp }}%
+                </div>
+                </div>
+
+            </div>
+        </div>
+
         <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
                 <div class="dialog-title-success">
@@ -279,6 +349,7 @@
                     <button class="no" @click="
                         eraseall_dms_msgbox_finished = false;
                         dfuModal.start();
+                        webSerial.isBusy = false;
                         ">Close</button>
                 </div>       
             </div>
@@ -408,6 +479,7 @@ const theme = ref('light');
 const textSize = ref(16);
 
 const percent_tmp = ref(0);
+const sel_devaddr = ref(1);
 
 const eraseall_dms_msgbox_confirm_final = ref(false);
 const eraseall_dms_msgbox_confirm_pre = ref(false);
@@ -416,6 +488,11 @@ const eraseall_dms_msgbox_finished = ref(false);
 const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
 const update_driver_msgbox_progress = ref(false);
+const connect_msgbox_progress = ref(false);
+
+
+const sel_cmd_msgbox = ref(false);
+
 
 
 
@@ -709,6 +786,32 @@ async function sendList(target) {
     }
 }
 
+async function do_connect() {
+    webSerial.connect_status.value = 0;
+    webSerial.connection_mode.value = 0; // regular mode
+
+    await webSerial.connect();
+
+    connect_msgbox_progress.value = true;
+    let start = Date.now();
+    percent_tmp.value = 0;
+    while (webSerial.connect_status.value == 0) {
+        await sleep(100); 
+
+        percent_tmp.value = webSerial.progress_percent.value;
+    }
+
+    if (webSerial.connect_status.value > 0) {
+        percent_tmp.value = 100;
+        await sleep(100); 
+    }
+    
+    webSerial.isBusy.value = false;
+    connect_msgbox_progress.value = false;
+    percent_tmp.value = 0;
+
+}
+
 async function eraseall_dms_show_confirm_pre() {
     eraseall_dms_msgbox_confirm_pre.value = true
 }
@@ -717,9 +820,11 @@ async function eraseall_dms_show_connect() {
    
     webSerial.eraseall_status_dms.value = 0;
     
+    
     if (webSerial.isConnected.value == false) {
         webSerial.eraseall_vid_dms.value = 0;
 
+        webSerial.connection_mode.value = 2; // erase all
         await webSerial.eraseall_dms_connect();
         
         while (webSerial.eraseall_status_dms.value == 0) {
@@ -788,6 +893,27 @@ async function do_eraseall_dms_final_yes() {
 
 }
 
+async function sel_cmd_msgbox_show() {
+    sel_cmd_msgbox.value = true;
+}
+
+async function do_sel_cmd_msgbox_yes() {
+    if (sel_devaddr.value != webSerial.update_devaddr.value) {
+        webSerial.update_devaddr.value = sel_devaddr.value;
+
+        if (webSerial.isConnected) {
+            await webSerial.disconnect();
+        }
+    }
+
+    sel_cmd_msgbox.value = false;
+}
+
+async function do_sel_cmd_msgbox_no() {
+    sel_devaddr.value = webSerial.update_devaddr.value;
+    sel_cmd_msgbox.value = false;
+}
+
 // Driver update
 async function do_update_driver_menubar(params) {
     if (webSerial.isConnected.value) {
@@ -808,37 +934,74 @@ async function do_update_driver_pre_yes() {
     if (!webSerial.isConnected.value) {
         webSerial.device_name.value = "";
         webSerial.driver_ver.value = "";
-        webSerial.update_driver_percent.value = 0;
+        webSerial.progress_percent.value = 0;
         percent_tmp.value = 0;
         webSerial.update_driver_status.value = 0;
+        //let tmp = webSerial.isBusy.value;
+        //webSerial.isBusy.value = true;
        
+        webSerial.connection_mode.value = 1; // driver mode
+        sel_devaddr.value = webSerial.update_devaddr.value;
         await webSerial.driver_connect();
+
+        connect_msgbox_progress.value = true;
+        let start = Date.now();
+        percent_tmp.value = 0;
 
         while (webSerial.update_driver_status.value == 0) {
             await sleep(100);
+
+            //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
+
+            //if (percent_tmp.value > 95)
+            //    percent_tmp.value = 95;
+             percent_tmp.value = webSerial.progress_percent.value;
         }
 
         await sleep(100);
 
         if (webSerial.update_driver_status.value == 1) { // user select connected
             
-           
+            let connected = false;
+            const expire = Date.now() + 4000;
             while (!webSerial.isConnected.value || webSerial.device_name.value == "" || webSerial.driver_ver.value=="") {
-                  await sleep(100);
+                await sleep(100);
+                if (Date.now() > expire) {
+                    break;
+                }
+                //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
+
+                //if (percent_tmp.value > 95)
+                //    percent_tmp.value = 95;
+                percent_tmp.value = webSerial.progress_percent.value;
             }
 
-            //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
-            do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
-            
-            if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
-                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
-            else
-                do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
-            do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
+            if (webSerial.isConnected.value && Date.now() < expire ){
+                connected = true;
+            }
+
+            if (connected) {
+                //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
+                do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
+                
+                if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
+                    do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
+                else
+                    do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1) 
+                do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
 
 
-            update_driver_msgbox_confirm_final.value = true;
+                update_driver_msgbox_confirm_final.value = true;
+
+                percent_tmp.value = 100;
+            }
         }
+
+        connect_msgbox_progress.value = false;
+        percent_tmp.value = 0;
+
+        //webSerial.isBusy.value = tmp;
+        
          
     }
     
@@ -852,9 +1015,9 @@ async function do_update_driver_final_yes() {
 
     webSerial.driver_update(); // no await because just send message
 
-    while (webSerial.update_driver_percent.value !=100) {
+    while (webSerial.progress_percent.value !=100) {
         await sleep(1);
-        percent_tmp.value = webSerial.update_driver_percent.value;
+        percent_tmp.value = webSerial.progress_percent.value;
     }
 
     // reset every thing
@@ -928,8 +1091,12 @@ function textSizeMinus() {
 }
 
 function onDeviceNumberBlur() {
-    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 0 || webSerial.update_devaddr.value > 254) {
+    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 1 || webSerial.update_devaddr.value > 254) {
         webSerial.update_devaddr.value = 1;
+    }
+
+    if (!sel_devaddr.value || sel_devaddr.value < 1 || sel_devaddr.value > 254) {
+        sel_devaddr.value = 1;
     }
 }
 </script>

@@ -4,7 +4,7 @@ const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 let ignoreOutput = false;
 let isConnected = false;
-let isEchoing = true;
+let isEchoing = false;
 let isLogging = true;
 let mode = '>';
 let output = '';
@@ -21,6 +21,8 @@ const ignoreChars = ['>', '$', '&'];
 const GHI_VID = 0x1B9F;
 const DL_PID = 0xF300;
 const MB_PID = 0xF301;
+
+let dev_responsed = false;
 
 addEventListener('message', (e) => {
     log(`---- on "message", do task: ${e.data.task} ----`);
@@ -131,7 +133,7 @@ async function connect() {
     reader = port.readable.getReader();
     
     startReadLoop();
-    await sleep(100);
+    await sleep(50);
     let ret = await synchronize();
 
     if (ret != 0) {
@@ -258,6 +260,7 @@ let update_device_partNum = "";
 let update_can_update = false;
 let update_driver_path = "";
 let update_devaddr = 1;
+
 
 async function do_driver_connect(devAdd) {
     update_can_update = false;
@@ -486,10 +489,14 @@ async function disconnect() {
     try {
         await stopReadLoop();
         if (writer) {
+            await writer.close();
             await writer.releaseLock();
+            writer = null;
         }
         if (reader) {
+            await reader.cancel();
             await reader.releaseLock();
+            reader = null;
         }
         await port.close();
         logEvent('Port disconnected.');
@@ -677,6 +684,8 @@ async function readLoop() {
             log('Reading... Done?', done);
             const finalValue = decoder.decode(value).replace(/\r/gm, '');
 
+            console.log("Output: ",finalValue );
+
             if (isConnected && !ignoreChars.includes(finalValue.substring(-1, 1))) {
                 output += finalValue;
                 if (output.length > 2000) {
@@ -743,7 +752,7 @@ async function readLoop() {
     }
 }
 
-function readUntil(terminator = null) {
+function readUntil_DoNotUse(terminator = null) {
     if (!terminator) {
         terminator = mode;
     }
@@ -774,6 +783,74 @@ function readUntil(terminator = null) {
             result.shift();
         }
         resolve(result);
+    });
+}
+
+let isReadingUntil = false;
+function cleanupResult(result, terminator) {
+    const cleaned = [...result];
+
+    if (cleaned.length > 1) {
+        cleaned.pop();
+    } else if (cleaned?.[0] === terminator) {
+        log('removed terminator from result', terminator);
+        cleaned.shift();
+    }
+
+    isReadingUntil = false;
+    return cleaned;
+}
+
+
+function readUntil(terminator = null, timeout = 3000) {
+    if (isReadingUntil)
+    {
+        return [];
+    }
+
+    isReadingUntil = true;
+    
+    if (!terminator) {
+        terminator = mode;
+    }
+
+    return new Promise(async (resolve) => {
+        const result = [];
+        let timedOut = false;
+
+        // Start timeout
+        const timeoutId = setTimeout(() => {
+            timedOut = true;
+            dev_responsed = !timedOut;
+            log('readUntilTimeout', `timeout reached (${timeout} ms)`, result);
+            resolve(cleanupResult(result, terminator));
+        }, timeout);
+
+        try {
+            let line;
+            do {
+                line = await queue.pop().catch(() => {
+                    log('read until', 'queue waiter terminated', result);
+                    return null;
+                });
+
+                if (!line || timedOut) break;
+
+                result.push(line);
+
+                if (line.startsWith('!')) {
+                    log('Error:', line);
+                    break;
+                }
+
+            } while (line !== terminator);
+
+        } finally {
+            // Terminator reached or loop exited → cancel timeout
+            clearTimeout(timeoutId);
+        }
+        dev_responsed = !timedOut;
+        resolve(cleanupResult(result, terminator));
     });
 }
 
@@ -822,6 +899,18 @@ async function stream(data) {
 
 async function synchronize() {
     // Escape the current program.
+    
+    // sync always talk to device 1 first
+    //dev_responsed = true;
+    //await write(`sel(1)`);    
+
+    //if (!dev_responsed) {        
+    //    await disconnect();
+    //    return 0;
+    //}
+
+    //
+    /*
     let tryCount = 4;
     while (tryCount > 0) {
         await writer.write(encoder.encode('\x1B'));
@@ -831,9 +920,7 @@ async function synchronize() {
 
         let result = await flush();
 
-        log('escape result', result);
-                
-        
+        log('escape result', result);                        
         if (result.length >= 1) { // when more than 1 device, more than '>' will be return
             result = result.pop();
             if (result === '>' || result === '$') {
@@ -858,21 +945,54 @@ async function synchronize() {
         await disconnect();
         return 0;
     }
+    */
+    postMessage({ event: 'update_driver_percent_msg', value: 0 });
+    await writer.write(encoder.encode('sel(1)\n'));
+    // max devices 255, each take 1ms, give 2ms to initialize
+    await sleep(500); 
+    await flush();      
     
+    postMessage({ event: 'update_driver_percent_msg', value: 10 });
     
-    let result = await write('');
-    log('new line result', result);
+    // stop loop if any
+    await writer.write(encoder.encode('\x1B'));
+    await sleep(50);
+    await flush();      
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 15 });
+    // send new line
+    await writer.write(encoder.encode('\n'));
+    await sleep(50);
+    await flush();     
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 20 });
 
-    await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
-    
-    result = await write(`sel(${update_devaddr})`);
-    log(`sel(${update_devaddr})`, result);
+    if (update_devaddr != 1) {
+        // now talk to special device address    
+        //dev_responsed = true;
+       // await write(`sel(${update_devaddr})`);
+        await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
+        await sleep(50);
+        await flush();   
         
+
+        // stop loop if any
+        await writer.write(encoder.encode('\x1B'));
+        await sleep(50);
+        await flush();        
+        // send new line
+        await writer.write(encoder.encode('\n'));
+        await sleep(50);
+        await flush();        
+    }
+
+    postMessage({ event: 'update_driver_percent_msg', value: 60 });
     if (isEchoing) {
         await turnOffEcho();
     }
 
     // Try to get the version.
+    /*
     tryCount = 3;
     while (tryCount > 0) {
         await sleep(100);
@@ -884,10 +1004,18 @@ async function synchronize() {
         }
         tryCount--;
     }
+    */
+     postMessage({ event: 'update_driver_percent_msg', value: 65 });
+    const ver = await getVersion();
+    if (typeof ver === 'string') {
+        log('version found', ver);
+        postMessage({ event: 'version', value: ver });
+        postMessage({ event: 'update_driver_percent_msg', value: 100 });
+        return 1;
+    }
     
-    return tryCount;
-
-
+    await disconnect();
+    return 0;
 }
 
 async function turnOffEcho() {
@@ -898,7 +1026,7 @@ async function turnOffEcho() {
     isEchoing = false;
 }
 
-async function write(command, terminator = null, lineEnd = '\n') {
+async function write(command, terminator = null, lineEnd = '\n',timeout = 3000) {
     try {
         log('----- write -----');
         postMessage({ event: 'isTalking', value: true });
@@ -915,7 +1043,7 @@ async function write(command, terminator = null, lineEnd = '\n') {
         log('write is sleeping');
         await sleep(50);
         log('write is reading until', terminator ? terminator : mode);
-        const result = await readUntil(terminator ? terminator : mode);
+        const result = await readUntil(terminator ? terminator : mode,timeout);
         log('write result', result);
         return result;
     } finally {

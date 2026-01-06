@@ -1,13 +1,27 @@
 <template>
-    <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
+     <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
+        <!--Group 1-->
+        
         <Button
             id="plugBtn"
+            :disabled="isBusy"
             :class="['tool', isConnected ? 'connected' : '']"
             :data-tippy-content="isConnected ? 'Disconnect' : 'Connect'"
             @click.native="onPlug"
         >
-            <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i>
+            <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i> 🡆 {{ deviceAddress }}
         </Button>
+        <Button
+            :disabled="isBusy || isConnected"
+            class="tool"
+            data-tippy-content="Select module address"
+            @click.native="$emit('sel_cmd')"
+        >
+            Sel
+        </Button>
+        
+         <!--Group 2-->
+        
         <Button
             :disabled="isBusy || !isConnected || isTalking || !canRecord"
             class="tool record"
@@ -32,6 +46,10 @@
         >
             <i class="fas fa-fw fa-square"></i>
         </Button>
+        
+
+        <!--Group 3-->
+        
         <Button
             :disabled="isBusy || !isConnected || isTalking || !canList"
             class="tool"
@@ -49,6 +67,7 @@
             <i class="fas fa-fw fa-download"></i>
         </Button>
         <label
+            :disabled="isBusy"
             class="btn primary tool text-center cursor-pointer"
             data-tippy-content="Load"
             for="file"
@@ -56,6 +75,10 @@
             <i class="fas fa-fw fa-upload"></i>
             <input id="file" type="file" class="hidden" @change="onLoad" />
         </label>
+       
+
+        <!--Group 4-->
+        
         <Button
             :disabled="!canTextSizePlus"
             class="tool"
@@ -72,6 +95,9 @@
         >
             <i class="fas fa-fw fa-magnifying-glass-minus"></i>
         </Button>
+        
+
+
     </div>
 </template>
 
@@ -79,6 +105,7 @@
 // Components
 
 import Button from './Button.vue';
+import { computed } from 'vue';
 
 // Emits
 
@@ -90,7 +117,8 @@ const $emit = defineEmits([
     'stop',
     'record',
     'list',
-    'load',    
+    'load',
+    'sel_cmd',
 ]);
 
 // Props
@@ -108,6 +136,7 @@ const props = defineProps({
     isConnected: Boolean,
     isTalking: Boolean,
     canEraseAll: Boolean,
+    devAdd:Number,
 });
 
 // Methods
@@ -131,4 +160,12 @@ function onPlug() {
         $emit('connect');
     }
 }
+
+const deviceAddress = computed(() => {
+    if (props.devAdd) {
+        //return props.version.substring(0, props.version.length - 1);
+        return props.devAdd;
+    }
+    return 1;
+});
 </script>

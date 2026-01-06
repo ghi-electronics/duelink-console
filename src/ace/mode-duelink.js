@@ -116,7 +116,7 @@ var DuelinkHighlightRules = function () {
         "variable.language": "self|cls",
         "constant.language": builtinConstants,
         "keyword": keywords
-    }, "identifier");
+    }, "identifier",true);
     var strPre = "[uU]?";
     var strRawPre = "[rR]";
     var strFormatPre = "[fF]";
