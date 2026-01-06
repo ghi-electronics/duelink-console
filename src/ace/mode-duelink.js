@@ -5,25 +5,111 @@ ace.define("ace/mode/duelink_highlight_rules",["require","exports","module","ace
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var DuelinkHighlightRules = function () {
-    var keywords = ("and|as|assert|break|class|continue|def|del|elif|else|except|exec|" +
-        "finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|" +
-        "raise|return|try|while|with|yield|async|await|nonlocal|" +
+
+    var keywords = (
         //DUELink methods
-        "dim|fn|end|wend|fend|" +
+        "dim|fn|fend|while|wend|"+
+        "for|in|to|step|range|next|"+
+        "if|else|end|"+
+        "@|goto|"+
+        "exit|alias"     
+        ); 
+
+    var builtinConstants = (
         //DUELink array variables
-        "b0|b1|b2|b3|b4|b5|b6|b7|a0|a1|a2|a3|a4|a5|a6|a7|" +
-        // DUELink built-in api
-        "freq|statled"); 
-    var builtinConstants = ("True|False|None|NotImplemented|Ellipsis|__debug__");
-    var builtinFunctions = ("abs|divmod|input|open|staticmethod|all|enumerate|int|ord|str|any|" +
-        "eval|isinstance|pow|sum|basestring|execfile|issubclass|print|super|" +
-        "binfile|bin|iter|property|tuple|bool|filter|len|range|type|bytearray|" +
-        "float|list|raw_input|unichr|callable|format|locals|reduce|unicode|" +
-        "chr|frozenset|long|reload|vars|classmethod|getattr|map|repr|xrange|" +
-        "cmp|globals|max|reversed|zip|compile|hasattr|memoryview|round|" +
-        "__import__|complex|hash|min|apply|delattr|help|next|setattr|set|" +
-        "buffer|dict|hex|object|slice|coerce|dir|id|oct|sorted|intern|" +
-        "ascii|breakpoint|bytes");
+        "b0|b1|b2|b3|b4|b5|b6|b7|b8|b9|a0|a1|a2|a3|a4|a5|a6|a7|a8|a9|"+
+     
+        //DUELink local variables
+        "_a|_b|_c|_d|_e|_f|_g|_h|_i|_j|_k|_l|_m|_n|_o|_p|_q|_r|_s|_t|_u|_v|_w|_x|_y|_z"
+    );
+    var builtinFunctions = (
+        // DUELink Standard Library
+   //DUELink local variables
+        "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|"+
+        //Device Addressing
+        "sel|getadd|setadd|"+
+        //Print
+        "print|println|PrintLn|"+
+        //Timing
+        "wait|waitus|tickms|tickus|"+
+        //Pin Control
+            //Status LED
+            "statled|"+
+            //Digital
+            "dread|dwrite|"+
+            //Analog
+            "aread|awrite|vread|"+
+            //Button
+            "btnen|btnup|btndown|btnread|"+
+            //Frequency
+            "freq|"+
+            //PulseIn
+            "pulsein|"+
+        //Digital Control
+            //Distance
+            "dist|"+
+            //Servo Motors
+            "servost|"+
+            //I2C
+            "i2ccfg|i2cwr|"+
+            //SPI
+            "spicfg|spiwr|spiwrs|"+
+            //Serial UART
+            "sercfg|serrd|serrds|serwr|serwrs|serb2r|serdisc|"+
+            //DMX
+            "dmxw|dmxu|dmxrdy|dmxr|"+
+            //Infrared
+            "iren|irread|irwrite|"+
+            //Temperature
+            "temp|"+
+            //Humidity
+            "humid|"+
+            //USB
+            "hid|"+
+            //Sound
+            "melodyp|melodys|beep|wave|sweep|"+
+            //System Info
+            "info|"+
+            //Graphics
+            "clear|pixel|circle|line|rect|fill|text|texts|textt|img|imgs|imgb|show|show565|"+
+            //File System
+                //Mount
+                "fsmnt|fsunmnt|fsfmt|"+
+                //File Operations
+                "fsopen|fsclose|fswrite|fsread|fssync|fsseek|fstell|fsdel|fsfind|fsfsz|"+
+                //Directory Operations
+                "fsmkdir|fsopdir|fsfnext|"+
+            //Scheduler
+            "sstart|sstat|sabort|"+
+            //Interrupts
+            "istart|istatled|iabort|irqen|"+
+            //Downlink Control
+            "dlmode|dli2cwr|cmd|cmdtmot|dlserwr|dlserrd|dlser2r|"+
+            //Math
+            "rnd|cos|sin|tan|sqrt|abs|ceil|floor|round|trunc|isnan|"+
+            //Convertors
+            "fmt|hex|chr|scale|memcpy|parse|sprintf|base64|"+
+            //Asynchronous IO
+            "asio|"+
+            //System Reset
+            "reset|"+
+            //Low Power
+            "lowpwr|"+
+            //One-Time Programmable
+            "otpr|otpw|"+
+            //Coprocessor
+                //Firmware Control
+                "coproce|coprocp|coprocs|"+
+                //Application Command
+                "coprocv|coprocw|coprocr|"+
+            //RTC
+            "rtcw|rtcr|rtca|"+
+            //MISC
+            "version|echo|len|readvcc|exit|esp32gw|"    
+    );
+
+
+
     var keywordMapper = this.createKeywordMapper({
         "invalid.deprecated": "debugger",
         "support.function": builtinFunctions,
@@ -50,169 +136,207 @@ var DuelinkHighlightRules = function () {
     this.$rules = {
         "start": [{
                 token: "comment",
-                regex: "#.*$"
+                regex: "#.*$",
+                caseInsensitive: true
             }, {
                 token: "string",
                 regex: strPre + '"{3}',
-                next: "qqstring3"
+                next: "qqstring3",
+                caseInsensitive: true
             }, {
                 token: "string",
                 regex: strPre + '"(?=.)',
-                next: "qqstring"
+                next: "qqstring",
+                caseInsensitive: true
             }, {
                 token: "string",
                 regex: strPre + "'{3}",
-                next: "qstring3"
+                next: "qstring3",
+                caseInsensitive: true
             }, {
                 token: "string",
                 regex: strPre + "'(?=.)",
-                next: "qstring"
+                next: "qstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawPre + '"{3}',
-                next: "rawqqstring3"
+                next: "rawqqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawPre + '"(?=.)',
-                next: "rawqqstring"
+                next: "rawqqstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawPre + "'{3}",
-                next: "rawqstring3"
+                next: "rawqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawPre + "'(?=.)",
-                next: "rawqstring"
+                next: "rawqstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strFormatPre + '"{3}',
-                next: "fqqstring3"
+                next: "fqqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strFormatPre + '"(?=.)',
-                next: "fqqstring"
+                next: "fqqstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strFormatPre + "'{3}",
-                next: "fqstring3"
+                next: "fqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strFormatPre + "'(?=.)",
-                next: "fqstring"
+                next: "fqstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawFormatPre + '"{3}',
-                next: "rfqqstring3"
+                next: "rfqqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawFormatPre + '"(?=.)',
-                next: "rfqqstring"
+                next: "rfqqstring",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawFormatPre + "'{3}",
-                next: "rfqstring3"
+                next: "rfqstring3",
+                 caseInsensitive: true
             }, {
                 token: "string",
                 regex: strRawFormatPre + "'(?=.)",
-                next: "rfqstring"
+                next: "rfqstring",
+                 caseInsensitive: true
             }, {
                 token: "keyword.operator",
-                regex: "\\+|\\-|\\*|\\*\\*|\\/|\\/\\/|%|@|<<|>>|&|\\||\\^|~|<|>|<=|=>|==|!=|<>|="
+                regex: "\\+|\\-|\\*|\\*\\*|\\/|\\/\\/|%|@|<<|>>|&|\\||\\^|~|<|>|<=|=>|==|!=|<>|=",
+                 caseInsensitive: true
             }, {
                 token: "punctuation",
-                regex: ",|:|;|\\->|\\+=|\\-=|\\*=|\\/=|\\/\\/=|%=|@=|&=|\\|=|^=|>>=|<<=|\\*\\*="
+                regex: ",|:|;|\\->|\\+=|\\-=|\\*=|\\/=|\\/\\/=|%=|@=|&=|\\|=|^=|>>=|<<=|\\*\\*=",
+                 caseInsensitive: true
             }, {
                 token: "paren.lparen",
-                regex: "[\\[\\(\\{]"
+                regex: "[\\[\\(\\{]",
+                 caseInsensitive: true
             }, {
                 token: "paren.rparen",
-                regex: "[\\]\\)\\}]"
+                regex: "[\\]\\)\\}]",
+                 caseInsensitive: true
             }, {
                 token: ["keyword", "text", "entity.name.function"],
-                regex: "(def|class)(\\s+)([\\u00BF-\\u1FFF\\u2C00-\\uD7FF\\w]+)"
+                regex: "(def|class)(\\s+)([\\u00BF-\\u1FFF\\u2C00-\\uD7FF\\w]+)",
+                 caseInsensitive: true
             }, {
                 token: "text",
-                regex: "\\s+"
+                regex: "\\s+",
+                 caseInsensitive: true
             }, {
                 include: "constants"
             }],
-        "qqstring3": [{
+          "qqstring3": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"{3}',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "qstring3": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "'{3}",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "qqstring": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "\\\\$",
-                next: "qqstring"
+                next: "qqstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"|$',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "qstring": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "\\\\$",
-                next: "qstring"
+                next: "qstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "'|$",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rawqqstring3": [{
                 token: "string",
                 regex: '"{3}',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rawqstring3": [{
                 token: "string",
                 regex: "'{3}",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rawqqstring": [{
                 token: "string",
                 regex: "\\\\$",
-                next: "rawqqstring"
+                next: "rawqqstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"|$',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rawqstring": [{
                 token: "string",
                 regex: "\\\\$",
-                next: "rawqstring"
+                next: "rawqstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "'|$",
@@ -222,7 +346,8 @@ var DuelinkHighlightRules = function () {
             }],
         "fqqstring3": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"{3}',
@@ -230,151 +355,185 @@ var DuelinkHighlightRules = function () {
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "fqstring3": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "'{3}",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "fqqstring": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "\\\\$",
-                next: "fqqstring"
+                next: "fqqstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"|$',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "fqstring": [{
                 token: "constant.language.escape",
-                regex: stringEscape
+                regex: stringEscape,
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: "'|$",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rfqqstring3": [{
                 token: "string",
                 regex: '"{3}',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rfqstring3": [{
                 token: "string",
                 regex: "'{3}",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rfqqstring": [{
                 token: "string",
                 regex: "\\\\$",
-                next: "rfqqstring"
+                next: "rfqqstring",
+                caseInsensitive: true 
             }, {
                 token: "string",
                 regex: '"|$',
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "rfqstring": [{
                 token: "string",
                 regex: "'|$",
-                next: "start"
+                next: "start",
+                caseInsensitive: true 
             }, {
                 token: "paren.lparen",
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }, {
                 defaultToken: "string"
             }],
         "fqstringParRules": [{
                 token: "paren.lparen",
-                regex: "[\\[\\(]"
+                regex: "[\\[\\(]",
+                caseInsensitive: true 
             }, {
                 token: "paren.rparen",
-                regex: "[\\]\\)]"
+                regex: "[\\]\\)]",
+                caseInsensitive: true 
             }, {
                 token: "string",
-                regex: "\\s+"
+                regex: "\\s+",
+                caseInsensitive: true 
             }, {
                 token: "string",
-                regex: "'[^']*'"
+                regex: "'[^']*'",
+                caseInsensitive: true 
             }, {
                 token: "string",
-                regex: '"[^"]*"'
+                regex: '"[^"]*"',
+                caseInsensitive: true 
             }, {
                 token: "function.support",
-                regex: "(!s|!r|!a)"
+                regex: "(!s|!r|!a)",
+                caseInsensitive: true 
             }, {
                 include: "constants"
             }, {
                 token: 'paren.rparen',
                 regex: "}",
-                next: 'pop'
+                next: 'pop',
+                caseInsensitive: true 
             }, {
                 token: 'paren.lparen',
                 regex: "{",
-                push: "fqstringParRules"
+                push: "fqstringParRules",
+                caseInsensitive: true 
             }],
         "constants": [{
                 token: "constant.numeric",
-                regex: "(?:" + floatNumber + "|\\d+)[jJ]\\b"
+                regex: "(?:" + floatNumber + "|\\d+)[jJ]\\b",
+                caseInsensitive: true 
             }, {
                 token: "constant.numeric",
-                regex: floatNumber
+                regex: floatNumber,
+                caseInsensitive: true 
             }, {
                 token: "constant.numeric",
-                regex: integer + "[lL]\\b"
+                regex: integer + "[lL]\\b",
+                caseInsensitive: true 
             }, {
                 token: "constant.numeric",
-                regex: integer + "\\b"
+                regex: integer + "\\b",
+                caseInsensitive: true 
             }, {
                 token: ["punctuation", "function.support"],
-                regex: "(\\.)([a-zA-Z_]+)\\b"
+                regex: "(\\.)([a-zA-Z_]+)\\b",
+                caseInsensitive: true 
             }, {
                 token: keywordMapper,
-                regex: "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
+                regex: "[a-zA-Z_$][a-zA-Z0-9_$]*\\b",
+                caseInsensitive: true 
             }]
     };
     this.normalizeRules();
