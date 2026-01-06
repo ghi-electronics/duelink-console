@@ -19,12 +19,14 @@
                     {{ deviceFirmwareVersion ? deviceFirmwareVersion : '...'  }}
                 </div>
             </div>
+            <!--
             <div class="px-2 py-1 flex justify-between">
                 <div class="font-medium">Device address</div>
                 <div>
                     {{ deviceAddress ? deviceAddress : '...'  }}
                 </div>
             </div>
+            -->
             <div class="px-2 py-1 flex justify-between">
                 <div class="font-medium">Latest firmware</div>
                 <div>
