@@ -1,5 +1,7 @@
 <template>
-    <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
+     <div id="tool-bar" class="p-2 flex items-center space-x-2 overflow-x-auto">
+        <!--Group 1-->
+        
         <Button
             id="plugBtn"
             :disabled="isBusy"
@@ -7,8 +9,19 @@
             :data-tippy-content="isConnected ? 'Disconnect' : 'Connect'"
             @click.native="onPlug"
         >
-            <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i>
+            <i :class="isConnected ? 'fa-plug-circle-xmark' : 'fa-plug'" class="fas fa-fw"></i> 🡆 {{ deviceAddress }}
         </Button>
+        <Button
+            :disabled="isBusy || isConnected"
+            class="tool"
+            data-tippy-content="Select module address"
+            @click.native="$emit('sel_cmd')"
+        >
+            Sel
+        </Button>
+        
+         <!--Group 2-->
+        
         <Button
             :disabled="isBusy || !isConnected || isTalking || !canRecord"
             class="tool record"
@@ -33,6 +46,10 @@
         >
             <i class="fas fa-fw fa-square"></i>
         </Button>
+        
+
+        <!--Group 3-->
+        
         <Button
             :disabled="isBusy || !isConnected || isTalking || !canList"
             class="tool"
@@ -58,6 +75,10 @@
             <i class="fas fa-fw fa-upload"></i>
             <input id="file" type="file" class="hidden" @change="onLoad" />
         </label>
+       
+
+        <!--Group 4-->
+        
         <Button
             :disabled="!canTextSizePlus"
             class="tool"
@@ -74,15 +95,9 @@
         >
             <i class="fas fa-fw fa-magnifying-glass-minus"></i>
         </Button>
+        
 
-        <Button
-            :disabled="isBusy"
-            class="tool"
-            data-tippy-content="Select module address"
-            @click.native="$emit('sel_cmd')"
-        >
-            Sel({{ deviceAddress }})
-        </Button>
+
     </div>
 </template>
 
