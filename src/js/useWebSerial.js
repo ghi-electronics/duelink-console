@@ -79,10 +79,11 @@ export default function useWebSerial($refs, emitter) {
         } catch (error) {
             logError(error?.message || 'Unable to request port.');
             isBusy.value = false;
-            return;
+            return 0;
         }
         //update_devaddr.value = 1;
         worker.postMessage({ task: 'connect', value: update_devaddr.value });
+        return 1;
     }
 
     async function eraseall_dms_execute() {
@@ -143,7 +144,7 @@ export default function useWebSerial($refs, emitter) {
             } catch (error) {
                 logError(error?.message || 'Unable to request port.');     
                 update_driver_status.value = -1;           
-                return;
+                return 0;
             }
             
             worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
@@ -152,6 +153,8 @@ export default function useWebSerial($refs, emitter) {
         else {
             update_driver_status.value = 1;
         }
+
+        return 1;
     }
 
     async function driver_update() {
