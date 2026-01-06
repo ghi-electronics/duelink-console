@@ -155,6 +155,10 @@
         <div v-if="sel_cmd_msgbox" class="overlay">
             <div class="dialog">
                 
+                <div class="dialog-title-success">                   
+                    Select Module Address
+                </div>
+
                 <div class="dialog-body">
                     <label for="device-number" style="display: block; margin-top: 10px;">
                         Module Address:                   
