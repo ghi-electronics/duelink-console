@@ -789,6 +789,7 @@ async function sendList(target) {
 async function do_connect() {
     webSerial.connect_status.value = 0;
     webSerial.connection_mode.value = 0; // regular mode
+    webSerial.update_driver_status.value = 0; // reset update list
 
     const ret = await webSerial.connect();
 
@@ -1031,7 +1032,7 @@ async function do_update_driver_final_yes() {
     webSerial.update_driver_status.value = 0;
 
     // return to normal state: Disconnect
-    webSerial.disconnect();
+    await webSerial.disconnect();
     await sleep(1);
 
 }
