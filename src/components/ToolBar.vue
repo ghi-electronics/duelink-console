@@ -81,7 +81,7 @@
             data-tippy-content="Select module address"
             @click.native="$emit('sel_cmd')"
         >
-            Sel
+            Sel({{ deviceAddress }})
         </Button>
     </div>
 </template>
@@ -90,6 +90,7 @@
 // Components
 
 import Button from './Button.vue';
+import { computed } from 'vue';
 
 // Emits
 
@@ -120,6 +121,7 @@ const props = defineProps({
     isConnected: Boolean,
     isTalking: Boolean,
     canEraseAll: Boolean,
+    devAdd:Number,
 });
 
 // Methods
@@ -143,4 +145,12 @@ function onPlug() {
         $emit('connect');
     }
 }
+
+const deviceAddress = computed(() => {
+    if (props.devAdd) {
+        //return props.version.substring(0, props.version.length - 1);
+        return props.devAdd;
+    }
+    return 1;
+});
 </script>

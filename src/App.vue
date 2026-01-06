@@ -27,6 +27,7 @@
             :is-busy="webSerial.isBusy.value"
             :is-connected="webSerial.isConnected.value"
             :is-talking="webSerial.isTalking.value"
+            :devAdd="sel_devaddr"
             @connect="do_connect"
             @disconnect="webSerial.disconnect()"
             @download="downloadModal.start()"
@@ -38,6 +39,7 @@
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
             @sel_cmd="sel_cmd_msgbox_show"
+            
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
             <div id="editor" class="flex-1 p-2 flex flex-col">
@@ -170,7 +172,7 @@
                 </div>
                 
                 <div class="dialog-buttons">
-                    <button class="yes" @click="do_sel_cmd_msgbox_yes">Set</button>      
+                    <button class="yes" @click="do_sel_cmd_msgbox_yes">Select</button>      
                     <button class="no" @click="do_sel_cmd_msgbox_no">Cancel</button>                   
                 </div>               
             </div>
