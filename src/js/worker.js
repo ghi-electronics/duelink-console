@@ -489,10 +489,14 @@ async function disconnect() {
     try {
         await stopReadLoop();
         if (writer) {
+            await writer.close();
             await writer.releaseLock();
+            writer = null;
         }
         if (reader) {
+            await reader.cancel();
             await reader.releaseLock();
+            reader = null;
         }
         await port.close();
         logEvent('Port disconnected.');
@@ -942,20 +946,26 @@ async function synchronize() {
         return 0;
     }
     */
-
+    postMessage({ event: 'update_driver_percent_msg', value: 0 });
     await writer.write(encoder.encode('sel(1)\n'));
     // max devices 255, each take 1ms, give 2ms to initialize
     await sleep(500); 
-    await flush();        
+    await flush();      
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 10 });
     
     // stop loop if any
     await writer.write(encoder.encode('\x1B'));
     await sleep(50);
-    await flush();        
+    await flush();      
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 15 });
     // send new line
     await writer.write(encoder.encode('\n'));
     await sleep(50);
-    await flush();        
+    await flush();     
+    
+    postMessage({ event: 'update_driver_percent_msg', value: 20 });
 
     if (update_devaddr != 1) {
         // now talk to special device address    
@@ -976,7 +986,7 @@ async function synchronize() {
         await flush();        
     }
 
-
+    postMessage({ event: 'update_driver_percent_msg', value: 60 });
     if (isEchoing) {
         await turnOffEcho();
     }
@@ -995,15 +1005,16 @@ async function synchronize() {
         tryCount--;
     }
     */
-
+     postMessage({ event: 'update_driver_percent_msg', value: 65 });
     const ver = await getVersion();
     if (typeof ver === 'string') {
         log('version found', ver);
         postMessage({ event: 'version', value: ver });
-        
+        postMessage({ event: 'update_driver_percent_msg', value: 100 });
         return 1;
     }
     
+    await disconnect();
     return 0;
 }
 

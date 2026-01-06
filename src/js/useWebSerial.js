@@ -27,7 +27,7 @@ export default function useWebSerial($refs, emitter) {
     const update_driver_status = ref(0);
     const driver_ver = ref("");
     const device_name = ref("");
-    const update_driver_percent = ref(0);
+    const progress_percent = ref(0);
     const update_driver_path = ref("");
     const update_devaddr=ref(1);
     const connect_status=ref(0);
@@ -243,6 +243,7 @@ export default function useWebSerial($refs, emitter) {
                 isConnected.value = false;
                 logEvent('Port disconnected.');
                 regions.value = [];
+                connect_status.value = -1;
                 break;
             case 'erased':
                 regions.value = [];
@@ -344,7 +345,7 @@ export default function useWebSerial($refs, emitter) {
                     msg = data.message.substring(0, index)
 
                 alert(msg)
-                connect_status.value = -1;
+                connect_status.value = -2;
                 
                 break;
 
@@ -369,7 +370,7 @@ export default function useWebSerial($refs, emitter) {
                 break;
 
             case 'update_driver_percent_msg':
-                update_driver_percent.value = data.value;
+                progress_percent.value = data.value;
                 break;
 
             case 'update_driver_path_msg':
@@ -404,7 +405,7 @@ export default function useWebSerial($refs, emitter) {
         update_driver_status,
         driver_ver,
         device_name,
-        update_driver_percent,
+        progress_percent,
         update_driver_path,
         update_devaddr,
         connect_status,

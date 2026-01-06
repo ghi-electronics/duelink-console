@@ -293,6 +293,44 @@
             </div>
         </div>
 
+        <div v-if="connect_msgbox_progress" class="overlay">
+            <div class="dialog" style="width: 25vw;">
+                <div 
+                class="dialog-title"
+                :class="{ 'dialog-title-success': percent_tmp === 100 }"
+                >
+                <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
+                 <!-- Show icon only while writing -->
+                <i
+                    v-if="percent_tmp < 100"
+                    class="fas fa-exclamation-triangle"
+                    style="margin-right: 8px;"
+                ></i>
+                {{ percent_tmp < 100 ? "Please wait..." : "Connected" }}
+                </div>
+
+                <div class="dialog-body">
+                <!-- Progress bar -->
+                <br>
+                <div class="update-driver-progress-container">
+                    <div
+                    class="update-driver-progress-bar"
+                    :style="{ 
+                        width: percent_tmp + '%'
+                        
+                        }"
+                    ></div>
+                </div>
+
+                <!-- Percent text -->
+                <div class="progress-text">
+                    {{ percent_tmp }}%
+                </div>
+                </div>
+
+            </div>
+        </div>
+
         <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
                 <div class="dialog-title-success">
@@ -446,6 +484,8 @@ const eraseall_dms_msgbox_finished = ref(false);
 const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
 const update_driver_msgbox_progress = ref(false);
+const connect_msgbox_progress = ref(false);
+
 
 const sel_cmd_msgbox = ref(false);
 
@@ -748,11 +788,23 @@ async function do_connect() {
 
     await webSerial.connect();
 
+    connect_msgbox_progress.value = true;
+    let start = Date.now();
+    percent_tmp.value = 0;
     while (webSerial.connect_status.value == 0) {
+        await sleep(100); 
+
+        percent_tmp.value = webSerial.progress_percent.value;
+    }
+
+    if (webSerial.connect_status.value > 0) {
+        percent_tmp.value = 100;
         await sleep(100); 
     }
     
     webSerial.isBusy.value = false;
+    connect_msgbox_progress.value = false;
+    percent_tmp.value = 0;
 
 }
 
@@ -878,17 +930,28 @@ async function do_update_driver_pre_yes() {
     if (!webSerial.isConnected.value) {
         webSerial.device_name.value = "";
         webSerial.driver_ver.value = "";
-        webSerial.update_driver_percent.value = 0;
+        webSerial.progress_percent.value = 0;
         percent_tmp.value = 0;
         webSerial.update_driver_status.value = 0;
-        let tmp = webSerial.isBusy.value;
-        webSerial.isBusy.value = true;
+        //let tmp = webSerial.isBusy.value;
+        //webSerial.isBusy.value = true;
        
         webSerial.connection_mode.value = 1; // driver mode
+        sel_devaddr.value = webSerial.update_devaddr.value;
         await webSerial.driver_connect();
+
+        connect_msgbox_progress.value = true;
+        let start = Date.now();
+        percent_tmp.value = 0;
 
         while (webSerial.update_driver_status.value == 0) {
             await sleep(100);
+
+            //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
+
+            //if (percent_tmp.value > 95)
+            //    percent_tmp.value = 95;
+             percent_tmp.value = webSerial.progress_percent.value;
         }
 
         await sleep(100);
@@ -896,12 +959,17 @@ async function do_update_driver_pre_yes() {
         if (webSerial.update_driver_status.value == 1) { // user select connected
             
             let connected = false;
-            const expire = Date.now() + 3000;
+            const expire = Date.now() + 4000;
             while (!webSerial.isConnected.value || webSerial.device_name.value == "" || webSerial.driver_ver.value=="") {
                 await sleep(100);
                 if (Date.now() > expire) {
                     break;
                 }
+                //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
+
+                //if (percent_tmp.value > 95)
+                //    percent_tmp.value = 95;
+                percent_tmp.value = webSerial.progress_percent.value;
             }
 
             if (webSerial.isConnected.value && Date.now() < expire ){
@@ -920,10 +988,16 @@ async function do_update_driver_pre_yes() {
 
 
                 update_driver_msgbox_confirm_final.value = true;
+
+                percent_tmp.value = 100;
             }
         }
 
-        webSerial.isBusy.value = tmp;
+        connect_msgbox_progress.value = false;
+        percent_tmp.value = 0;
+
+        //webSerial.isBusy.value = tmp;
+        
          
     }
     
@@ -937,9 +1011,9 @@ async function do_update_driver_final_yes() {
 
     webSerial.driver_update(); // no await because just send message
 
-    while (webSerial.update_driver_percent.value !=100) {
+    while (webSerial.progress_percent.value !=100) {
         await sleep(1);
-        percent_tmp.value = webSerial.update_driver_percent.value;
+        percent_tmp.value = webSerial.progress_percent.value;
     }
 
     // reset every thing
