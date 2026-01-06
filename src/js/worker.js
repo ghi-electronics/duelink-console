@@ -133,7 +133,7 @@ async function connect() {
     reader = port.readable.getReader();
     
     startReadLoop();
-    await sleep(100);
+    await sleep(50);
     let ret = await synchronize();
 
     if (ret != 0) {
@@ -680,6 +680,8 @@ async function readLoop() {
             log('Reading... Done?', done);
             const finalValue = decoder.decode(value).replace(/\r/gm, '');
 
+            console.log("Output: ",finalValue );
+
             if (isConnected && !ignoreChars.includes(finalValue.substring(-1, 1))) {
                 output += finalValue;
                 if (output.length > 2000) {
@@ -780,6 +782,7 @@ function readUntil_DoNotUse(terminator = null) {
     });
 }
 
+let isReadingUntil = false;
 function cleanupResult(result, terminator) {
     const cleaned = [...result];
 
@@ -790,10 +793,19 @@ function cleanupResult(result, terminator) {
         cleaned.shift();
     }
 
+    isReadingUntil = false;
     return cleaned;
 }
 
+
 function readUntil(terminator = null, timeout = 3000) {
+    if (isReadingUntil)
+    {
+        return [];
+    }
+
+    isReadingUntil = true;
+    
     if (!terminator) {
         terminator = mode;
     }
@@ -883,6 +895,18 @@ async function stream(data) {
 
 async function synchronize() {
     // Escape the current program.
+    
+    // sync always talk to device 1 first
+    //dev_responsed = true;
+    //await write(`sel(1)`);    
+
+    //if (!dev_responsed) {        
+    //    await disconnect();
+    //    return 0;
+    //}
+
+    //
+    /*
     let tryCount = 4;
     while (tryCount > 0) {
         await writer.write(encoder.encode('\x1B'));
@@ -917,38 +941,48 @@ async function synchronize() {
         await disconnect();
         return 0;
     }
-    
-    
-    let result = await write('');
-    log('new line result', result);
+    */
 
-    await sleep(500); // max devices 255, each take 1ms, give 2ms to initialize
+    await writer.write(encoder.encode('sel(1)\n'));
+    // max devices 255, each take 1ms, give 2ms to initialize
+    await sleep(500); 
+    await flush();        
     
-    dev_responsed = true;
-    result = await write(`sel(${update_devaddr})`);
-    log(`sel(${update_devaddr})`, result);    
+    // stop loop if any
+    await writer.write(encoder.encode('\x1B'));
+    await sleep(50);
+    await flush();        
+    // send new line
+    await writer.write(encoder.encode('\n'));
+    await sleep(50);
+    await flush();        
 
-    if (!dev_responsed) {
-        // when device address is not in range, back to sel(1) as default so there is always response.
-        if (update_devaddr!==1) {
-            await write(`sel(1)`);
-        }
+    if (update_devaddr != 1) {
+        // now talk to special device address    
+        //dev_responsed = true;
+       // await write(`sel(${update_devaddr})`);
+        await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
+        await sleep(50);
+        await flush();   
         
-        await disconnect();
-        return 0;
+
+        // stop loop if any
+        await writer.write(encoder.encode('\x1B'));
+        await sleep(50);
+        await flush();        
+        // send new line
+        await writer.write(encoder.encode('\n'));
+        await sleep(50);
+        await flush();        
     }
 
-    //await sleep(100); // stop if loop is running
-    //await writer.write(encoder.encode('\x1B'));
-
-    await sleep(100); // max devices 255, each take 1ms, give 2ms to initialize
-    result  = await flush();
 
     if (isEchoing) {
         await turnOffEcho();
     }
 
     // Try to get the version.
+    /*
     tryCount = 3;
     while (tryCount > 0) {
         await sleep(100);
@@ -960,10 +994,17 @@ async function synchronize() {
         }
         tryCount--;
     }
+    */
+
+    const ver = await getVersion();
+    if (typeof ver === 'string') {
+        log('version found', ver);
+        postMessage({ event: 'version', value: ver });
+        
+        return 1;
+    }
     
-    return tryCount;
-
-
+    return 0;
 }
 
 async function turnOffEcho() {
