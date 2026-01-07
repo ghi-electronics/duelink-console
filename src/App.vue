@@ -822,7 +822,17 @@ async function do_connect() {
 }
 
 async function eraseall_dms_show_confirm_pre() {
-    eraseall_dms_msgbox_confirm_pre.value = true
+    if (webSerial.update_devaddr.value != 1 || sel_devaddr.value != 1) {
+        let v = webSerial.update_devaddr.value;
+        if (sel_devaddr.value != 1){
+            v = sel_devaddr.value;
+        }
+        alert(`The selected device {${v}} is not the first in the chain. Firmware updates are supported only for the first device. Please select the first device and continue.`);
+        dfuModal.open = false
+    }
+    else {
+        eraseall_dms_msgbox_confirm_pre.value = true  
+    }
 }
 
 async function eraseall_dms_show_connect() {

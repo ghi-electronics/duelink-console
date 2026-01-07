@@ -71,7 +71,7 @@ addEventListener('message', (e) => {
             break;
 
         case 'eraseall_dms_connect_msg':
-            eraseall_dms_connect();
+            eraseall_dms_connect(e.data.value);
             break;  
             
         case 'driver_connect_msg':
@@ -170,7 +170,7 @@ async function eraseall_dms_execute() {
     //await disconnect();
 }
 
-async function eraseall_dms_connect() {
+async function eraseall_dms_connect(devAdd) {
     log(`Port status ${isConnected}`);
     [port] = await navigator.serial.getPorts();
     try {
@@ -220,6 +220,11 @@ async function eraseall_dms_connect() {
         postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId)});
         
     }       
+
+    update_devaddr = devAdd;
+    await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
+    await sleep(50);
+    await flush();   
 
     postMessage({ event: 'eraseall_status_dms', value: 1});
         

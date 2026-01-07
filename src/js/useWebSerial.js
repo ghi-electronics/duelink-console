@@ -118,7 +118,7 @@ export default function useWebSerial($refs, emitter) {
                 return;
             }
 
-            worker.postMessage({ task: 'eraseall_dms_connect_msg' });
+            worker.postMessage({ task: 'eraseall_dms_connect_msg',value: update_devaddr.value });
         }
         else {
             eraseall_status_dms.value = 1;
