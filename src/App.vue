@@ -801,6 +801,12 @@ async function do_connect() {
             await sleep(100); 
 
             percent_tmp.value = webSerial.progress_percent.value;
+
+            // when percent_tmp.value is 65, get version() then 100
+            // if 71 then failed
+            if (percent_tmp.value == 71) { // make sure it is stop
+                break;
+            }
         }
 
         if (webSerial.connect_status.value > 0) {
@@ -808,7 +814,6 @@ async function do_connect() {
             await sleep(100); 
         }
         
-        webSerial.isBusy.value = false;
         connect_msgbox_progress.value = false;
         percent_tmp.value = 0;
         await sleep(100); // make sure connect_msgbox_progress is off

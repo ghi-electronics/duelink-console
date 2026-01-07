@@ -1027,6 +1027,8 @@ async function synchronize() {
         postMessage({ event: 'update_driver_percent_msg', value: 100 });
         return 1;
     }
+
+    postMessage({ event: 'update_driver_percent_msg', value: 71 });
     
     await disconnect();
     return 0;
