@@ -247,6 +247,7 @@ export default function useWebSerial($refs, emitter) {
                 logEvent('Port disconnected.');
                 regions.value = [];
                 connect_status.value = -1;
+                isBusy.value = false;
                 break;
             case 'erased':
                 regions.value = [];
@@ -349,6 +350,7 @@ export default function useWebSerial($refs, emitter) {
 
                 alert(msg)
                 connect_status.value = -2;
+                isBusy.value = false;
                 
                 break;
 
