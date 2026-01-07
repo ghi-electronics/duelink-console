@@ -560,7 +560,8 @@ async function newAll() {
 async function play() {
     stopped = false;
     postMessage({ event: 'playing' });
-    await write('run');
+    await write('run',null,'\n',-1);
+    //await write('run');
     if (!stopped) {
         stopped = true;
         postMessage({ event: 'stopped' });
@@ -803,13 +804,12 @@ function cleanupResult(result, terminator) {
 
 
 function readUntil(terminator = null, timeout = 3000) {
-    if (isReadingUntil)
-    {
+    if (isReadingUntil) {
         return [];
     }
 
     isReadingUntil = true;
-    
+
     if (!terminator) {
         terminator = mode;
     }
@@ -817,16 +817,28 @@ function readUntil(terminator = null, timeout = 3000) {
     return new Promise(async (resolve) => {
         const result = [];
         let timedOut = false;
+        let timeoutId = null;
 
-        // Start timeout
-        const timeoutId = setTimeout(() => {
-            timedOut = true;
-            dev_responsed = !timedOut;
-            log('readUntilTimeout', `timeout reached (${timeout} ms)`, result);
-            resolve(cleanupResult(result, terminator));
-        }, timeout);
+        const startTimeout = () => {
+            if (timeout < 0) return; // no timeout mode
+
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                timedOut = true;
+                dev_responsed = false;
+                log(
+                    'readUntilTimeout',
+                    `no response for ${timeout} ms`,
+                    result
+                );
+                resolve(cleanupResult(result, terminator));
+            }, timeout);
+        };
 
         try {
+            // Start initial idle timeout
+            startTimeout();
+
             let line;
             do {
                 line = await queue.pop().catch(() => {
@@ -835,6 +847,9 @@ function readUntil(terminator = null, timeout = 3000) {
                 });
 
                 if (!line || timedOut) break;
+
+                // Valid response → reset idle timeout
+                startTimeout();
 
                 result.push(line);
 
@@ -846,14 +861,13 @@ function readUntil(terminator = null, timeout = 3000) {
             } while (line !== terminator);
 
         } finally {
-            // Terminator reached or loop exited → cancel timeout
             clearTimeout(timeoutId);
         }
+
         dev_responsed = !timedOut;
         resolve(cleanupResult(result, terminator));
     });
 }
-
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }

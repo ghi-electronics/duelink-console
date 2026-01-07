@@ -811,6 +811,7 @@ async function do_connect() {
         webSerial.isBusy.value = false;
         connect_msgbox_progress.value = false;
         percent_tmp.value = 0;
+        await sleep(100); // make sure connect_msgbox_progress is off
     }
 
 }
@@ -1033,7 +1034,7 @@ async function do_update_driver_final_yes() {
 
     // return to normal state: Disconnect
     await webSerial.disconnect();
-    await sleep(1);
+    await sleep(10);
 
 }
 
