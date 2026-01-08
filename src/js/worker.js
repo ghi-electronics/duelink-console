@@ -965,20 +965,26 @@ async function synchronize() {
         return 0;
     }
     */
-    postMessage({ event: 'update_driver_percent_msg', value: 0 });
+   // stop loop if any, unknow device address
+    postMessage({ event: 'update_driver_percent_msg', value: 5 });
+    await writer.write(encoder.encode('\x1B'));
+    await sleep(500);
+    await flush();
+
+    postMessage({ event: 'update_driver_percent_msg', value: 10 });
     await writer.write(encoder.encode('sel(1)\n'));
     // max devices 255, each take 1ms, give 2ms to initialize
-    await sleep(500); 
+    await sleep(100); 
     await flush();      
     
-    postMessage({ event: 'update_driver_percent_msg', value: 10 });
+    postMessage({ event: 'update_driver_percent_msg', value: 15 });
     
     // stop loop if any
     await writer.write(encoder.encode('\x1B'));
     await sleep(50);
     await flush();      
     
-    postMessage({ event: 'update_driver_percent_msg', value: 15 });
+    postMessage({ event: 'update_driver_percent_msg', value: 17 });
     // send new line
     await writer.write(encoder.encode('\n'));
     await sleep(50);
