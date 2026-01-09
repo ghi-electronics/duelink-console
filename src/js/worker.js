@@ -90,14 +90,19 @@ async function connect() {
     log(`Port status ${isConnected}`);
     [port] = await navigator.serial.getPorts();
     try {
+        logError('Start connect.');
         if (port.connected ) {
+            logError('port.connect');
             if (port.readable != null && port.writable!= null) {
                 if (port.readable.locked || port.writable.locked) {
+                    logError('port. locked');
                     await disconnect();
+
+                    logError('port. release');
                 }
             }            
         
-
+            logError('port. open');
             await port.open({
                 baudRate: 115200,
                 dataBits: 8,
@@ -105,8 +110,10 @@ async function connect() {
                 stopBits: 1,
                 flowControl: 'none',
             });
+            logError('port. opened');
         }
         else {
+            logError('port. return');
             return;
         }
     } catch (error) {
