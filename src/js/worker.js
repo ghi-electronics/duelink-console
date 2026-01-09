@@ -133,7 +133,7 @@ async function connect() {
     reader = port.readable.getReader();
     
     startReadLoop();
-    await sleep(50);
+    await sleep(200);
     let ret = await synchronize();
 
     if (ret != 0) {
@@ -968,44 +968,52 @@ async function synchronize() {
    // stop loop if any, unknow device address
     postMessage({ event: 'update_driver_percent_msg', value: 5 });
     await writer.write(encoder.encode('\x1B'));
-    await sleep(500);
+    await sleep(400);
     await flush();
 
     postMessage({ event: 'update_driver_percent_msg', value: 10 });
+    await writer.write(encoder.encode('\n'));
+    await sleep(400);
+    await flush();    
+
+    postMessage({ event: 'update_driver_percent_msg', value: 15 });
     await writer.write(encoder.encode('sel(1)\n'));
     // max devices 255, each take 1ms, give 2ms to initialize
     await sleep(100); 
     await flush();      
     
-    postMessage({ event: 'update_driver_percent_msg', value: 15 });
+    postMessage({ event: 'update_driver_percent_msg', value: 20 });
     
     // stop loop if any
     await writer.write(encoder.encode('\x1B'));
-    await sleep(50);
+    await sleep(100);
     await flush();      
     
-    postMessage({ event: 'update_driver_percent_msg', value: 17 });
+    postMessage({ event: 'update_driver_percent_msg', value: 25 });
     // send new line
     await writer.write(encoder.encode('\n'));
-    await sleep(50);
+    await sleep(100);
     await flush();     
     
-    postMessage({ event: 'update_driver_percent_msg', value: 20 });
+    postMessage({ event: 'update_driver_percent_msg', value: 30 });
 
     if (update_devaddr != 1) {
         // now talk to special device address    
         //dev_responsed = true;
        // await write(`sel(${update_devaddr})`);
+       postMessage({ event: 'update_driver_percent_msg', value: 35 });
         await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
         await sleep(50);
         await flush();   
         
 
         // stop loop if any
+        postMessage({ event: 'update_driver_percent_msg', value: 40 });
         await writer.write(encoder.encode('\x1B'));
         await sleep(50);
         await flush();        
         // send new line
+        postMessage({ event: 'update_driver_percent_msg', value: 45 });
         await writer.write(encoder.encode('\n'));
         await sleep(50);
         await flush();        
@@ -1030,7 +1038,7 @@ async function synchronize() {
         tryCount--;
     }
     */
-     postMessage({ event: 'update_driver_percent_msg', value: 65 });
+    postMessage({ event: 'update_driver_percent_msg', value: 65 });
     const ver = await getVersion();
     if (typeof ver === 'string') {
         log('version found', ver);
