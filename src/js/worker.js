@@ -88,6 +88,7 @@ addEventListener('message', (e) => {
 
 async function connect() {
     log(`Port status ${isConnected}`);
+    await new Promise(r => setTimeout(r, 200)); // 200ms pause
     [port] = await navigator.serial.getPorts();
     try {
         console.log('Start connect.');
