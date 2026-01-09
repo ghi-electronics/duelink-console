@@ -790,7 +790,8 @@ async function do_connect() {
     webSerial.connect_status.value = 0;
     webSerial.connection_mode.value = 0; // regular mode
     webSerial.update_driver_status.value = 0; // reset update list
-
+    percent_tmp.value = 0;
+    webSerial.progress_percent.value = 0;
     const ret = await webSerial.connect();
 
     if (ret) {
@@ -1035,6 +1036,7 @@ async function do_update_driver_final_yes() {
    
     update_driver_msgbox_progress.value = true;
     webSerial.progress_percent.value = 0;
+    percent_tmp.value = 0;
 
     webSerial.driver_update(); // no await because just send message
 
