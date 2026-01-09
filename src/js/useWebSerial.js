@@ -70,7 +70,7 @@ export default function useWebSerial($refs, emitter) {
         isBusy.value = true;
 
         try {
-            const available = await navigator.serial.getPorts(); // this refresh port only
+            //const available = await navigator.serial.getPorts(); // this refresh port only
             await navigator.serial.requestPort({ 
                 filters: [
                     { usbVendorId: GHI_VID, usbProductId:DL_PID } // GHI Electronics VID           
@@ -104,7 +104,7 @@ export default function useWebSerial($refs, emitter) {
         if (isConnected.value == false) {
             
             try {
-                const available = await navigator.serial.getPorts(); // this refresh port only
+                //const available = await navigator.serial.getPorts(); // this refresh port only
                 await navigator.serial.requestPort({ 
                     
                     filters: [
