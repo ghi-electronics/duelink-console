@@ -180,6 +180,7 @@ async function eraseall_dms_execute() {
 
 async function eraseall_dms_connect(devAdd) {
     log(`Port status ${isConnected}`);
+    await new Promise(r => setTimeout(r, 200)); // 200ms pause
     [port] = await navigator.serial.getPorts();
     try {
        if (port.connected ) {

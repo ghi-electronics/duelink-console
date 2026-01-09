@@ -134,7 +134,7 @@ export default function useWebSerial($refs, emitter) {
         if (isConnected.value == false) {
             
             try {
-                const available = await navigator.serial.getPorts(); // this refresh port only
+                //const available = await navigator.serial.getPorts(); // this refresh port only
                 await navigator.serial.requestPort({ 
                     
                     filters: [
