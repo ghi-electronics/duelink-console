@@ -88,22 +88,22 @@ addEventListener('message', (e) => {
 
 async function connect() {
     log(`Port status ${isConnected}`);
-    await new Promise(r => setTimeout(r, 200)); // 200ms pause
+    await new Promise(r => setTimeout(r, 400)); // 200ms pause
     [port] = await navigator.serial.getPorts();
     try {
-        console.log('Start connect.');
+
         if (port.connected ) {
-            console.log('port.connect');
             if (port.readable != null && port.writable!= null) {
                 if (port.readable.locked || port.writable.locked) {
                     console.log('port. locked');
                     await disconnect();
+                    await new Promise(r => setTimeout(r, 1000)); 
 
-                    console.log('port. release');
+
                 }
             }            
         
-            console.log('port. open');
+
             await port.open({
                 baudRate: 115200,
                 dataBits: 8,
@@ -111,7 +111,7 @@ async function connect() {
                 stopBits: 1,
                 flowControl: 'none',
             });
-            console.log('port. opened');
+
         }
         else {
             console.log('port. return');
@@ -180,13 +180,14 @@ async function eraseall_dms_execute() {
 
 async function eraseall_dms_connect(devAdd) {
     log(`Port status ${isConnected}`);
-    await new Promise(r => setTimeout(r, 200)); // 200ms pause
+    await new Promise(r => setTimeout(r, 400)); // 200ms pause
     [port] = await navigator.serial.getPorts();
     try {
        if (port.connected ) {
             if (port.readable != null && port.writable!= null) {
                 if (port.readable.locked || port.writable.locked) {
                     await disconnect();
+                    await new Promise(r => setTimeout(r, 1000)); 
                 }
             }            
         
