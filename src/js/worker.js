@@ -858,6 +858,7 @@ function readUntil(terminator = null, timeout = 3000) {
             do {
                 line = await queue.pop().catch(() => {
                     log('read until', 'queue waiter terminated', result);
+                    clearTimeout(timeoutId);
                     return null;
                 });
 
