@@ -803,7 +803,6 @@ function readUntil_DoNotUse(terminator = null) {
 }
 
 let isReadingUntil = false;
-
 function cleanupResult(result, terminator) {
     const cleaned = [...result];
 
@@ -814,11 +813,10 @@ function cleanupResult(result, terminator) {
         cleaned.shift();
     }
 
-    // Reset the reading flag
     isReadingUntil = false;
-
     return cleaned;
 }
+
 
 function readUntil(terminator = null, timeout = 3000) {
     if (isReadingUntil) {
@@ -835,15 +833,6 @@ function readUntil(terminator = null, timeout = 3000) {
         const result = [];
         let timedOut = false;
         let timeoutId = null;
-        let resolved = false;
-
-        // Safe resolve function to prevent double resolve
-        const safeResolve = (value) => {
-            if (!resolved) {
-                resolved = true;
-                resolve(value);
-            }
-        };
 
         const startTimeout = () => {
             if (timeout < 0) return; // no timeout mode
@@ -857,7 +846,7 @@ function readUntil(terminator = null, timeout = 3000) {
                     `no response for ${timeout} ms`,
                     result
                 );
-                safeResolve(cleanupResult(result, terminator));
+                resolve(cleanupResult(result, terminator));
             }, timeout);
         };
 
@@ -868,16 +857,14 @@ function readUntil(terminator = null, timeout = 3000) {
             let line;
             do {
                 try {
-                    // Catch both synchronous and async errors
                     line = await queue.pop();
                 } catch (err) {
                     log('read until', err.message || err, result);
                     clearTimeout(timeoutId);
                     dev_responsed = false;
-                    safeResolve(cleanupResult(result, terminator));
-                    return; // stop execution
+                    resolve(cleanupResult(result, terminator));
+                    return; // stop the loop safely
                 }
-
                 if (!line || timedOut) break;
 
                 // Valid response → reset idle timeout
@@ -894,15 +881,12 @@ function readUntil(terminator = null, timeout = 3000) {
 
         } finally {
             clearTimeout(timeoutId);
-            // ensure flag reset
-            isReadingUntil = false;
         }
 
         dev_responsed = !timedOut;
-        safeResolve(cleanupResult(result, terminator));
+        resolve(cleanupResult(result, terminator));
     });
 }
-
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
