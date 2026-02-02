@@ -160,6 +160,12 @@
                 </div>
 
                 <div class="dialog-body">
+                    <div class="tip-box">
+                        <span class="tip-icon">💡</span>
+                        <span class="tip-text">
+                            <strong>Tip:</strong> All Daisylinked modules must have the DUELink official firmware.
+                        </span>
+                    </div>
                     <label for="device-number" style="display: block; margin-top: 10px;">
                         Module Address:                   
                         <input
@@ -172,7 +178,7 @@
                             style="width: 70px; height: 26px;margin-top: 1px;"
                             @blur="onDeviceNumberBlur"
                         />
-                     </label>
+                    </label>
                 </div>
                 
                 <div class="dialog-buttons">
