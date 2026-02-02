@@ -118,12 +118,30 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware. It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br>Note: The following connect window will be empty if the device is already in DFU mode or it has an uncompatible firmware, see <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.</p>
+                    <p v-if="sel_devaddr === 1">
+                        This feature only works on modules loaded with either DUELink official firmware or MicroBlocks firmware. It will completely erase the device and put it in DFU (Device Firmware Update) mode.<br><br>Note: The following <strong>Connect</strong> window will be empty if the device is already in DFU mode or it has an uncompatible firmware, see <a target="_blank" href="https://www.duelink.com/docs/loader">Loader page</a>.
+                    </p>
+                    <p v-else>
+                        This feature is only allowed on <strong>Sel(1)</strong>,
+                        you have <strong>Sel({{ sel_devaddr }})</strong>.
+                    </p>
                 </div>
                 
                 <div class="dialog-buttons">
-                    <button class="yes" @click="do_eraseall_dms_pre_yes">Continue</button>
-                    <button class="no" @click="do_eraseall_dms_pre_no">Abort</button>
+                    <button
+                        v-if="sel_devaddr === 1"
+                        class="yes"
+                        @click="do_eraseall_dms_pre_yes"
+                    >
+                        Continue
+                    </button>
+                    <button
+                        :class="sel_devaddr === 1 ? 'no' : 'yes'"
+                        @click="do_eraseall_dms_pre_no"
+                    >
+                        Abort
+                    </button>
+                    
                 </div>               
             </div>
         </div>
@@ -846,12 +864,14 @@ async function eraseall_dms_show_confirm_pre() {
         if (sel_devaddr.value != 1){
             v = sel_devaddr.value;
         }
-        alert(`The selected device {${v}} is not the first in the chain. Firmware updates are supported only for the first device. Please select the first device and continue.`);
-        dfuModal.open = false
+        //alert(`The selected device {${v}} is not the first in the chain. Firmware updates are supported only for the first device. Please select the first device and continue.`);
+        //dfuModal.open = false
+          
     }
-    else {
-        eraseall_dms_msgbox_confirm_pre.value = true  
-    }
+   
+
+    dfuModal.open = false
+    eraseall_dms_msgbox_confirm_pre.value = true  
 }
 
 async function eraseall_dms_show_connect() {
@@ -1158,7 +1178,7 @@ function onDeviceNumberBlur() {
 
 .dialog {
   width: auto;        
-  max-width: 25vw;    
+  max-width: 75vw;    
   min-width: 200px;
   display: inline-block;
   text-align: center;

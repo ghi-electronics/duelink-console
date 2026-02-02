@@ -201,7 +201,10 @@ import Button from "./Button.vue";
 
 // Emits
 
-const $emit = defineEmits(["close"]);
+const emit = defineEmits([
+  'eraseall_dms_dfumodal',
+  'close'
+])
 
 // Props
 
@@ -238,7 +241,19 @@ const availableVersions = computed(
 
 watch([dfu, version],
 async () => {
-  const url = availableVersions.value[version.value].url;
+  //const url = availableVersions.value[version.value].url;
+      const v = availableVersions.value?.[version.value];
+
+      if (!v || !v.url) {
+        console.warn('Firmware not ready yet', {
+          dfu: dfu.value,
+          version: version.value
+        });
+        return;
+      }
+
+      const url = v.url;
+
       console.log("DFU selected", url);
       const hashedKey = await sha256(url);
       const saveAs = `download_${hashedKey}`;
@@ -309,7 +324,7 @@ async function disconnect() {
 async function done() {
   restart();
   await disconnect();
-  $emit("close");
+  emit("close");
 }
 
 async function doback() {
