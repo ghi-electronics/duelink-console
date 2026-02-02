@@ -166,6 +166,13 @@ export default function useWebSerial($refs, emitter) {
         
     }
 
+    async function sendescape() {
+        if (isConnected.value == true)
+        {
+            worker.postMessage({ task: 'sendescape' });
+        }        
+    }
+
 
     async function disconnect() {        
         worker.postMessage({ task: 'disconnect' });        
@@ -430,5 +437,6 @@ export default function useWebSerial($refs, emitter) {
         eraseall_dms_connect,
         driver_connect,
         driver_update,
+        sendescape,
     };
 }

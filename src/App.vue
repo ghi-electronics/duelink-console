@@ -84,6 +84,13 @@
                     >
                         <i class="fas fa-fw fa-arrow-right"></i>
                     </Button>
+                    <Button
+                        :disabled="disabled"
+                        data-tippy-content="Stop"
+                        @click.native="sendEscape"
+                    >
+                        <i class="fas fa-fw fa-stop"></i>
+                    </Button>
                 </div>
             </div>
             <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
@@ -771,6 +778,11 @@ async function sendRecordMode() {
 async function sendDirectMode() {
     console.log('sendDirectMode');
     webSerial.execute(directModeCode.value.replace(/\t/gm, ' '));
+}
+
+async function sendEscape() {
+    console.log('sendEscape');
+    webSerial.sendescape();
 }
 
 async function sendList(target) {

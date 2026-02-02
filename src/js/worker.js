@@ -81,6 +81,10 @@ addEventListener('message', (e) => {
         case 'driver_connect_updadate_msg':
             do_driver_update();
             break; 
+
+        case 'sendescape':
+            do_sendescape();
+            break
     }
 });
 
@@ -238,6 +242,13 @@ async function eraseall_dms_connect(devAdd) {
 
     postMessage({ event: 'eraseall_status_dms', value: 1});
         
+}
+
+async function do_sendescape() {
+    await writer.write(encoder.encode('\x1B'));
+    await sleep(400);
+    await flush();
+    
 }
 
 // driver update
@@ -533,7 +544,12 @@ async function execute(line) {
     if (line.startsWith('mem')) {
         const result = await write(line);
         postMessage({ event: 'memoryRegionsResult', result });
-    } else {
+    } else if (line.startsWith('run')) {
+        //await write('run',null,'\n',-1);
+        const result = await write(line,null,'\n',100);
+        postMessage({ event: 'memoryRegionsResult', result });
+    }     
+    else {
         await write(line);
     }
     logEvent(`Executed: &nbsp;<code>${line}</code>`);
