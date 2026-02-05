@@ -14,6 +14,7 @@
             @update:theme="updateTippyTheme"
             @updateTippy="updateTippy"
             @update_driver_menubar="do_update_driver_menubar"            
+            @clone_fw="do_clone_fw"
         />
         <ToolBar
             :can-download="canDownload"
@@ -365,7 +366,7 @@
 
             </div>
         </div>
-
+        
         <div v-if="eraseall_dms_msgbox_finished" class="overlay">
             <div class="dialog">
                 <div class="dialog-title-success">
@@ -383,6 +384,146 @@
                         webSerial.isBusy = false;
                         ">Close</button>
                 </div>       
+            </div>
+        </div>
+
+        <div v-if="do_clone_fw_pre" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning  
+                </div>
+                <div class="dialog-body">
+                    <p>All selected devices will be erased and the firmware will be cloned from the starting device address.</p>
+   
+                    <label for="device-number-start" style="display: block; margin-top: 10px;">
+                        Clone firmware from device address:                   
+                        <input
+                            id="device-number-start"
+                            type="number"
+                            min="1"
+                            max="254"
+                            v-model.number="clone_dev_addr_start"
+                            placeholder="Enter device number"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
+                            @blur="onDeviceNumberBlur"
+                        />
+                        <span style="margin-left: 12px;">
+                            to device address:
+                        </span>
+                        
+                        <input
+                            id="device-number-end"
+                            type="number"
+                            min="1"
+                            max="254"
+                            v-model.number="clone_dev_addr_end"
+                            placeholder="Enter device number"
+                            style="width: 70px; height: 26px;margin-top: 1px;"
+                            @blur="onDeviceNumberBlur"
+                        />
+                     </label>
+                    
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button class="yes" @click="do_clone_fw_pre_yes">Continue</button>
+                    <button class="no" @click="do_clone_fw_pre_no">Abort</button>
+                </div>               
+            </div>
+        </div>
+
+        <div v-if="clone_msg_box_progress" class="overlay">
+            <div class="dialog" style="width: 25vw;">
+                <div 
+                class="dialog-title"
+                :class="{ 'dialog-title-success': webSerial.clone_fw_status.value == clone_dev_addr_end }"
+                >
+                <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
+                 <!-- Show icon only while writing -->
+                <i
+                    v-if="webSerial.clone_fw_status.value != clone_dev_addr_end"
+                    class="fas fa-exclamation-triangle"
+                    style="margin-right: 8px;"
+                ></i>
+                {{ webSerial.clone_fw_status.value != clone_dev_addr_end ? "Please wait..." : "Finishing..." }}
+                </div>
+
+                <div class="dialog-body">
+                <!-- Progress bar -->
+                
+                <div class="progress-text">
+                    Cloning firmware from device {{ webSerial.clone_fw_dev.value-1 }} to device {{ webSerial.clone_fw_dev.value }}
+                </div>
+                <br>
+                <div class="update-driver-progress-container">
+                    <div
+                    class="update-driver-progress-bar"
+                    :style="{ 
+                        width: webSerial.clone_fw_progress.value + '%'
+                        
+                        }"
+                    ></div>
+                </div>
+
+                <!-- Percent text -->
+                <div class="progress-text">
+                    {{ webSerial.clone_fw_progress.value }}%
+                </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div v-if="clone_msg_box_ask_connect" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title-question">
+                    <i class="fas fa-question-circle" style="color: white; margin-right: 8px;"></i>
+                    Clone Firmware
+                </div>
+                <div class="dialog-body">
+                     <p>This feature requires the devices to be connected to the console. Do you want to connect?</p>        
+                </div>
+
+                <div class="dialog-buttons">
+                     <button class="yes" @click="                        
+                        clone_msg_box_ask_connect_result = 1;
+                        clone_msg_box_ask_connect = false;
+                        ">Connect
+                    </button>
+                    <button class="no" @click="                        
+                        clone_msg_box_ask_connect_result = 0;                
+                        clone_msg_box_ask_connect = false; 
+                        ">Abort
+                    </button>
+                </div>       
+            </div>
+        </div>
+
+        <div v-if="clone_msg_box_result" class="overlay">
+            <div class="dialog" style="width: 50vw;">
+                <div 
+                    class="dialog-title"
+                    :class="{ 'dialog-title-success': webSerial.clone_fw_status.value == clone_dev_addr_end }"
+                    >
+                    Clone Firmware
+                </div> 
+                <div class="dialog-body">                    
+                    <template v-if="webSerial.clone_fw_status.value === clone_dev_addr_end">
+                        Cloned from device {{ webSerial.clone_fw_dev.value - 1 }} to device {{ webSerial.clone_fw_dev.value }} successfully.
+                    </template>
+
+                    <template v-else>
+                        Cloning failed at device {{ webSerial.clone_fw_dev.value }}.
+                    </template>
+                </div>
+                <div class="dialog-buttons">
+                    <button class="yes" @click="                                                
+                        clone_msg_box_result = false;
+                        ">OK
+                    </button>
+                
+                </div>                     
             </div>
         </div>
 
@@ -521,8 +662,18 @@ const update_driver_msgbox_confirm_final = ref(false);
 const update_driver_msgbox_progress = ref(false);
 const connect_msgbox_progress = ref(false);
 
-
 const sel_cmd_msgbox = ref(false);
+
+const do_clone_fw_pre = ref(false);
+const clone_dev_addr_start = ref(1);
+const clone_dev_addr_end = ref(2);
+const clone_dev_addr_num = ref(1);
+const clone_msg_box_progress = ref(false);
+const clone_msg_box_ask_connect= ref(false);
+const clone_msg_box_ask_connect_result = ref(0);
+const clone_msg_box_result = ref(0);
+
+
 
 
 
@@ -1116,6 +1267,68 @@ async function do_update_driver_final_no() {
     
 }
 
+async function do_clone_fw() {    
+    if (webSerial.isConnected.value == false) {
+        
+        clone_msg_box_ask_connect_result.value = -1            
+        clone_msg_box_ask_connect.value = true
+
+        while (true) {
+            if (clone_msg_box_ask_connect_result.value  == 1) {
+                await do_connect();
+
+                break
+            }
+            else if (clone_msg_box_ask_connect_result.value  == 0) {
+                 break
+            }
+            await sleep(100); 
+        }
+    }
+
+    if (webSerial.isConnected.value == false) 
+        return
+
+    webSerial.clone_fw_status.value = 0
+    do_clone_fw_pre.value = true
+
+    await sleep(100); 
+}
+
+async function do_clone_fw_pre_yes() {
+    //console.log("Clone firmware - yes")
+    clone_dev_addr_num.value = clone_dev_addr_start.value - clone_dev_addr_end.value    
+
+    // do clone but no await
+    webSerial.do_clone_fw(clone_dev_addr_start.value,clone_dev_addr_end.value)   
+
+    do_clone_fw_pre.value = false
+
+    webSerial.clone_fw_progress.value = 0
+    clone_msg_box_progress.value = true;
+
+    // wait for await
+    while (webSerial.clone_fw_status.value == 0) {
+        await sleep(1000); 
+    }
+    
+    await sleep(100); 
+    clone_msg_box_progress.value = false;
+
+    //if (webSerial.clone_fw_status.value == clone_dev_addr_end.value)
+    //    console.log("success")
+    //else
+    //    console.log("failed")
+    clone_msg_box_result.value = true
+}
+
+async function do_clone_fw_pre_no() {
+    //console.log("Clone firmware - no")
+    do_clone_fw_pre.value = false
+    
+    await sleep(100); 
+}
+
 function updateTippy(target, show = false) {
     if (!target) {
         return;
@@ -1195,6 +1408,15 @@ function onDeviceNumberBlur() {
   padding: 10px;
   font-weight: bold;
   font-size: 1.1em;
+}
+
+.dialog-title-question {
+  background-color: #d9534f;  /* green background */
+  color: white;                /* white text */
+  padding: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+  text-align: left;
 }
 
 .dialog-title-success {

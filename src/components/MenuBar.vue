@@ -21,7 +21,9 @@
         <div class="flex items-center space-x-4">
             <a href="https://duelink.com" target="_blank">Docs</a>
             <Menu :options="demoOptions" id="demo">Demos</Menu>
-            <a @click.prevent="$emit('dfu')">Firmware</a>  
+            <Menu :options="firmwareOptions" id="firmware">
+                Firmware
+            </Menu>
             <a @click.prevent="$emit('update_driver_menubar')">Driver</a>                      
             <a
                 class="text-sm"
@@ -36,7 +38,7 @@
 
 <script setup>
 import { ref } from 'vue';
-
+import { computed } from 'vue';
 // Components
 
 import Menu from './Menu.vue';
@@ -44,7 +46,7 @@ import Button from './Button.vue';
 
 // Emits
 
-const $emit = defineEmits(['demo', 'dfu', 'update:theme', 'updateTippy','update_driver_menubar']);
+const $emit = defineEmits(['demo', 'dfu', 'update:theme', 'updateTippy','update_driver_menubar','clone_fw']);
 
 // Props
 
@@ -55,6 +57,21 @@ const props = defineProps({
 // Data
 
 const demoOptions = ref([]);
+
+const firmwareOptions = [
+    {
+        label: 'Update Firmware',
+        click: () => {
+            $emit('dfu')
+        }
+    },
+    {
+        label: 'Clone Firmware',
+        click: () => {
+            $emit('clone_fw')
+        }
+    }
+]
 
 // Created
 
@@ -86,6 +103,7 @@ async function loadDemos() {
     }
 }
 
+
 function toggleDarkMode(event) {
     if (props.theme === 'dark') {
         $emit('update:theme', 'light');
@@ -100,4 +118,5 @@ function toggleDarkMode(event) {
     }
     $emit('updateTippy', event.target, true);
 }
+
 </script>

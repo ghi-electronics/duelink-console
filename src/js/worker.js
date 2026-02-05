@@ -85,6 +85,9 @@ addEventListener('message', (e) => {
         case 'sendescape':
             do_sendescape();
             break
+        case 'do_clone_fw':
+            do_clone_fw(e.data.value1, e.data.value2)
+            break    
     }
 });
 
@@ -509,6 +512,74 @@ async function do_driver_update() {
     // end program
 
     //console.log("done");
+}
+
+let clone_fw_single_status = 0
+async function clone_fw_single(from_addr) {
+    await write(`sel(${from_addr+1})`,null, '\n',1000)
+    
+    // try to read statled pin, if return 1 mean exist
+    // we need it because sel return "\r\n>", no value.
+    // When dread(0,1) then return "1\r\n>". it must be 1 then it is good
+    const result = await write(`Info(1)`)
+
+    if (result.length > 0) {
+        const ret = Number(result.pop());
+        if (ret > 0 ) {
+            await write(`sel(${from_addr})`,null, '\n',1000)
+            const cloned =  await write(`clone()`, null, '\n', 30000)
+
+            if (cloned.length > 0) {
+                const dev = Number(cloned.pop());
+
+                if (dev == from_addr + 1) {
+                    clone_fw_single_status = dev
+                    return clone_fw_single_status
+                }
+            }
+        }
+    }
+
+    // something wrong, select start 1
+    await write(`sel(1)`)
+    clone_fw_single_status = -1
+    return clone_fw_single_status
+    
+}
+
+async function do_clone_fw(add_start, add_end) {
+    console.log(add_start);
+    console.log(add_end);
+    let d = add_start
+    clone_fw_single_status = 0
+
+    for (d = add_start; d < add_end; d++)  {
+        postMessage({ event: 'clone_fw_dev', value: (d+1) });
+
+        clone_fw_single(add_start)
+        
+        await sleep(100)
+        let i = 0
+        while (clone_fw_single_status == 0) {
+            postMessage({ event: 'clone_fw_progress', value: i });
+            i = i + 1
+            await sleep(300)         
+            if (i >99) {
+                
+                i = 99
+            }  
+            
+        }
+        
+        if (clone_fw_single_status < 0) {
+            break
+        }
+        else {
+            postMessage({ event: 'clone_fw_progress', value: 100 });
+        }
+    }
+
+    postMessage({ event: 'clone_fw_status', value: (d) });
 }
 
 async function disconnect() {

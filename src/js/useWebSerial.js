@@ -33,6 +33,9 @@ export default function useWebSerial($refs, emitter) {
     const connect_status=ref(0);
 
     const connection_mode=ref(0);; // 0: duelink regular, 1: update driver, 1: erase all
+    const clone_fw_status=ref(0)
+    const clone_fw_progress=ref(0)
+    const clone_fw_dev=ref(0)
     
     
 
@@ -171,6 +174,13 @@ export default function useWebSerial($refs, emitter) {
         {
             worker.postMessage({ task: 'sendescape' });
         }        
+    }
+
+    async function do_clone_fw(add_start, add_end) {
+        if (isConnected.value == true)
+        {
+            worker.postMessage({ task: 'do_clone_fw', value1: add_start, value2: add_end });
+        }  
     }
 
 
@@ -387,7 +397,19 @@ export default function useWebSerial($refs, emitter) {
 
             case 'update_driver_path_msg':
                 update_driver_path.value = data.value;
-                break;    
+                break; 
+                
+            case 'clone_fw_progress':
+                clone_fw_progress.value = data.value
+                break;  
+                
+            case 'clone_fw_dev':
+                clone_fw_dev.value = data.value
+                break;
+
+            case 'clone_fw_status':
+                clone_fw_status.value = data.value
+                break
         }
     }
 
@@ -422,6 +444,9 @@ export default function useWebSerial($refs, emitter) {
         update_devaddr,
         connect_status,
         connection_mode,
+        clone_fw_status,
+        clone_fw_progress,
+        clone_fw_dev,
         // Methods
         connect,
         disconnect,
@@ -438,5 +463,6 @@ export default function useWebSerial($refs, emitter) {
         driver_connect,
         driver_update,
         sendescape,
+        do_clone_fw,
     };
 }
