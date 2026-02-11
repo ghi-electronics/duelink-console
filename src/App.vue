@@ -8,12 +8,9 @@
     <div class="min-h-screen flex flex-col space-y-0.5">
         <MenuBar
             v-model:theme="theme"
-            @demo="demo"
-            @firmware="firmwareModal.start()"
-            @dfu="dfuModal.start()"
+            @demo="demo"            
             @update:theme="updateTippyTheme"
-            @updateTippy="updateTippy"
-            @update_driver_menubar="do_update_driver_menubar"            
+            @updateTippy="updateTippy"                      
         />
         <ToolBar
             :can-download="canDownload"
