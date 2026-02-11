@@ -12,7 +12,8 @@ var DuelinkHighlightRules = function () {
         "for|in|to|step|range|next|"+
         "if|else|end|"+
         "@|goto|"+
-        "exit|alias"     
+        "exit|alias|" +
+        "break|continue" 
         ); 
 
     var builtinConstants = (
