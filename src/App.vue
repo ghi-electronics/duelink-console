@@ -206,12 +206,12 @@
                     Warning
                 </div>
                 <div class="dialog-body">
-                    <p>{{ load_sample_confirm_final_text1 }}<br></p>                    
+                    <p>{{ load_sample_confirm_final_text1 }}<br></p>
                 </div>
 
                 <div class="dialog-buttons">
                     <button class="yes" @click="fn_load_sample">Yes</button>
-                    <button class="no" @click="load_sample_msg_box_confirm_final=false">No</button>
+                    <button class="no" @click="load_sample_msg_box_confirm_final = false">No</button>
                 </div>
             </div>
         </div>
@@ -334,6 +334,26 @@
 
                                 </div>
 
+                        </div>
+                    </div>
+
+                    <div v-if="msg_box_failed" class="overlay">
+                        <div class="dialog">
+                            <div class="dialog-title">
+                                <i class="fa-solid fa-triangle-exclamation"
+                                    style="color: #f5c542; margin-right: 8px;"></i>
+                                Failed
+                            </div>
+                            <div class="dialog-body">
+                                <p>{{ msg_box_failed_body_text }}</p>
+                            </div>
+
+                            <div class="dialog-buttons">
+                                <button class="no" @click="
+                                    msg_box_failed = false;
+
+                                ">Close</button>
+                            </div>
                         </div>
                     </div>
 
@@ -460,6 +480,8 @@ const sel_cmd_msgbox = ref(false);
 const progressbar_body_text = ref('')
 const progressbar_title_text = ref('')
 const progressbar_standard = ref(false);
+const msg_box_failed = ref(false);
+const msg_box_failed_body_text = ref('')
 
 
 
@@ -918,25 +940,32 @@ async function load_sample() {
     else {
         load_sample_confirm_final_text1.value = "This will load " + webSerial.device_name.value + " sample to the editor. Do you want to continue?";
     }
-    
+
 
     load_sample_msg_box_confirm_final.value = true;
 }
 // Sample update
 async function fn_load_sample() {
     load_sample_msg_box_confirm_final.value = false;
-    if ( webSerial.regions?.value?.length < 2) {
-        console.log("There is no region(1). The sample need to be installed on region(1)")
-    }
-    else if (webSerial.regions?.value[1]?.current === false) {
-        console.log("Please switch to region(1)")
-    }
-    else {
+    // if (webSerial.regions?.value?.length < 2) {
+    //     //console.log("There is no region(1). The sample need to be installed on region(1)")
+    //     msg_box_failed_body_text.value = "There is no Region (1). The sample needs to be installed in Region (1).";
+    //     msg_box_failed.value = true;
+    // }
+    // else if (webSerial.regions?.value[1]?.current === false) {
+    //     //console.log("Please switch to region(1)")
+    //     msg_box_failed_body_text.value = "Please switch to region(1)";
+    //     msg_box_failed.value = true;
+    // }
+    // else 
+    // {
         if (webSerial.device_name.value == "") {
             //const ret = await webSerial.driver_connect();
-            console.log("Device has no name")
+            msg_box_failed_body_text.value = "Device name (PID) not found.";
+            //console.log("Device name not found")
+             msg_box_failed.value = true;
             return;
-            
+
         }
 
         webSerial.load_sample_result.value = ""
@@ -944,9 +973,9 @@ async function fn_load_sample() {
         percent_tmp.value = 0;
         progressbar_title_text.value = "Looking for the sample..."
         //progressbar_body_text.value = "Looking for the sample..."
-        progressbar_standard.value = true;     
-        
-        
+        progressbar_standard.value = true;
+
+
 
         webSerial.fn_load_sample();
         let success = true
@@ -962,7 +991,7 @@ async function fn_load_sample() {
                 //progressbar_body_text.value = "Downloading the sample..."  
                 progressbar_title_text.value = "Downloading the sample..."
             }
-            
+
             await sleep(100);
         }
 
@@ -970,7 +999,7 @@ async function fn_load_sample() {
         if (webSerial.load_sample_result.value != "") {
             recordModeCode.value = webSerial.load_sample_result.value
         }
-        
+
         if (success) {
             percent_tmp.value = webSerial.progress_percent.value
             //progressbar_body_text.value = "The " + webSerial.device_name.value + " sample was downloaded successfully."
@@ -979,14 +1008,23 @@ async function fn_load_sample() {
         }
         progressbar_standard.value = false;
 
-        
-    }    
+
+    //}
 
 }
 
 // Driver update
 async function load_driver() {
     if (webSerial.isConnected.value) {
+        if (webSerial.device_name.value == "") {
+
+            msg_box_failed_body_text.value = "Device name (PID) not found.";
+
+            msg_box_failed.value = true;
+            return;
+
+        }
+
         do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
 
         if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
@@ -1019,11 +1057,21 @@ async function do_update_driver_final_yes() {
     while (webSerial.progress_percent.value != 100) {
         await sleep(1);
         percent_tmp.value = webSerial.progress_percent.value;
+
+        if (webSerial.progress_percent.value == 1) { // we mark 1 is failed
+            break;
+        }
     }
 
     // reset every thing
 
+    //memoryRegionsSelect(true);
+
     webSerial.update_driver_status.value = 0;
+
+    if (webSerial.progress_percent.value == 100) {
+        webSerial.memoryRegionsSelect(true);
+    }
 
     // return to normal state: Disconnect
     //await webSerial.disconnect();

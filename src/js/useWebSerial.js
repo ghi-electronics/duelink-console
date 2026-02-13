@@ -466,5 +466,6 @@ export default function useWebSerial($refs, emitter) {
         driver_update,
         sendescape,
         fn_load_sample,
+        memoryRegionsSelect,
     };
 }

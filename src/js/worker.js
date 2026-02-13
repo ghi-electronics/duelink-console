@@ -373,13 +373,16 @@ async function do_driver_connect(devAdd) {
 }
 
 async function do_driver_update() {
+    postMessage({ event: 'update_progress_percent_msg', value: 0 });
     if (!isConnected ) {
+        postMessage({ event: 'update_progress_percent_msg', value: 1 });
         return;
     }
 
    
 
     if (!update_can_update) {
+        postMessage({ event: 'update_progress_percent_msg', value: 1 });
         return
     }
 
@@ -393,6 +396,7 @@ async function do_driver_update() {
 
     if (!response.ok) {
         console.error("Failed to load text file:", response.status);
+        postMessage({ event: 'update_progress_percent_msg', value: 1 });
         return;
     }
     let driverText = await response.text(); // store content in variable
@@ -402,7 +406,7 @@ async function do_driver_update() {
 
     let lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
 
-    postMessage({ event: 'update_progress_percent_msg', value: 0 });
+    
 
     // erase program
     await write('new all');
@@ -560,8 +564,17 @@ async function fn_load_sample() {
         return;
     }
     let sample = await response.text(); // store content in variable
-    postMessage({ event: 'load_sample_result', value: sample });
 
+    if (sample?.length > 0) {
+        sample = "# The sample always assumes that the proper driver is installed.\n" + sample
+        postMessage({ event: 'load_sample_result', value: sample });
+    }
+    else {
+        postMessage({ event: 'update_progress_percent_msg', value: 51 });
+        console.error("Failed to load text file:", response.status);
+        return;
+    }
+    
     await sleep(1000)
 
     postMessage({ event: 'update_progress_percent_msg', value: 100 });
