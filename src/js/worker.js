@@ -627,17 +627,22 @@ async function execute(line) {
 }
 
 async function list(callbackId) {
+    ignoreOutput = true
     const result = await write('list');
     postMessage({ event: 'writeResult', callbackId, result });
     logEvent('Listed program code.');
+
+    ignoreOutput = false
 }
 
 /**
  * List all region code.
  */
 async function listAll() {
+    ignoreOutput = true
     const result = await write('list all');
     postMessage({ event: 'listAllResult', result });
+    ignoreOutput = false
 }
 
 async function memInfo() {
