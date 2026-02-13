@@ -129,46 +129,46 @@ export default function useWebSerial($refs, emitter) {
     }
 
     // driver update
-    async function driver_connect() {
-        if (window.document.documentMode || !navigator.serial) {
-            window.location = '/browser-not-supported.html';
-        }
+    // async function driver_connect() {
+    //     if (window.document.documentMode || !navigator.serial) {
+    //         window.location = '/browser-not-supported.html';
+    //     }
 
-        if (isConnected.value) {
-            worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
-            update_driver_status.value = 1;
-        }
-        else {
-            update_driver_status.value = -1;
-        }
+    //     if (isConnected.value) {
+    //         worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
+    //         update_driver_status.value = 1;
+    //     }
+    //     else {
+    //         update_driver_status.value = -1;
+    //     }
 
-        return 1;
+    //     return 1;
 
-        // if (isConnected.value == false) {
+    //     // if (isConnected.value == false) {
 
-        //     try {
-        //         //const available = await navigator.serial.getPorts(); // this refresh port only
-        //         await navigator.serial.requestPort({
+    //     //     try {
+    //     //         //const available = await navigator.serial.getPorts(); // this refresh port only
+    //     //         await navigator.serial.requestPort({
 
-        //             filters: [
-        //                 { usbVendorId: GHI_VID, usbProductId: DL_PID } // GHI Electronics VID                     
-        //             ]
-        //         });
-        //     } catch (error) {
-        //         logError(error?.message || 'Unable to request port.');
-        //         update_driver_status.value = -1;
-        //         return 0;
-        //     }
+    //     //             filters: [
+    //     //                 { usbVendorId: GHI_VID, usbProductId: DL_PID } // GHI Electronics VID                     
+    //     //             ]
+    //     //         });
+    //     //     } catch (error) {
+    //     //         logError(error?.message || 'Unable to request port.');
+    //     //         update_driver_status.value = -1;
+    //     //         return 0;
+    //     //     }
 
-        //     worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
-        //     update_driver_status.value = 1;
-        // }
-        // else {
-        //     update_driver_status.value = 1;
-        // }
+    //     //     worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
+    //     //     update_driver_status.value = 1;
+    //     // }
+    //     // else {
+    //     //     update_driver_status.value = 1;
+    //     // }
 
-        // return 1;
-    }
+    //     // return 1;
+    // }
 
     async function driver_update() {
         if (isConnected.value == true) {
@@ -462,7 +462,7 @@ export default function useWebSerial($refs, emitter) {
         stop,
         eraseall_dms_execute,
         eraseall_dms_connect,
-        driver_connect,
+        //driver_connect,
         driver_update,
         sendescape,
         fn_load_sample,

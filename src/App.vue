@@ -199,6 +199,23 @@
             </div>
         </div>
 
+        <div v-if="load_sample_msg_box_confirm_final" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    Warning
+                </div>
+                <div class="dialog-body">
+                    <p>{{ load_sample_confirm_final_text1 }}<br></p>                    
+                </div>
+
+                <div class="dialog-buttons">
+                    <button class="yes" @click="fn_load_sample">Yes</button>
+                    <button class="no" @click="load_sample_msg_box_confirm_final=false">No</button>
+                </div>
+            </div>
+        </div>
+
         <div v-if="update_driver_msgbox_progress" class="overlay">
             <div class="dialog" style="width: 25vw;">
                 <div class="dialog-title" :class="{ 'dialog-title-success': percent_tmp === 100 }">
@@ -432,6 +449,8 @@ const eraseall_dms_msgbox_finished = ref(false);
 
 //const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
+const load_sample_msg_box_confirm_final = ref(false);
+
 const update_driver_msgbox_progress = ref(false);
 const connect_msgbox_progress = ref(false);
 
@@ -451,6 +470,9 @@ const dms_confirm_final_text = ref(ERASE_ALL_DMS_CONFIRM_FINAL_TEXT);
 const do_update_driver_confirm_final_text1 = ref("");
 const do_update_driver_confirm_final_text2 = ref("");
 const do_update_driver_confirm_final_text3 = ref("");
+
+const load_sample_confirm_final_text1 = ref("");
+
 
 const firmwareMatches = ref(false);
 
@@ -889,8 +911,20 @@ async function do_sel_cmd_msgbox_no() {
     sel_devaddr.value = webSerial.update_devaddr.value;
     sel_cmd_msgbox.value = false;
 }
-// Sample update
 async function load_sample() {
+    if (recordModeCode.value?.length > 0) {
+        load_sample_confirm_final_text1.value = "You already have code in the editor. Do you want to replace it with the " + webSerial.device_name.value + " sample?";
+    }
+    else {
+        load_sample_confirm_final_text1.value = "This will load " + webSerial.device_name.value + " sample to the editor. Do you want to continue?";
+    }
+    
+
+    load_sample_msg_box_confirm_final.value = true;
+}
+// Sample update
+async function fn_load_sample() {
+    load_sample_msg_box_confirm_final.value = false;
     if ( webSerial.regions?.value?.length < 2) {
         console.log("There is no region(1). The sample need to be installed on region(1)")
     }
@@ -898,20 +932,35 @@ async function load_sample() {
         console.log("Please switch to region(1)")
     }
     else {
-        //console.log("good to go")
+        if (webSerial.device_name.value == "") {
+            //const ret = await webSerial.driver_connect();
+            console.log("Device has no name")
+            return;
+            
+        }
+
         webSerial.load_sample_result.value = ""
         webSerial.progress_percent.value = 0;
         percent_tmp.value = 0;
-        progressbar_title_text.value = "Please wait..."        
-        progressbar_body_text.value = "Looking for the sample..."
-        progressbar_standard.value = true;        
+        progressbar_title_text.value = "Looking for the sample..."
+        //progressbar_body_text.value = "Looking for the sample..."
+        progressbar_standard.value = true;     
+        
+        
+
         webSerial.fn_load_sample();
         let success = true
 
         while (webSerial.progress_percent.value < 100) {
+            percent_tmp.value = webSerial.progress_percent.value
             if (webSerial.progress_percent.value % 2 == 1) { // we marked 1,11,21.....mean failed
                 success = false
                 break;
+            }
+
+            if (webSerial.progress_percent.value >= 50) {
+                //progressbar_body_text.value = "Downloading the sample..."  
+                progressbar_title_text.value = "Downloading the sample..."
             }
             
             await sleep(100);
@@ -921,15 +970,16 @@ async function load_sample() {
         if (webSerial.load_sample_result.value != "") {
             recordModeCode.value = webSerial.load_sample_result.value
         }
+        
+        if (success) {
+            percent_tmp.value = webSerial.progress_percent.value
+            //progressbar_body_text.value = "The " + webSerial.device_name.value + " sample was downloaded successfully."
+            progressbar_title_text.value = "Downloaded successfully."
+            await sleep(1000);
+        }
         progressbar_standard.value = false;
 
-
-        if (!success) {
-
-        }
-        else {
-            console.log("good to go")
-        }
+        
     }    
 
 }
@@ -937,79 +987,18 @@ async function load_sample() {
 // Driver update
 async function load_driver() {
     if (webSerial.isConnected.value) {
-        webSerial.device_name.value = "";
-        webSerial.driver_ver.value = "";
-        webSerial.progress_percent.value = 0;
-        percent_tmp.value = 0;
-        webSerial.update_driver_status.value = 0;
-        //let tmp = webSerial.isBusy.value;
-        //webSerial.isBusy.value = true;
+        do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
 
-        webSerial.connection_mode.value = 1; // driver mode
-        sel_devaddr.value = webSerial.update_devaddr.value;
-        const ret = await webSerial.driver_connect();
-
-        if (ret) {
-
-            progressbar_title_text.value = "Please wait..."
-            progressbar_body_text.value = "Looking for the driver..."
-            progressbar_standard.value = true;
-            percent_tmp.value = 0;
-
-            while (webSerial.update_driver_status.value == 0) {
-                await sleep(100);
-
-                //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
-
-                //if (percent_tmp.value > 95)
-                //    percent_tmp.value = 95;
-                percent_tmp.value = webSerial.progress_percent.value;
-            }
-
-            await sleep(100);
-
-            if (webSerial.update_driver_status.value == 1) { // user select connected
-
-                let connected = false;
-                const expire = Date.now() + 4000;
-                while (!webSerial.isConnected.value || webSerial.device_name.value == "" || webSerial.driver_ver.value == "") {
-                    await sleep(100);
-                    if (Date.now() > expire) {
-                        break;
-                    }
-                    //percent_tmp.value = Math.floor((((Date.now() - start) / 4000) * 100));
-
-                    //if (percent_tmp.value > 95)
-                    //    percent_tmp.value = 95;
-                    percent_tmp.value = webSerial.progress_percent.value;
-                }
-
-                if (webSerial.isConnected.value && Date.now() < expire) {
-                    connected = true;
-                }
-
-                if (connected) {
-                    //do_update_driver_confirm_final_text1.value = webSerial.device_name.value + " detected. FW version: " + webSerial.version.value + ". Driver script version: " + webSerial.driver_ver.value
-                    do_update_driver_confirm_final_text1.value = "Device Name: " + webSerial.device_name.value
-
-                    if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
-                        do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
-                    else
-                        do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1)
-                    do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
+        if (webSerial.driver_ver.value == "" || webSerial.driver_ver.value == "N/A")
+            do_update_driver_confirm_final_text2.value = "Driver Script Version: " + webSerial.driver_ver.value
+        else
+            do_update_driver_confirm_final_text2.value = "Driver Script Version: " + Number(webSerial.driver_ver.value).toFixed(1)
+        do_update_driver_confirm_final_text3.value = "Firmware Version: " + webSerial.version.value;// + "-" +  (firmwareMatches.value)
 
 
-                    update_driver_msgbox_confirm_final.value = true;
+        update_driver_msgbox_confirm_final.value = true;
 
-                    percent_tmp.value = 100;
-                }
-            }
-
-            progressbar_standard.value = false;
-            percent_tmp.value = 0;
-
-            //webSerial.isBusy.value = tmp;
-        }
+        percent_tmp.value = 100;
 
 
     }
@@ -1103,13 +1092,15 @@ function textSizeMinus() {
 }
 
 function onDeviceNumberBlur() {
-    if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 1 || webSerial.update_devaddr.value > 254) {
-        webSerial.update_devaddr.value = 1;
-    }
+    // if (!webSerial.update_devaddr.value || webSerial.update_devaddr.value < 1 || webSerial.update_devaddr.value > 254) {
+    //     webSerial.update_devaddr.value = 1;
+    // }
 
     if (!sel_devaddr.value || sel_devaddr.value < 1 || sel_devaddr.value > 254) {
         sel_devaddr.value = 1;
     }
+
+    webSerial.update_devaddr.value = 1
 }
 </script>
 

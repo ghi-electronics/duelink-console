@@ -32,7 +32,7 @@ addEventListener('message', (e) => {
             break;
         case 'connect':
             update_devaddr = e.data.value;
-            connect();
+            connect();            
             break;
         case 'disconnect':
             disconnect();
@@ -75,7 +75,7 @@ addEventListener('message', (e) => {
             break;
 
         case 'driver_connect_msg':
-            do_driver_connect(e.data.value);
+            //do_driver_connect(e.data.value);
             break;
 
         case 'driver_connect_updadate_msg':
@@ -150,10 +150,14 @@ async function connect() {
     let ret = await synchronize();
 
     if (ret != 0) {
+        await do_driver_connect(update_devaddr);
         isConnected = true;
         const info = port.getInfo();
         postMessage({ event: 'connected' });
         postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId) });
+
+        
+        
     }
     else {
         //logEvent('There was an error while connencting.');
@@ -298,9 +302,9 @@ async function do_driver_connect(devAdd) {
 
     //await sleep(100);
 
-    if (!isConnected) {
-        return;
-    }
+    //if (!isConnected) {
+    //    return;
+    //}
 
     await writer.write(encoder.encode("\n"));
     await sleep(400);
@@ -530,19 +534,19 @@ async function fn_load_sample() {
         return;
     }
 
-    postMessage({ event: 'update_progress_percent_msg', value: 10 });
+    //postMessage({ event: 'update_progress_percent_msg', value: 10 });
 
-    if (!update_can_update) {
-        postMessage({ event: 'update_progress_percent_msg', value: 11 });
-        await do_driver_connect()
-    }
+    // if (!update_can_update) {
+    //     postMessage({ event: 'update_progress_percent_msg', value: 11 });
+    //     await do_driver_connect()
+    // }
 
-    postMessage({ event: 'update_progress_percent_msg', value: 20 });
+    // postMessage({ event: 'update_progress_percent_msg', value: 20 });
 
-    if (!update_can_update) {
-        postMessage({ event: 'update_progress_percent_msg', value: 21 });
-        return
-    }
+    // if (!update_can_update) {
+    //     postMessage({ event: 'update_progress_percent_msg', value: 21 });
+    //     return
+    // }
 
     const device_driver_path = sample_path;//"https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + device_part_number + ".txt";
 
