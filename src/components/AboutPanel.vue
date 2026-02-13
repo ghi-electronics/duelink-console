@@ -51,7 +51,7 @@
             to the latest firmware.
         </span>
     </div>
-    <div class="flex justify-end px-4">
+    <!-- <div class="flex justify-end px-4">
         <a
             class="mt-4 inline-block w-full sm:w-auto text-center sm:text-left px-4 py-2 font-medium rounded transition bg-slate-300 hover:bg-slate-500 text-slate-600 hover:text-slate-50 dark:bg-zinc-600 dark:hover:bg-zinc-300 dark:text-zinc-100 dark:hover:text-zinc-950"
             href="https://github.com/ghi-electronics/due-console/issues/"
@@ -59,7 +59,7 @@
         >
             <i class="fas fa-fw fa-arrow-up-right-from-square mr-1"></i> Report Issue
         </a>
-    </div>
+    </div> -->
 </template>
 
 <script setup>
