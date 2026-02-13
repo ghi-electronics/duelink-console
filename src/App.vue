@@ -49,8 +49,8 @@
                 <LogPanel v-model:log="webSerial.log.value" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value"
-                    :devAdd="webSerial.update_devaddr.value" :deviceName="webSerial.device_name.value" @firmware-matches="onFirmwareMatches"
-                    @call-update-firmware-box="dfuModal.start()" />
+                    :devAdd="webSerial.update_devaddr.value" :deviceName="webSerial.device_name.value"
+                    @firmware-matches="onFirmwareMatches" @call-update-firmware-box="dfuModal.start()" />
             </div>
         </div>
 
@@ -959,54 +959,64 @@ async function fn_load_sample() {
     // }
     // else 
     // {
-        if (webSerial.device_name.value == "") {
-            //const ret = await webSerial.driver_connect();
-            msg_box_failed_body_text.value = "Device name (PID) not found.";
-            //console.log("Device name not found")
-             msg_box_failed.value = true;
-            return;
 
+    if (webSerial.regions?.value?.length === 2) {
+        if (webSerial.regions?.value[1]?.current === false) {
+            //console.log("Please switch to region(1)")
+            msg_box_failed_body_text.value = "Please switch to Region (1). The sample needs to be in Region (1).";
+            msg_box_failed.value = true;
+
+            return
+        }
+    }
+    if (webSerial.device_name.value == "") {
+        //const ret = await webSerial.driver_connect();
+        msg_box_failed_body_text.value = "Device name (PID) not found.";
+        //console.log("Device name not found")
+        msg_box_failed.value = true;
+        return;
+
+    }
+
+    webSerial.load_sample_result.value = ""
+    webSerial.progress_percent.value = 0;
+    percent_tmp.value = 0;
+    progressbar_title_text.value = "Looking for the sample..."
+    //progressbar_body_text.value = "Looking for the sample..."
+    progressbar_standard.value = true;
+
+
+
+    webSerial.fn_load_sample();
+    let success = true
+
+    while (webSerial.progress_percent.value < 100) {
+        percent_tmp.value = webSerial.progress_percent.value
+        if (webSerial.progress_percent.value % 2 == 1) { // we marked 1,11,21.....mean failed
+            success = false
+            break;
         }
 
-        webSerial.load_sample_result.value = ""
-        webSerial.progress_percent.value = 0;
-        percent_tmp.value = 0;
-        progressbar_title_text.value = "Looking for the sample..."
-        //progressbar_body_text.value = "Looking for the sample..."
-        progressbar_standard.value = true;
-
-
-
-        webSerial.fn_load_sample();
-        let success = true
-
-        while (webSerial.progress_percent.value < 100) {
-            percent_tmp.value = webSerial.progress_percent.value
-            if (webSerial.progress_percent.value % 2 == 1) { // we marked 1,11,21.....mean failed
-                success = false
-                break;
-            }
-
-            if (webSerial.progress_percent.value >= 50) {
-                //progressbar_body_text.value = "Downloading the sample..."  
-                progressbar_title_text.value = "Downloading the sample..."
-            }
-
-            await sleep(100);
+        if (webSerial.progress_percent.value >= 50) {
+            //progressbar_body_text.value = "Downloading the sample..."  
+            progressbar_title_text.value = "Downloading the sample..."
         }
 
+        await sleep(100);
+    }
 
-        if (webSerial.load_sample_result.value != "") {
-            recordModeCode.value = webSerial.load_sample_result.value
-        }
 
-        if (success) {
-            percent_tmp.value = webSerial.progress_percent.value
-            //progressbar_body_text.value = "The " + webSerial.device_name.value + " sample was downloaded successfully."
-            progressbar_title_text.value = "Downloaded successfully."
-            await sleep(1000);
-        }
-        progressbar_standard.value = false;
+    if (webSerial.load_sample_result.value != "") {
+        recordModeCode.value = webSerial.load_sample_result.value
+    }
+
+    if (success) {
+        percent_tmp.value = webSerial.progress_percent.value
+        //progressbar_body_text.value = "The " + webSerial.device_name.value + " sample was downloaded successfully."
+        progressbar_title_text.value = "Downloaded successfully."
+        await sleep(1000);
+    }
+    progressbar_standard.value = false;
 
 
     //}
