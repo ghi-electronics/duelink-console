@@ -49,7 +49,7 @@
                 <LogPanel v-model:log="webSerial.log.value" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value"
-                    :devAdd="webSerial.update_devaddr.value" @firmware-matches="onFirmwareMatches"
+                    :devAdd="webSerial.update_devaddr.value" :deviceName="webSerial.device_name.value" @firmware-matches="onFirmwareMatches"
                     @call-update-firmware-box="dfuModal.start()" />
             </div>
         </div>

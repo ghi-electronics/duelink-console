@@ -10,7 +10,7 @@
             <div class="px-2 py-1 flex justify-between">
                 <div class="font-medium">Device</div>
                 <div>
-                    {{ device ? device : '...'  }}
+                    {{ deviceName ? deviceName : '...'  }}
                 </div>
             </div>
             <div class="px-2 py-1 flex justify-between">
@@ -75,6 +75,7 @@ const props = defineProps({
     availableDfu: Object,
     version: String,
     devAdd:Number,
+    deviceName:String,
 });
 
 // Setup
@@ -102,6 +103,14 @@ const deviceAddress = computed(() => {
     if (props.version) {
         //return props.version.substring(0, props.version.length - 1);
         return props.devAdd;
+    }
+    return null;
+});
+
+const deviceName = computed(() => {
+    if (props.version) {
+        //return props.version.substring(0, props.version.length - 1);
+        return props.deviceName;
     }
     return null;
 });
