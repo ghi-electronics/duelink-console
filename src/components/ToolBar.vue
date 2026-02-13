@@ -76,8 +76,26 @@
             <input id="file" type="file" class="hidden" @change="onLoad" />
         </label>
        
-
         <!--Group 4-->
+        <Button
+            :disabled="isBusy || !isConnected || isTalking "
+            class="tool"
+            data-tippy-content="Load driver"
+            @click.native="$emit('load_driver')"
+        >
+            Driver
+        </Button>
+
+        <Button
+            :disabled="isBusy || !isConnected || isTalking "
+            class="tool"
+            data-tippy-content="Load sample"
+            @click.native="$emit('load_sample')"
+        >
+            Sample
+        </Button>
+
+        <!--Group 5-->
         
         <Button
             :disabled="!canTextSizePlus"
@@ -119,6 +137,8 @@ const $emit = defineEmits([
     'list',
     'load',
     'sel_cmd',
+    'load_driver',
+    'load_sample',
 ]);
 
 // Props

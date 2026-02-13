@@ -29,12 +29,12 @@ export default function useWebSerial($refs, emitter) {
     const device_name = ref("");
     const progress_percent = ref(0);
     const update_driver_path = ref("");
-    const update_devaddr=ref(1);
-    const connect_status=ref(0);
+    const update_devaddr = ref(1);
+    const connect_status = ref(0);
 
-    const connection_mode=ref(0);; // 0: duelink regular, 1: update driver, 1: erase all
-    
-    
+    const connection_mode = ref(0);; // 0: duelink regular, 1: update driver, 1: erase all
+
+
 
     let memoryRegionsCallback = null;
 
@@ -71,11 +71,11 @@ export default function useWebSerial($refs, emitter) {
 
         try {
             //const available = await navigator.serial.getPorts(); // this refresh port only
-            await navigator.serial.requestPort({ 
+            await navigator.serial.requestPort({
                 filters: [
-                    { usbVendorId: GHI_VID, usbProductId:DL_PID } // GHI Electronics VID           
+                    { usbVendorId: GHI_VID, usbProductId: DL_PID } // GHI Electronics VID           
                 ]
-             });
+            });
         } catch (error) {
             logError(error?.message || 'Unable to request port.');
             isBusy.value = false;
@@ -102,23 +102,23 @@ export default function useWebSerial($refs, emitter) {
         }
 
         if (isConnected.value == false) {
-            
+
             try {
                 //const available = await navigator.serial.getPorts(); // this refresh port only
-                await navigator.serial.requestPort({ 
-                    
+                await navigator.serial.requestPort({
+
                     filters: [
-                        { usbVendorId: GHI_VID, usbProductId:DL_PID }, // GHI Electronics VID
-                        { usbVendorId: GHI_VID, usbProductId:MB_PID }  
+                        { usbVendorId: GHI_VID, usbProductId: DL_PID }, // GHI Electronics VID
+                        { usbVendorId: GHI_VID, usbProductId: MB_PID }
                     ]
                 });
             } catch (error) {
-                logError(error?.message || 'Unable to request port.');                
+                logError(error?.message || 'Unable to request port.');
                 eraseall_status_dms.value = 1;
                 return;
             }
 
-            worker.postMessage({ task: 'eraseall_dms_connect_msg',value: update_devaddr.value });
+            worker.postMessage({ task: 'eraseall_dms_connect_msg', value: update_devaddr.value });
         }
         else {
             eraseall_status_dms.value = 1;
@@ -131,51 +131,59 @@ export default function useWebSerial($refs, emitter) {
             window.location = '/browser-not-supported.html';
         }
 
-        if (isConnected.value == false) {
-            
-            try {
-                //const available = await navigator.serial.getPorts(); // this refresh port only
-                await navigator.serial.requestPort({ 
-                    
-                    filters: [
-                        { usbVendorId: GHI_VID, usbProductId:DL_PID } // GHI Electronics VID                     
-                    ]
-                });
-            } catch (error) {
-                logError(error?.message || 'Unable to request port.');     
-                update_driver_status.value = -1;           
-                return 0;
-            }
-            
+        if (isConnected.value) {
             worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
             update_driver_status.value = 1;
         }
         else {
-            update_driver_status.value = 1;
+            update_driver_status.value = -1;
         }
 
         return 1;
+
+        // if (isConnected.value == false) {
+
+        //     try {
+        //         //const available = await navigator.serial.getPorts(); // this refresh port only
+        //         await navigator.serial.requestPort({
+
+        //             filters: [
+        //                 { usbVendorId: GHI_VID, usbProductId: DL_PID } // GHI Electronics VID                     
+        //             ]
+        //         });
+        //     } catch (error) {
+        //         logError(error?.message || 'Unable to request port.');
+        //         update_driver_status.value = -1;
+        //         return 0;
+        //     }
+
+        //     worker.postMessage({ task: 'driver_connect_msg', value: update_devaddr.value });
+        //     update_driver_status.value = 1;
+        // }
+        // else {
+        //     update_driver_status.value = 1;
+        // }
+
+        // return 1;
     }
 
     async function driver_update() {
-        if (isConnected.value == true)
-        {
+        if (isConnected.value == true) {
 
             worker.postMessage({ task: 'driver_connect_updadate_msg' });
         }
-        
+
     }
 
     async function sendescape() {
-        if (isConnected.value == true)
-        {
+        if (isConnected.value == true) {
             worker.postMessage({ task: 'sendescape' });
-        }        
+        }
     }
 
 
-    async function disconnect() {        
-        worker.postMessage({ task: 'disconnect' });        
+    async function disconnect() {
+        worker.postMessage({ task: 'disconnect' });
     }
 
     function execute(line) {
@@ -193,7 +201,7 @@ export default function useWebSerial($refs, emitter) {
         worker.postMessage({ task: 'listAll' });
     }
 
-    function memoryRegionsSelect(regionSelected = false) {        
+    function memoryRegionsSelect(regionSelected = false) {
         if (regionSelected) {
             memoryRegionsCallback = () => emitter.emit('regionSelected');
         }
@@ -226,7 +234,7 @@ export default function useWebSerial($refs, emitter) {
     function stop() {
         worker.postMessage({ task: 'stop' });
     }
-    
+
     // Methods - Utilities
 
     function logError(message) {
@@ -264,8 +272,8 @@ export default function useWebSerial($refs, emitter) {
                 isTalking.value = data.value;
                 // window.console.log('***********  TQD isTalking.......' + isTalking.value );
                 // if (data?.lastCommand?.startsWith?.('region')) {
-                    // window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
-                    // // memoryRegionsSelect(false);
+                // window.console.log('***********  TQD isTalking command: ' + data?.lastCommand );
+                // // memoryRegionsSelect(false);
                 // }
                 break;
             case 'listAllResult':
@@ -326,7 +334,7 @@ export default function useWebSerial($refs, emitter) {
             case 'recorded':
                 $refs.progress.style.width = '100%';
                 $refs.progress.classList.add('opacity-0');
-                
+
                 memoryRegionsSelect(false);
                 break;
             case 'regionSelected':
@@ -350,21 +358,21 @@ export default function useWebSerial($refs, emitter) {
                 break;
             case 'ConnectFailed':
                 const index = data.message.indexOf(':');
-                let msg = data.message               
-                
+                let msg = data.message
+
                 if (index !== -1)
                     msg = data.message.substring(0, index)
 
                 alert(msg)
                 connect_status.value = -2;
                 isBusy.value = false;
-                
+
                 break;
 
             case 'eraseall_status_dms':
                 eraseall_status_dms.value = data.value;
-                break; 
-                
+                break;
+
             case 'eraseall_vid_dms':
                 eraseall_vid_dms.value = data.value;
                 break;
@@ -387,7 +395,7 @@ export default function useWebSerial($refs, emitter) {
 
             case 'update_driver_path_msg':
                 update_driver_path.value = data.value;
-                break;    
+                break;
         }
     }
 
@@ -433,7 +441,7 @@ export default function useWebSerial($refs, emitter) {
         record,
         region,
         stop,
-        eraseall_dms_execute,        
+        eraseall_dms_execute,
         eraseall_dms_connect,
         driver_connect,
         driver_update,

@@ -36,6 +36,8 @@
             @text-size-plus="textSizePlus"
             @text-size-minus="textSizeMinus"
             @sel_cmd="sel_cmd_msgbox_show"
+            @load_driver="load_driver"
+            @load_sample="load_sample"
             
         />
         <div class="flex-1 flex flex-col space-y-0.5 sm:space-y-0 sm:flex-row sm:space-x-0.5">
@@ -143,7 +145,7 @@
             </div>
         </div>
 
-        <div v-if="update_driver_msgbox_confirm_pre" class="overlay">
+        <!-- <div v-if="update_driver_msgbox_confirm_pre" class="overlay">
             <div class="dialog">
                 <div class="dialog-title">
                     <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
@@ -172,7 +174,7 @@
                     <button class="no" @click="do_update_driver_pre_no">Abort</button>
                 </div>               
             </div>
-        </div>
+        </div> -->
 
         <div v-if="sel_cmd_msgbox" class="overlay">
             <div class="dialog">
@@ -383,6 +385,36 @@
             </div>
         </div>
 
+        <div v-if="progressbar_standard" class="overlay">
+        <div class="dialog" style="width: 25vw;">
+            <div class="dialog-title" :class="{ 'dialog-title-success': percent_tmp === 100 }">
+            <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
+            <!-- Show icon only while writing -->
+            <i v-if="percent_tmp < 100" class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+            {{ percent_tmp < 100 ? progressbar_title_text : progressbar_title_text }} </div>
+
+                <div class="dialog-body">
+        
+                <div class="progress-text">
+                    {{progressbar_body_text}}
+                </div>
+                <br>
+                
+                <div class="update-driver-progress-container">
+                    <div class="update-driver-progress-bar" :style="{
+                    width: percent_tmp + '%'
+
+                    }"></div>
+                </div>
+                <div class="progress-text">
+                    {{ percent_tmp }}%
+                </div>
+
+                </div>
+
+            </div>
+        </div>
+
         <div id="spacer"></div>
         <Footer />
     </div>
@@ -513,13 +545,17 @@ const eraseall_dms_msgbox_confirm_final = ref(false);
 const eraseall_dms_msgbox_confirm_pre = ref(false);
 const eraseall_dms_msgbox_finished = ref(false);
 
-const update_driver_msgbox_confirm_pre = ref(false);
+//const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
 const update_driver_msgbox_progress = ref(false);
 const connect_msgbox_progress = ref(false);
 
 
 const sel_cmd_msgbox = ref(false);
+
+const progressbar_body_text = ref('')
+const progressbar_title_text = ref('')
+const progressbar_standard = ref(false);
 
 
 
@@ -968,25 +1004,39 @@ async function do_sel_cmd_msgbox_no() {
     sel_devaddr.value = webSerial.update_devaddr.value;
     sel_cmd_msgbox.value = false;
 }
-
-// Driver update
-async function do_update_driver_menubar(params) {
-    if (webSerial.isConnected.value) {
+// Sample update
+async function load_sample() {
+    if (!webSerial.isConnected.value) {
         // Disconnect, we need to reconnect again because need get driver ver, pid....
-        webSerial.disconnect();
+        //webSerial.disconnect();
 
-        await sleep(100); 
+        //await sleep(100); 
+        return
     }
 
-    update_driver_msgbox_confirm_pre.value = true;
+    //update_driver_msgbox_confirm_pre.value = true;
     
+}
+
+// Driver update
+async function load_driver() {
+    if (!webSerial.isConnected.value) {
+        // Disconnect, we need to reconnect again because need get driver ver, pid....
+        //webSerial.disconnect();
+
+        //await sleep(100); 
+        return
+    }
+
+    //update_driver_msgbox_confirm_pre.value = true;
+    await do_update_driver_pre_yes()
 }
 
 async function do_update_driver_pre_yes() {
 
-    update_driver_msgbox_confirm_pre.value = false;
+    //update_driver_msgbox_confirm_pre.value = false;
 
-    if (!webSerial.isConnected.value) {
+    if (webSerial.isConnected.value) {
         webSerial.device_name.value = "";
         webSerial.driver_ver.value = "";
         webSerial.progress_percent.value = 0;
@@ -1001,8 +1051,9 @@ async function do_update_driver_pre_yes() {
 
         if (ret) {
 
-            connect_msgbox_progress.value = true;
-            let start = Date.now();
+            progressbar_title_text.value = "Please wait..."
+            progressbar_body_text.value = "Looking for the driver..."
+            progressbar_standard.value = true;            
             percent_tmp.value = 0;
 
             while (webSerial.update_driver_status.value == 0) {
@@ -1054,7 +1105,7 @@ async function do_update_driver_pre_yes() {
                 }
             }
 
-            connect_msgbox_progress.value = false;
+            progressbar_standard.value = false;
             percent_tmp.value = 0;
 
             //webSerial.isBusy.value = tmp;
@@ -1085,29 +1136,29 @@ async function do_update_driver_final_yes() {
     webSerial.update_driver_status.value = 0;
 
     // return to normal state: Disconnect
-    await webSerial.disconnect();
+    //await webSerial.disconnect();
     await sleep(10);
 
 }
 
 async function do_update_driver_pre_no() {   
-     if (webSerial.isConnected.value) {
-        // Disconnect, we need to reconnect again because need get driver ver, pid....
-        webSerial.disconnect();
+    //  if (webSerial.isConnected.value) {
+    //     // Disconnect, we need to reconnect again because need get driver ver, pid....
+    //     webSerial.disconnect();
 
-         await sleep(100); 
-    } 
-    update_driver_msgbox_confirm_pre.value = false;
+    //      await sleep(100); 
+    // } 
+    // update_driver_msgbox_confirm_pre.value = false;
     
 }
 
 async function do_update_driver_final_no() {    
-    if (webSerial.isConnected.value) {
-        // Disconnect, we need to reconnect again because need get driver ver, pid....
-        webSerial.disconnect();
+    // if (webSerial.isConnected.value) {
+    //     // Disconnect, we need to reconnect again because need get driver ver, pid....
+    //     webSerial.disconnect();
 
-        await sleep(100); 
-    }
+    //     await sleep(100); 
+    // }
 
     update_driver_msgbox_confirm_final.value = false;
     
