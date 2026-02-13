@@ -72,15 +72,15 @@ addEventListener('message', (e) => {
 
         case 'eraseall_dms_connect_msg':
             eraseall_dms_connect(e.data.value);
-            break;  
-            
+            break;
+
         case 'driver_connect_msg':
             do_driver_connect(e.data.value);
-            break; 
+            break;
 
         case 'driver_connect_updadate_msg':
             do_driver_update();
-            break; 
+            break;
 
         case 'sendescape':
             do_sendescape();
@@ -96,18 +96,16 @@ async function connect() {
     [port] = await navigator.serial.getPorts();
     try {
 
-        if (port.connected ) {
-            if (port.readable != null && port.writable!= null) {
-                if (port.readable.locked || port.writable.locked) {
-                    console.log('port. locked');
-                    await disconnect();
-                    await new Promise(r => setTimeout(r, 1000)); 
-
-
+        if (port != null) {
+            if (port.connected) {
+                if (port.readable != null && port.writable != null) {
+                    if (port.readable.locked || port.writable.locked) {
+                        console.log('port. locked');
+                        await disconnect();
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
                 }
-            }            
-        
-
+            }
             await port.open({
                 baudRate: 115200,
                 dataBits: 8,
@@ -115,14 +113,13 @@ async function connect() {
                 stopBits: 1,
                 flowControl: 'none',
             });
-
         }
         else {
             console.log('port. return');
             return;
         }
     } catch (error) {
-        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
+        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full: error });
         logError(error?.message || 'Unable to open port.');
         return;
     }
@@ -143,7 +140,7 @@ async function connect() {
 
     writer = port.writable.getWriter();
     reader = port.readable.getReader();
-    
+
     startReadLoop();
     await sleep(200);
     let ret = await synchronize();
@@ -152,7 +149,7 @@ async function connect() {
         isConnected = true;
         const info = port.getInfo();
         postMessage({ event: 'connected' });
-        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId)});
+        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId) });
     }
     else {
         //logEvent('There was an error while connencting.');
@@ -162,21 +159,21 @@ async function connect() {
 
 async function eraseall_dms_execute() {
     const info = port.getInfo();
-    
+
     if (info.usbVendorId == GHI_VID && info.usbProductId == MB_PID) {
         await writer.write(new Uint8Array([0xFA, 0x0F, 0xC7]));
-        await sleep(200);        
-        postMessage({ event: 'eraseall_status_dms', value: 2 });       
+        await sleep(200);
+        postMessage({ event: 'eraseall_status_dms', value: 2 });
     }
     else if (info.usbVendorId == GHI_VID && info.usbProductId == DL_PID) {
-        await writer.write(encoder.encode("\n"));                 
+        await writer.write(encoder.encode("\n"));
         await sleep(400);
-        await writer.write(encoder.encode("reset(1)\n"));         
+        await writer.write(encoder.encode("reset(1)\n"));
         await sleep(100);
-        await writer.write(encoder.encode("reset(1)\n"));         
+        await writer.write(encoder.encode("reset(1)\n"));
         await sleep(700);
-        postMessage({ event: 'eraseall_status_dms', value: 2 });  
-        
+        postMessage({ event: 'eraseall_status_dms', value: 2 });
+
     }
 
     //await disconnect();
@@ -187,15 +184,15 @@ async function eraseall_dms_connect(devAdd) {
     await new Promise(r => setTimeout(r, 400)); // 200ms pause
     [port] = await navigator.serial.getPorts();
     try {
-       if (port.connected ) {
-            if (port.readable != null && port.writable!= null) {
-                if (port.readable.locked || port.writable.locked) {
-                    await disconnect();
-                    await new Promise(r => setTimeout(r, 1000)); 
+        if (port != null) {
+            if (port.connected) {
+                if (port.readable != null && port.writable != null) {
+                    if (port.readable.locked || port.writable.locked) {
+                        await disconnect();
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
                 }
-            }            
-        
-
+            }
             await port.open({
                 baudRate: 115200,
                 dataBits: 8,
@@ -208,7 +205,7 @@ async function eraseall_dms_connect(devAdd) {
             return;
         }
     } catch (error) {
-        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full:error });
+        postMessage({ event: 'ConnectFailed', message: error?.message, name: error.name, full: error });
         logError(error?.message || 'Unable to open port.');
         return;
     }
@@ -231,52 +228,52 @@ async function eraseall_dms_connect(devAdd) {
 
     if (info.usbVendorId == GHI_VID) {
         writer = port.writable.getWriter();
-        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId)});
-        
-    }       
+        postMessage({ event: 'eraseall_vid_dms', value: ((info.usbVendorId << 16) | info.usbProductId) });
+
+    }
 
     update_devaddr = devAdd;
     await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
     await sleep(50);
-    await flush();   
+    await flush();
 
-    postMessage({ event: 'eraseall_status_dms', value: 1});
-        
+    postMessage({ event: 'eraseall_status_dms', value: 1 });
+
 }
 
 async function do_sendescape() {
     await writer.write(encoder.encode('\x1B'));
     await sleep(400);
     await flush();
-    
+
 }
 
 // driver update
 let dl_json_data = null;
 async function loadDLJson() {
-  //const response = await fetch('https://www.duelink.com/duelink.json');
-  const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink.json');
-  
-  const json = await response.json();
+    //const response = await fetch('https://www.duelink.com/duelink.json');
+    const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink.json');
 
-  // Ensure products array exists
-  dl_json_data = Array.isArray(json.products) ? json.products : [];
+    const json = await response.json();
+
+    // Ensure products array exists
+    dl_json_data = Array.isArray(json.products) ? json.products : [];
 }
 
 function getDeviceByPID(pid) {
-   if (!dl_json_data) return "NA";
+    if (!dl_json_data) return "NA";
 
-  // Convert pid to uppercase for case‑insensitive match
-  const pidStr = String(pid).toUpperCase();
+    // Convert pid to uppercase for case‑insensitive match
+    const pidStr = String(pid).toUpperCase();
 
-  const item = dl_json_data.find(d => String(d.PID).toUpperCase() === pidStr);
+    const item = dl_json_data.find(d => String(d.PID).toUpperCase() === pidStr);
 
-  if (!item) return "NA";
+    if (!item) return "NA";
 
-  return {
-    name: item.name ?? "NA",
-    partNumber: item.partNumber ?? "NA"
-  };
+    return {
+        name: item.name ?? "NA",
+        partNumber: item.partNumber ?? "NA"
+    };
 }
 
 let update_driver_ver = "";
@@ -299,35 +296,35 @@ async function do_driver_connect(devAdd) {
         return;
     }
 
-    await writer.write(encoder.encode("\n"));                 
+    await writer.write(encoder.encode("\n"));
     await sleep(400);
     (await flush()).pop();
-    await writer.write(encoder.encode("Dver()\n"));         
+    await writer.write(encoder.encode("Dver()\n"));
     await sleep(100);
 
     let response = await flush();
 
 
-    if (response.length > 0) {   
+    if (response.length > 0) {
         response.pop();
 
         let c = response.pop();
 
         if (c.includes("unknown identifier")) {
 
-           update_driver_ver = "N/A";
+            update_driver_ver = "N/A";
         }
         else {
-           update_driver_ver = c;
+            update_driver_ver = c;
         }
-        
+
     }
 
     // get pid
-    await writer.write(encoder.encode("Info(0)\n")); 
+    await writer.write(encoder.encode("Info(0)\n"));
     await sleep(100);
     response = await flush();
-    if (response.length > 0) {  
+    if (response.length > 0) {
         response.pop();
 
         let c = response.pop();
@@ -348,18 +345,18 @@ async function do_driver_connect(devAdd) {
         console.log("NA");
         return;
     } else {
-       
+
         update_device_name = device.name;
-        update_device_partNum = device.partNumber; 
+        update_device_partNum = device.partNumber;
         update_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + update_device_partNum.toLowerCase() + ".txt";
 
         postMessage({ event: 'update_driver_path_msg', value: update_driver_path });
         postMessage({ event: 'driver_ver_msg', value: update_driver_ver });
         postMessage({ event: 'device_name_msg', value: update_device_name });
-        
+
         update_can_update = true;
     }
-       
+
 }
 
 async function do_driver_update() {
@@ -381,7 +378,7 @@ async function do_driver_update() {
     }
     let driverText = await response.text(); // store content in variable
 
-    
+
     //console.log("Driver text loaded:", driverText);
 
     let lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
@@ -396,10 +393,10 @@ async function do_driver_update() {
 
     await write('pgmbrst()', '&');
     await sleep(250);
-    
+
     postMessage({ event: 'update_driver_percent_msg', value: 20 });
 
-    
+
     let lineNumber = 0;
     for (let line of lines) {
         await sleep(2);
@@ -411,12 +408,11 @@ async function do_driver_update() {
 
         lineNumber++;
 
-        let per =  Math.floor((lineNumber / lines.length) * 70);
+        let per = Math.floor((lineNumber / lines.length) * 70);
 
-        
 
-        if (per > 70)
-        {
+
+        if (per > 70) {
             per = 70;
         }
 
@@ -435,17 +431,17 @@ async function do_driver_update() {
     await readUntil();
 
 
-    await writer.write(encoder.encode("run\n"));         
+    await writer.write(encoder.encode("run\n"));
     await sleep(100);
 
     //await writer.write(encoder.encode("Statled(100,100,10)\n"));         
     //await sleep(100);
 
-    await writer.write(encoder.encode("Region(1)\n"));   
-    await sleep(100);   
+    await writer.write(encoder.encode("Region(1)\n"));
+    await sleep(100);
     await flush();
 
-    await writer.write(encoder.encode("run\n"));         
+    await writer.write(encoder.encode("run\n"));
     await sleep(1000);
 
 
@@ -453,7 +449,7 @@ async function do_driver_update() {
     //await sleep(100);
     //await flush();
 
-    
+
 
     //# This is region 1 User
     //# Replace this with your code
@@ -462,7 +458,7 @@ async function do_driver_update() {
 
     //await write('pgmbrst()', '&');
 
-   
+
     if (false) {
         driverText = "# This is region 1 User\n# Replace this with your code\n\n# StatLed(200,200,10)";
         lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
@@ -479,28 +475,28 @@ async function do_driver_update() {
 
         await stream('\0');
         await readUntil();
-        
+
     }
     else {
-        await writer.write(encoder.encode("$\n"));   await sleep(250);   
+        await writer.write(encoder.encode("$\n")); await sleep(250);
         postMessage({ event: 'update_driver_percent_msg', value: 96 });
-        await writer.write(encoder.encode("# This is region 1 User\n"));   await sleep(250);   
-        await writer.write(encoder.encode("# Replace this with your code\n"));   await sleep(250);
+        await writer.write(encoder.encode("# This is region 1 User\n")); await sleep(250);
+        await writer.write(encoder.encode("# Replace this with your code\n")); await sleep(250);
         postMessage({ event: 'update_driver_percent_msg', value: 97 });
-        await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(250);   
+        await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(250);
 
         postMessage({ event: 'update_driver_percent_msg', value: 99 });
-        await writer.write(encoder.encode(">\n"));   await sleep(250);   
+        await writer.write(encoder.encode(">\n")); await sleep(250);
 
         await flush();
-    
+
 
     }
 
 
 
     postMessage({ event: 'update_driver_percent_msg', value: 100 });
-    
+
     //postMessage({ event: 'isTalking', value: false });
 
     //postMessage({ event: 'recorded' });
@@ -546,9 +542,9 @@ async function execute(line) {
         postMessage({ event: 'memoryRegionsResult', result });
     } else if (line.startsWith('run')) {
         //await write('run',null,'\n',-1);
-        const result = await write(line,null,'\n',100);
+        const result = await write(line, null, '\n', 100);
         postMessage({ event: 'memoryRegionsResult', result });
-    }     
+    }
     else {
         await write(line);
     }
@@ -570,7 +566,7 @@ async function listAll() {
 }
 
 async function memInfo() {
-    
+
     //log('memoryRegions 2');
     ignoreOutput = true;
     const result = await write('mem()');
@@ -591,7 +587,7 @@ async function newAll() {
 async function play() {
     stopped = false;
     postMessage({ event: 'playing' });
-    await write('run',null,'\n',-1);
+    await write('run', null, '\n', -1);
     //await write('run');
     if (!stopped) {
         stopped = true;
@@ -603,7 +599,7 @@ async function record(lines) {
     postMessage({ event: 'recording', percent: 0 });
 
     await write('pgmbrst()', '&');
-    
+
     postMessage({ event: 'isTalking', value: true });
 
     lines = lines.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
@@ -615,14 +611,14 @@ async function record(lines) {
         }
         log('line', `"${line}"`);
         await stream(line + '\n');
-        postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
+        postMessage({ event: 'recording', percent: (++lineNumber / lines.length) * 100 });
     }
 
     postMessage({ event: 'recording', percent: 100 });
 
     await stream('\0');
     await readUntil();
-    
+
     postMessage({ event: 'isTalking', value: false });
 
     postMessage({ event: 'recorded' });
@@ -680,11 +676,11 @@ async function getVersion() {
     const result = await write('version()');
     for (const line of result) {
         log('line', line, (line.match(/\./g) || []).length);
-        let p = line.indexOf ('GHI Electronics DUELink v')
-        if ( p != -1) {
+        let p = line.indexOf('GHI Electronics DUELink v')
+        if (p != -1) {
             let lines = line.split(':')
-       
-       
+
+
             return lines[0].substring(24);
         }
     }
@@ -716,7 +712,7 @@ async function readLoop() {
             log('Reading... Done?', done);
             const finalValue = decoder.decode(value).replace(/\r/gm, '');
 
-            console.log("Output: ",finalValue );
+            console.log("Output: ", finalValue);
 
             if (isConnected && !ignoreChars.includes(finalValue.substring(-1, 1))) {
                 output += finalValue;
@@ -923,7 +919,7 @@ async function stopReadLoop() {
 async function stream(data) {
     // although USB fast but UART 115200 can send  ~10 bytes in 1ms.
     // If we program chain (from second device, it is always UART interface, need limited 10KB/second)
-    const BLOCK_SIZE = 10; 
+    const BLOCK_SIZE = 10;
 
     let bytes = encoder.encode(data);
     let count = bytes.length;
@@ -948,7 +944,7 @@ async function stream(data) {
 
 async function synchronize() {
     // Escape the current program.
-    
+
     // sync always talk to device 1 first
     //dev_responsed = true;
     //await write(`sel(1)`);    
@@ -995,7 +991,7 @@ async function synchronize() {
         return 0;
     }
     */
-   // stop loop if any, unknow device address
+    // stop loop if any, unknow device address
     postMessage({ event: 'update_driver_percent_msg', value: 5 });
     await writer.write(encoder.encode('\x1B'));
     await sleep(400);
@@ -1004,49 +1000,49 @@ async function synchronize() {
     postMessage({ event: 'update_driver_percent_msg', value: 10 });
     await writer.write(encoder.encode('\n'));
     await sleep(400);
-    await flush();    
+    await flush();
 
     postMessage({ event: 'update_driver_percent_msg', value: 15 });
     await writer.write(encoder.encode('sel(1)\n'));
     // max devices 255, each take 1ms, give 2ms to initialize
-    await sleep(100); 
-    await flush();      
-    
+    await sleep(100);
+    await flush();
+
     postMessage({ event: 'update_driver_percent_msg', value: 20 });
-    
+
     // stop loop if any
     await writer.write(encoder.encode('\x1B'));
     await sleep(100);
-    await flush();      
-    
+    await flush();
+
     postMessage({ event: 'update_driver_percent_msg', value: 25 });
     // send new line
     await writer.write(encoder.encode('\n'));
     await sleep(100);
-    await flush();     
-    
+    await flush();
+
     postMessage({ event: 'update_driver_percent_msg', value: 30 });
 
     if (update_devaddr != 1) {
         // now talk to special device address    
         //dev_responsed = true;
-       // await write(`sel(${update_devaddr})`);
-       postMessage({ event: 'update_driver_percent_msg', value: 35 });
+        // await write(`sel(${update_devaddr})`);
+        postMessage({ event: 'update_driver_percent_msg', value: 35 });
         await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
         await sleep(50);
-        await flush();   
-        
+        await flush();
+
 
         // stop loop if any
         postMessage({ event: 'update_driver_percent_msg', value: 40 });
         await writer.write(encoder.encode('\x1B'));
         await sleep(50);
-        await flush();        
+        await flush();
         // send new line
         postMessage({ event: 'update_driver_percent_msg', value: 45 });
         await writer.write(encoder.encode('\n'));
         await sleep(50);
-        await flush();        
+        await flush();
     }
 
     postMessage({ event: 'update_driver_percent_msg', value: 60 });
@@ -1078,7 +1074,7 @@ async function synchronize() {
     }
 
     postMessage({ event: 'update_driver_percent_msg', value: 71 });
-    
+
     await disconnect();
     return 0;
 }
@@ -1091,7 +1087,7 @@ async function turnOffEcho() {
     isEchoing = false;
 }
 
-async function write(command, terminator = null, lineEnd = '\n',timeout = 3000) {
+async function write(command, terminator = null, lineEnd = '\n', timeout = 3000) {
     try {
         log('----- write -----');
         postMessage({ event: 'isTalking', value: true });
@@ -1108,7 +1104,7 @@ async function write(command, terminator = null, lineEnd = '\n',timeout = 3000) 
         log('write is sleeping');
         await sleep(50);
         log('write is reading until', terminator ? terminator : mode);
-        const result = await readUntil(terminator ? terminator : mode,timeout);
+        const result = await readUntil(terminator ? terminator : mode, timeout);
         log('write result', result);
         return result;
     } finally {
