@@ -78,7 +78,7 @@
        
         <!--Group 4-->
         <Button
-            :disabled="isBusy || !isConnected || isTalking "
+            :disabled="isBusy || !isConnected || isTalking || canStop"
             class="tool"
             data-tippy-content="Load driver"
             @click.native="$emit('load_driver')"
@@ -87,7 +87,7 @@
         </Button>
 
         <Button
-            :disabled="isBusy || !isConnected || isTalking "
+            :disabled="isBusy || !isConnected || isTalking || canStop"
             class="tool"
             data-tippy-content="Load sample"
             @click.native="$emit('load_sample')"
