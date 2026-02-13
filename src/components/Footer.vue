@@ -42,6 +42,9 @@
                 <a href="https://www.linkedin.com/company/ghielectronics/" target="_blank">
                     <i class="fab fa-linkedin"></i>
                 </a>
+                <a href="https://www.instagram.com/ghielectronics/" target="_blank">
+                    <i class="fab fa-instagram-square"></i>
+                </a>
             </div>
         </div>
         <div class="text-center text-sm sm:hidden">
