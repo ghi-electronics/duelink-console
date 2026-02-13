@@ -960,6 +960,15 @@ async function fn_load_sample() {
     // else 
     // {
 
+
+    if (webSerial.device_name.value == "") {
+        //const ret = await webSerial.driver_connect();
+        msg_box_failed_body_text.value = "Device name (PID) not found.";
+        //console.log("Device name not found")
+        msg_box_failed.value = true;
+        return;
+
+    }
     if (webSerial.regions?.value?.length === 2) {
         if (webSerial.regions?.value[1]?.current === false) {
             //console.log("Please switch to region(1)")
@@ -968,14 +977,6 @@ async function fn_load_sample() {
 
             return
         }
-    }
-    if (webSerial.device_name.value == "") {
-        //const ret = await webSerial.driver_connect();
-        msg_box_failed_body_text.value = "Device name (PID) not found.";
-        //console.log("Device name not found")
-        msg_box_failed.value = true;
-        return;
-
     }
 
     webSerial.load_sample_result.value = ""
