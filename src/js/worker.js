@@ -292,6 +292,7 @@ let update_can_update = false;
 let update_driver_path = "";
 let sample_path = "";
 let update_devaddr = 1;
+let device_img_link = "";
 
 
 async function do_driver_connect(devAdd) {
@@ -360,12 +361,14 @@ async function do_driver_connect(devAdd) {
         update_device_partNum = device.partNumber;
         update_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + update_device_partNum.toLowerCase() + ".txt";
         sample_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/sample/standalone/" + update_device_partNum.toLowerCase() + ".txt";
+        device_img_link = "https://www.duelink.com/img/catalog/" + update_device_partNum.toLowerCase().slice(4) + "-1.webp";
 
 
         postMessage({ event: 'update_driver_path_msg', value: update_driver_path });
-        postMessage({ event: 'driver_ver_msg', value: update_driver_ver });
+        postMessage({ event: 'driver_ver_msg', value: update_driver_ver });1
         postMessage({ event: 'device_name_msg', value: update_device_name });
         postMessage({ event: 'sample_path_msg', value: sample_path });
+        postMessage({ event: 'device_img_link_msg', value: device_img_link });
 
         update_can_update = true;
     }
@@ -606,6 +609,20 @@ async function disconnect() {
         isConnected = false;
         postMessage({ event: 'disconnected' });
         postMessage({ event: 'version', value: null });
+
+        update_device_name = "";
+        update_device_partNum = "";
+        update_driver_path = "";
+        sample_path = "";
+        device_img_link = "";
+
+
+        postMessage({ event: 'update_driver_path_msg', value: update_driver_path });
+        postMessage({ event: 'driver_ver_msg', value: update_driver_ver });1
+        postMessage({ event: 'device_name_msg', value: update_device_name });
+        postMessage({ event: 'sample_path_msg', value: sample_path });
+        postMessage({ event: 'device_img_link_msg', value: device_img_link });
+
     }
 }
 

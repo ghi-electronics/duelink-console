@@ -31,6 +31,7 @@ export default function useWebSerial($refs, emitter) {
     const update_driver_path = ref("");
     const sample_path_msg = ref("");
     const load_sample_result = ref("");
+    const device_img_link = ref("");
     
     const update_devaddr = ref(1);
     const connect_status = ref(0);
@@ -413,6 +414,10 @@ export default function useWebSerial($refs, emitter) {
             case 'load_sample_result':
                 load_sample_result.value = data.value;
                 break;
+
+            case 'device_img_link_msg':
+                device_img_link.value = data.value;
+                break
         }
     }
 
@@ -449,6 +454,7 @@ export default function useWebSerial($refs, emitter) {
         update_devaddr,
         connect_status,
         connection_mode,
+        device_img_link,
         // Methods
         connect,
         disconnect,

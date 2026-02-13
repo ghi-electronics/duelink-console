@@ -51,6 +51,7 @@
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value"
                     :devAdd="webSerial.update_devaddr.value" :deviceName="webSerial.device_name.value"
                     @firmware-matches="onFirmwareMatches" @call-update-firmware-box="dfuModal.start()" />
+                <ProductPanel :product-link="webSerial.device_img_link.value" />
             </div>
         </div>
 
@@ -437,6 +438,7 @@ import HistoryPanel from './components/HistoryPanel.vue';
 import AboutPanel from './components/AboutPanel.vue';
 import ListAllModal from "./components/ListAllModal.vue";
 import NewAllModal from "./components/NewAllModal.vue";
+import ProductPanel  from "./components/ProductPanel.vue";
 
 // Const
 const GHI_VID = 0x1B9F;
