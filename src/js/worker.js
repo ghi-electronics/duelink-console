@@ -84,7 +84,11 @@ addEventListener('message', (e) => {
 
         case 'sendescape':
             do_sendescape();
-            break
+            break;
+
+        case 'fn_load_sample':
+            fn_load_sample()
+            break;
     }
 });
 
@@ -282,15 +286,17 @@ let update_device_pid = "";
 let update_device_partNum = "";
 let update_can_update = false;
 let update_driver_path = "";
+let sample_path = "";
 let update_devaddr = 1;
 
 
 async function do_driver_connect(devAdd) {
     update_can_update = false;
     update_devaddr = devAdd;
-    await connect()
+    
+    //await connect()
 
-    await sleep(100);
+    //await sleep(100);
 
     if (!isConnected) {
         return;
@@ -349,10 +355,13 @@ async function do_driver_connect(devAdd) {
         update_device_name = device.name;
         update_device_partNum = device.partNumber;
         update_driver_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + update_device_partNum.toLowerCase() + ".txt";
+        sample_path = "https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/sample/standalone/" + update_device_partNum.toLowerCase() + ".txt";
+
 
         postMessage({ event: 'update_driver_path_msg', value: update_driver_path });
         postMessage({ event: 'driver_ver_msg', value: update_driver_ver });
         postMessage({ event: 'device_name_msg', value: update_device_name });
+        postMessage({ event: 'sample_path_msg', value: sample_path });
 
         update_can_update = true;
     }
@@ -360,8 +369,14 @@ async function do_driver_connect(devAdd) {
 }
 
 async function do_driver_update() {
-    if (!isConnected || !update_can_update) {
+    if (!isConnected ) {
         return;
+    }
+
+   
+
+    if (!update_can_update) {
+        return
     }
 
     //console.log(device.name, device.partNumber);
@@ -383,18 +398,18 @@ async function do_driver_update() {
 
     let lines = driverText.replace(/\r/gm, '').replace(/\t/gm, ' ').split(/\n/);
 
-    postMessage({ event: 'update_driver_percent_msg', value: 0 });
+    postMessage({ event: 'update_progress_percent_msg', value: 0 });
 
     // erase program
     await write('new all');
 
     // start program
-    postMessage({ event: 'update_driver_percent_msg', value: 10 });
+    postMessage({ event: 'update_progress_percent_msg', value: 10 });
 
     await write('pgmbrst()', '&');
     await sleep(250);
 
-    postMessage({ event: 'update_driver_percent_msg', value: 20 });
+    postMessage({ event: 'update_progress_percent_msg', value: 20 });
 
 
     let lineNumber = 0;
@@ -418,14 +433,14 @@ async function do_driver_update() {
 
         per = per + 20;
 
-        postMessage({ event: 'update_driver_percent_msg', value: per });
+        postMessage({ event: 'update_progress_percent_msg', value: per });
 
         //postMessage({ event: 'recording', percent: (++lineNumber/lines.length) * 100 });
     }
 
     //postMessage({ event: 'recording', percent: 100 });
 
-    postMessage({ event: 'update_driver_percent_msg', value: 95 });
+    postMessage({ event: 'update_progress_percent_msg', value: 95 });
 
     await stream('\0');
     await readUntil();
@@ -479,13 +494,13 @@ async function do_driver_update() {
     }
     else {
         await writer.write(encoder.encode("$\n")); await sleep(250);
-        postMessage({ event: 'update_driver_percent_msg', value: 96 });
+        postMessage({ event: 'update_progress_percent_msg', value: 96 });
         await writer.write(encoder.encode("# This is region 1 User\n")); await sleep(250);
         await writer.write(encoder.encode("# Replace this with your code\n")); await sleep(250);
-        postMessage({ event: 'update_driver_percent_msg', value: 97 });
+        postMessage({ event: 'update_progress_percent_msg', value: 97 });
         await writer.write(encoder.encode("# StatLed(200,200,10)\n")); await sleep(250);
 
-        postMessage({ event: 'update_driver_percent_msg', value: 99 });
+        postMessage({ event: 'update_progress_percent_msg', value: 99 });
         await writer.write(encoder.encode(">\n")); await sleep(250);
 
         await flush();
@@ -495,7 +510,7 @@ async function do_driver_update() {
 
 
 
-    postMessage({ event: 'update_driver_percent_msg', value: 100 });
+    postMessage({ event: 'update_progress_percent_msg', value: 100 });
 
     //postMessage({ event: 'isTalking', value: false });
 
@@ -505,6 +520,49 @@ async function do_driver_update() {
     // end program
 
     //console.log("done");
+}
+
+
+async function fn_load_sample() {
+    
+    if (!isConnected ) {
+        postMessage({ event: 'update_progress_percent_msg', value: 1 });
+        return;
+    }
+
+    postMessage({ event: 'update_progress_percent_msg', value: 10 });
+
+    if (!update_can_update) {
+        postMessage({ event: 'update_progress_percent_msg', value: 11 });
+        await do_driver_connect()
+    }
+
+    postMessage({ event: 'update_progress_percent_msg', value: 20 });
+
+    if (!update_can_update) {
+        postMessage({ event: 'update_progress_percent_msg', value: 21 });
+        return
+    }
+
+    const device_driver_path = sample_path;//"https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/code/driver/" + device_part_number + ".txt";
+
+    const response = await fetch(device_driver_path);
+
+    postMessage({ event: 'update_progress_percent_msg', value: 50 });
+
+    if (!response.ok) {
+        postMessage({ event: 'update_progress_percent_msg', value: 51 });
+        console.error("Failed to load text file:", response.status);
+        return;
+    }
+    let sample = await response.text(); // store content in variable
+    postMessage({ event: 'load_sample_result', value: sample });
+
+    await sleep(1000)
+
+    postMessage({ event: 'update_progress_percent_msg', value: 100 });
+
+    
 }
 
 async function disconnect() {
@@ -992,60 +1050,60 @@ async function synchronize() {
     }
     */
     // stop loop if any, unknow device address
-    postMessage({ event: 'update_driver_percent_msg', value: 5 });
+    postMessage({ event: 'update_progress_percent_msg', value: 5 });
     await writer.write(encoder.encode('\x1B'));
     await sleep(400);
     await flush();
 
-    postMessage({ event: 'update_driver_percent_msg', value: 10 });
+    postMessage({ event: 'update_progress_percent_msg', value: 10 });
     await writer.write(encoder.encode('\n'));
     await sleep(400);
     await flush();
 
-    postMessage({ event: 'update_driver_percent_msg', value: 15 });
+    postMessage({ event: 'update_progress_percent_msg', value: 15 });
     await writer.write(encoder.encode('sel(1)\n'));
     // max devices 255, each take 1ms, give 2ms to initialize
     await sleep(100);
     await flush();
 
-    postMessage({ event: 'update_driver_percent_msg', value: 20 });
+    postMessage({ event: 'update_progress_percent_msg', value: 20 });
 
     // stop loop if any
     await writer.write(encoder.encode('\x1B'));
     await sleep(100);
     await flush();
 
-    postMessage({ event: 'update_driver_percent_msg', value: 25 });
+    postMessage({ event: 'update_progress_percent_msg', value: 25 });
     // send new line
     await writer.write(encoder.encode('\n'));
     await sleep(100);
     await flush();
 
-    postMessage({ event: 'update_driver_percent_msg', value: 30 });
+    postMessage({ event: 'update_progress_percent_msg', value: 30 });
 
     if (update_devaddr != 1) {
         // now talk to special device address    
         //dev_responsed = true;
         // await write(`sel(${update_devaddr})`);
-        postMessage({ event: 'update_driver_percent_msg', value: 35 });
+        postMessage({ event: 'update_progress_percent_msg', value: 35 });
         await writer.write(encoder.encode(`sel(${update_devaddr})\n`));
         await sleep(50);
         await flush();
 
 
         // stop loop if any
-        postMessage({ event: 'update_driver_percent_msg', value: 40 });
+        postMessage({ event: 'update_progress_percent_msg', value: 40 });
         await writer.write(encoder.encode('\x1B'));
         await sleep(50);
         await flush();
         // send new line
-        postMessage({ event: 'update_driver_percent_msg', value: 45 });
+        postMessage({ event: 'update_progress_percent_msg', value: 45 });
         await writer.write(encoder.encode('\n'));
         await sleep(50);
         await flush();
     }
 
-    postMessage({ event: 'update_driver_percent_msg', value: 60 });
+    postMessage({ event: 'update_progress_percent_msg', value: 60 });
     if (isEchoing) {
         await turnOffEcho();
     }
@@ -1064,16 +1122,16 @@ async function synchronize() {
         tryCount--;
     }
     */
-    postMessage({ event: 'update_driver_percent_msg', value: 65 });
+    postMessage({ event: 'update_progress_percent_msg', value: 65 });
     const ver = await getVersion();
     if (typeof ver === 'string') {
         log('version found', ver);
         postMessage({ event: 'version', value: ver });
-        postMessage({ event: 'update_driver_percent_msg', value: 100 });
+        postMessage({ event: 'update_progress_percent_msg', value: 100 });
         return 1;
     }
 
-    postMessage({ event: 'update_driver_percent_msg', value: 71 });
+    postMessage({ event: 'update_progress_percent_msg', value: 71 });
 
     await disconnect();
     return 0;

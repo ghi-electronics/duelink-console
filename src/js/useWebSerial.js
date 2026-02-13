@@ -29,6 +29,9 @@ export default function useWebSerial($refs, emitter) {
     const device_name = ref("");
     const progress_percent = ref(0);
     const update_driver_path = ref("");
+    const sample_path_msg = ref("");
+    const load_sample_result = ref("");
+    
     const update_devaddr = ref(1);
     const connect_status = ref(0);
 
@@ -178,6 +181,12 @@ export default function useWebSerial($refs, emitter) {
     async function sendescape() {
         if (isConnected.value == true) {
             worker.postMessage({ task: 'sendescape' });
+        }
+    }
+
+    async function fn_load_sample() {
+        if (isConnected.value == true) {
+            worker.postMessage({ task: 'fn_load_sample' });
         }
     }
 
@@ -389,12 +398,20 @@ export default function useWebSerial($refs, emitter) {
                 device_name.value = data.value;
                 break;
 
-            case 'update_driver_percent_msg':
+            case 'update_progress_percent_msg':
                 progress_percent.value = data.value;
                 break;
 
             case 'update_driver_path_msg':
                 update_driver_path.value = data.value;
+                break;
+
+            case 'sample_path_msg':
+                sample_path_msg.value = data.value;
+                break;
+
+            case 'load_sample_result':
+                load_sample_result.value = data.value;
                 break;
         }
     }
@@ -427,6 +444,8 @@ export default function useWebSerial($refs, emitter) {
         device_name,
         progress_percent,
         update_driver_path,
+        sample_path_msg,
+        load_sample_result,
         update_devaddr,
         connect_status,
         connection_mode,
@@ -446,5 +465,6 @@ export default function useWebSerial($refs, emitter) {
         driver_connect,
         driver_update,
         sendescape,
+        fn_load_sample,
     };
 }
