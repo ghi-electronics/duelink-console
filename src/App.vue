@@ -1156,8 +1156,9 @@ async function do_update_driver_final_no() {
 }
 
 async function do_list_all() {
+
     await webSerial.listAll()
-    listAllModal.open = true
+
 }
 
 function updateTippy(target, show = false) {
