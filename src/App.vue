@@ -217,6 +217,23 @@
             </div>
         </div>
 
+        <div v-if="msg_box_detect_no_region" class="overlay">
+            <div class="dialog">
+                <div class="dialog-title">
+                    <i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>
+                    {{msg_box_detect_no_region_title_text}}
+                </div>
+                <div class="dialog-body">
+                    <p>{{ msg_box_detect_no_region_text }}<br></p>
+                </div>
+
+                <div class="dialog-buttons">
+                    <button class="yes" @click="msg_box_detect_no_region_answer=1">Yes</button>
+                    <button class="no" @click="msg_box_detect_no_region_answer=2">No</button>
+                </div>
+            </div>
+        </div>
+
         <div v-if="update_driver_msgbox_progress" class="overlay">
             <div class="dialog" style="width: 25vw;">
                 <div class="dialog-title" :class="{ 'dialog-title-success': percent_tmp === 100 }">
@@ -472,6 +489,7 @@ const eraseall_dms_msgbox_finished = ref(false);
 //const update_driver_msgbox_confirm_pre = ref(false);
 const update_driver_msgbox_confirm_final = ref(false);
 const load_sample_msg_box_confirm_final = ref(false);
+const msg_box_detect_no_region  = ref(false);
 
 const update_driver_msgbox_progress = ref(false);
 const connect_msgbox_progress = ref(false);
@@ -484,6 +502,9 @@ const progressbar_title_text = ref('')
 const progressbar_standard = ref(false);
 const msg_box_failed = ref(false);
 const msg_box_failed_body_text = ref('')
+const  msg_box_detect_no_region_text= ref('')
+const  msg_box_detect_no_region_title_text= ref('')
+const  msg_box_detect_no_region_answer= ref(0)
 
 
 
@@ -962,6 +983,25 @@ async function fn_load_sample() {
     // else 
     // {
 
+    if (webSerial.regions?.value?.length < 2) {
+         //console.log("There is no region(1). The sample need to be installed on region(1)")
+         //msg_box_failed_body_text.value = "There is no Region (1). The sample needs to be installed in Region (1).";
+         //msg_box_failed.value = true;
+        msg_box_detect_no_region_answer.value = 0;
+        msg_box_detect_no_region_title_text.value = "Warning: Driver not found"
+        msg_box_detect_no_region_text.value = "The sample assumes the driver is installed. Do you want to continue and open this sample in the editor?"
+        msg_box_detect_no_region.value = true
+
+        while (msg_box_detect_no_region_answer.value == 0) {
+            await sleep(100)
+        }
+
+        msg_box_detect_no_region.value = false;
+        if (msg_box_detect_no_region_answer.value == 2) {
+            return;
+        }
+
+    }
 
     if (webSerial.device_name.value == "") {
         //const ret = await webSerial.driver_connect();
