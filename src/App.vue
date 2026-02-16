@@ -44,7 +44,7 @@
                         <i class="fas fa-fw fa-stop"></i>
                     </Button>
                 </div>
-                <RegionsPanel :regions="webSerial.regions.value" @list-all="do_list_all()"
+                <RegionsPanel :regions="webSerial.regions.value" @list-all="webSerial.listAll()"
                     @new-all="newAllModal.open = true" @region="webSerial.region($event)" />
                 <LogPanel v-model:log="webSerial.log.value" />
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
@@ -1155,11 +1155,6 @@ async function do_update_driver_final_no() {
 
 }
 
-async function do_list_all() {
-
-    await webSerial.listAll()
-
-}
 
 function updateTippy(target, show = false) {
     if (!target) {
