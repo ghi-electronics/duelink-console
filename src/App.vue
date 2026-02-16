@@ -240,7 +240,7 @@
                     <!--<i class="fas fa-exclamation-triangle" style="color: yellow; margin-right: 8px;"></i>-->
                     <!-- Show icon only while writing -->
                     <i v-if="percent_tmp < 100" class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
-                    {{ percent_tmp < 100 ? "Writting..." : "Updated successful" }} </div>
+                    {{ percent_tmp < 100 ? "Writing..." : "Updated successful" }} </div>
 
                         <div class="dialog-body">
                             <!-- Progress bar -->
@@ -259,7 +259,7 @@
                         </div>
 
                         <div class="dialog-buttons">
-                            <button class="no" @click="update_driver_msgbox_progress = false"
+                            <button class="no" @click="update_driver_done"
                                 :disabled="percent_tmp < 100">
                                 {{ percent_tmp < 100 ? "Please wait..." : "Close" }} </button>
 
@@ -1123,7 +1123,7 @@ async function do_update_driver_final_yes() {
     webSerial.update_driver_status.value = 0;
 
     if (webSerial.progress_percent.value == 100) {
-        webSerial.memoryRegionsSelect(true);
+        //webSerial.memoryRegionsSelect(true);
     }
 
     // return to normal state: Disconnect
@@ -1153,6 +1153,13 @@ async function do_update_driver_final_no() {
 
     update_driver_msgbox_confirm_final.value = false;
 
+}
+
+async function update_driver_done() {
+    
+    update_driver_msgbox_progress.value = false
+    await sleep(10)
+    webSerial.memoryRegionsSelect(true);    
 }
 
 
