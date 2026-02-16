@@ -18,7 +18,9 @@
                 <VAceEditor v-model:value="recordModeCode" :lang="language" :ref="(el) => $refs.editor = el"
                     :theme="theme === 'dark' ? 'tomorrow_night_bright' : 'crimson_editor'" class="flex-1"
                     @init="onEditorInit" />
-                <div id="direct-bar" class="p-2 sm:pl-[42px] flex space-x-2">
+            </div>
+            <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
+                <div id="direct-bar" class="p-2 sm:pl-[2px] flex space-x-2">
                     <div class="flex-1">
                         <div class="relative">
                             <div class="absolute right-0 inset-y-0 p-1 flex items-center justify-center rounded-r-md"
@@ -42,8 +44,6 @@
                         <i class="fas fa-fw fa-stop"></i>
                     </Button>
                 </div>
-            </div>
-            <div id="side-bar" class="sm:w-1/2 lg:w-1/3 p-2 space-y-0.5">
                 <RegionsPanel :regions="webSerial.regions.value" @list-all="webSerial.listAll()"
                     @new-all="newAllModal.open = true" @region="webSerial.region($event)" />
                 <LogPanel v-model:log="webSerial.log.value" />
@@ -1279,5 +1279,17 @@ button.ok {
     background-color: #4caf50;
     /* green bar */
     transition: width 0.3s ease;
+}
+
+.dark .dialog-body {
+    color: #111; /* keep dark text since background is white */
+}
+
+.dialog-body label {
+    color: black;
+}
+
+.dark .dialog-body label {
+    color: black;
 }
 </style>
