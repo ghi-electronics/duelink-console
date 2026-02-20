@@ -259,13 +259,15 @@ async function do_sendescape() {
 // driver update
 let dl_json_data = null;
 async function loadDLJson() {
-    //const response = await fetch('https://www.duelink.com/duelink.json');
-    const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink.json');
+    if (dl_json_data == null) {
+        //const response = await fetch('https://www.duelink.com/duelink.json');
+        const response = await fetch('https://raw.githubusercontent.com/ghi-electronics/duelink-website/refs/heads/dev/static/duelink.json');
 
-    const json = await response.json();
+        const json = await response.json();
 
-    // Ensure products array exists
-    dl_json_data = Array.isArray(json.products) ? json.products : [];
+        // Ensure products array exists
+        dl_json_data = Array.isArray(json.products) ? json.products : [];
+    }
 }
 
 function getDeviceByPID(pid) {
