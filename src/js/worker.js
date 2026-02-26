@@ -630,11 +630,11 @@ async function disconnect() {
 
 async function execute(line) {
     await write('>');
-    line = line.toLowerCase();
-    if (line.startsWith('mem')) {
+    //line = line.toLowerCase();
+    if (line.toLowerCase().startsWith('mem')) {
         const result = await write(line);
         postMessage({ event: 'memoryRegionsResult', result });
-    } else if (line.startsWith('run')) {
+    } else if (line.toLowerCase().startsWith('run')) {
         //await write('run',null,'\n',-1);
         const result = await write(line, null, '\n', 100);
         postMessage({ event: 'memoryRegionsResult', result });
