@@ -50,7 +50,7 @@
                 <HistoryPanel v-model:history="webSerial.history.value" closed />
                 <AboutPanel :available-dfu="availableDfu" :version="webSerial.version.value"
                     :devAdd="webSerial.update_devaddr.value" :deviceName="webSerial.device_name.value"
-                    @firmware-matches="onFirmwareMatches" @call-update-firmware-box="dfuModal.start()" />
+                    @firmware-matches="onFirmwareMatches" @call-update-firmware-box="openLoaderPage()" />
                 <ProductPanel :product-link="webSerial.device_img_link.value" />
             </div>
         </div>
@@ -1162,6 +1162,22 @@ async function update_driver_done() {
     webSerial.memoryRegionsSelect(true);    
 }
 
+async function openLoaderPage() {
+    try {
+        // Wait for disconnect to complete
+        if (webSerial.isConnected.value) {
+             // Disconnect, we need to reconnect again because need get driver ver, pid....
+            await webSerial.disconnect();
+
+            await sleep(100); 
+        } 
+
+        // Open in new tab
+        window.open('https://loader.duelink.com/update', '_blank', 'noopener,noreferrer')
+    } catch (error) {
+        console.error('Error while opening loader page:', error)
+    }
+}
 
 function updateTippy(target, show = false) {
     if (!target) {
