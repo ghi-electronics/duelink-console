@@ -10,7 +10,7 @@ var DuelinkHighlightRules = function () {
         //DUELink methods
         "dim|fn|fend|while|wend|"+
         "for|in|to|step|range|next|"+
-        "if|else|end|return"+
+        "if|else|end|return|"+
         "@|goto|"+
         "exit|alias|" +
         "break|continue" 
